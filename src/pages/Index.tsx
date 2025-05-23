@@ -33,12 +33,16 @@ const Index = () => {
     console.log('Conexión exitosa - actualizar tabla');
   };
 
+  const handleConnectClick = () => {
+    setShowConnectionModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       
       <div className="flex-1 flex flex-col">
-        <DashboardHeader />
+        <DashboardHeader onConnectClick={handleConnectClick} />
         
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto space-y-6">
@@ -93,7 +97,7 @@ const Index = () => {
       {activeTab === 'connections' && (
         <div className="fixed bottom-8 right-8">
           <Button 
-            onClick={() => setShowConnectionModal(true)}
+            onClick={handleConnectClick}
             className="bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 shadow-lg"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

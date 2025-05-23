@@ -1,7 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onConnectClick: () => void;
+}
+
+export function DashboardHeader({ onConnectClick }: DashboardHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -10,7 +14,10 @@ export function DashboardHeader() {
           <p className="text-gray-600 mt-1">Administra tus conexiones de WhatsApp</p>
         </div>
         
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
+        <Button 
+          onClick={onConnectClick}
+          className="bg-green-600 hover:bg-green-700 text-white"
+        >
           + Conectar WhatsApp
         </Button>
       </div>
