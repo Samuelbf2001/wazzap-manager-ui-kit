@@ -36,9 +36,9 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     phone_number: '',
     account_protection: true,
     log_messages: true,
-    webhook_url: '',
-    webhook_enabled: false,
-    webhook_events: []
+    webhook_url: 'https://n8n.srv823701.hstgr.cloud/webhook/cfe44692-83e5-40a8-ac76-ae24154419a1',
+    webhook_enabled: true,
+    webhook_events: ['message', 'status', 'qrcode']
   });
 
   const webhookEventOptions = [
@@ -47,11 +47,45 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     { value: 'qrcode', label: 'Código QR' }
   ];
 
+  const sendWebhookNotification = async (data: any) => {
+    try {
+      console.log('Enviando datos al webhook:', formData.webhook_url);
+      const response = await fetch(formData.webhook_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          event: 'whatsapp_connection_started',
+          session_name: formData.name,
+          phone_number: formData.phone_number,
+          timestamp: new Date().toISOString(),
+          ...data
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Webhook enviado exitosamente');
+      } else {
+        console.warn('Error al enviar webhook:', response.status);
+      }
+    } catch (error) {
+      console.error('Error enviando webhook:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Enviar notificación de webhook al inicio del proceso
+      if (formData.webhook_enabled && formData.webhook_url) {
+        await sendWebhookNotification({
+          status: 'connection_initiated'
+        });
+      }
+
       // Paso 1: Crear sesión de WhatsApp
       const createResponse = await fetch('https://app.wasenderapi.com/api/sessions/create-whatsapp-session', {
         method: 'POST',
@@ -93,6 +127,15 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
       if (connectData.qr) {
         setQrCode(connectData.qr);
         setStep('qr');
+        
+        // Enviar webhook con el código QR generado
+        if (formData.webhook_enabled && formData.webhook_url) {
+          await sendWebhookNotification({
+            status: 'qr_generated',
+            qr_code: connectData.qr
+          });
+        }
+
         toast({
           title: "Código QR generado",
           description: "Escanea el código con tu WhatsApp para conectar.",
@@ -103,6 +146,15 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
 
     } catch (error) {
       console.error('Error:', error);
+      
+      // Enviar webhook de error
+      if (formData.webhook_enabled && formData.webhook_url) {
+        await sendWebhookNotification({
+          status: 'connection_failed',
+          error: error instanceof Error ? error.message : 'Error desconocido'
+        });
+      }
+
       toast({
         title: "Error de conexión",
         description: "No fue posible conectar. Revisa los datos e intenta nuevamente.",
@@ -113,7 +165,16 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     }
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = async () => {
+    // Enviar webhook de conexión exitosa
+    if (formData.webhook_enabled && formData.webhook_url) {
+      await sendWebhookNotification({
+        status: 'connection_successful',
+        session_name: formData.name,
+        phone_number: formData.phone_number
+      });
+    }
+
     setStep('success');
     toast({
       title: "¡Conexión exitosa!",
@@ -134,9 +195,9 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
       phone_number: '',
       account_protection: true,
       log_messages: true,
-      webhook_url: '',
-      webhook_enabled: false,
-      webhook_events: []
+      webhook_url: 'https://n8n.srv823701.hstgr.cloud/webhook/cfe44692-83e5-40a8-ac76-ae24154419a1',
+      webhook_enabled: true,
+      webhook_events: ['message', 'status', 'qrcode']
     });
   };
 
@@ -204,12 +265,13 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="webhook_url">URL del Webhook (opcional)</Label>
+              <Label htmlFor="webhook_url">URL del Webhook</Label>
               <Input
                 id="webhook_url"
                 value={formData.webhook_url}
                 onChange={(e) => setFormData({ ...formData, webhook_url: e.target.value })}
                 placeholder="https://mi-servidor.com/webhook"
+                readOnly
               />
             </div>
 
