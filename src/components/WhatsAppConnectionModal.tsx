@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import QRCode from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, X } from "lucide-react";
 
@@ -241,7 +241,7 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
           <div className="text-center space-y-4">
             <h3 className="text-lg font-medium">Escanea este código con tu WhatsApp</h3>
             <div className="flex justify-center">
-              <QRCode value={qrCode} size={200} />
+              <QRCodeSVG value={qrCode} size={200} />
             </div>
             <p className="text-sm text-gray-600">
               Abre WhatsApp → Configuración → Dispositivos vinculados → Vincular un dispositivo
