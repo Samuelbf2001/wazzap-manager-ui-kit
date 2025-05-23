@@ -6,12 +6,14 @@ import { MetricsCards } from "@/components/MetricsCards";
 import { ConnectionsTable } from "@/components/ConnectionsTable";
 import { ConfigurationPanel } from "@/components/ConfigurationPanel";
 import { LogsPanel } from "@/components/LogsPanel";
+import { WhatsAppConnectionModal } from "@/components/WhatsAppConnectionModal";
 import { Button } from "@/components/ui/button";
 
 type ActiveTab = 'connections' | 'configuration' | 'logs';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('connections');
+  const [showConnectionModal, setShowConnectionModal] = useState(false);
 
   const renderActiveTab = () => {
     switch (activeTab) {
@@ -24,6 +26,11 @@ const Index = () => {
       default:
         return <ConnectionsTable />;
     }
+  };
+
+  const handleConnectionSuccess = () => {
+    // Aquí podrías actualizar la lista de conexiones
+    console.log('Conexión exitosa - actualizar tabla');
   };
 
   return (
@@ -85,13 +92,23 @@ const Index = () => {
       {/* Floating Action Button */}
       {activeTab === 'connections' && (
         <div className="fixed bottom-8 right-8">
-          <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 shadow-lg">
+          <Button 
+            onClick={() => setShowConnectionModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 shadow-lg"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           </Button>
         </div>
       )}
+
+      {/* WhatsApp Connection Modal */}
+      <WhatsAppConnectionModal
+        open={showConnectionModal}
+        onOpenChange={setShowConnectionModal}
+        onConnectionSuccess={handleConnectionSuccess}
+      />
     </div>
   );
 };
