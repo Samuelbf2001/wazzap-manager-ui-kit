@@ -1,5 +1,4 @@
-
-import { MessageSquare, Settings, Shield, Connection } from "lucide-react";
+import { MessageSquare, Settings, Shield, Plug } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
@@ -8,7 +7,7 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const menuItems = [
-    { id: 'connections', label: 'Connections', icon: Connection },
+    { id: 'connections', label: 'Connections', icon: Plug },
     { id: 'configuration', label: 'Messages', icon: MessageSquare },
     { id: 'logs', label: 'Security', icon: Shield },
     { id: 'settings', label: 'Settings', icon: Settings }

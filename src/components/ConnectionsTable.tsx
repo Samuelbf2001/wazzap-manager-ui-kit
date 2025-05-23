@@ -61,6 +61,9 @@ export function ConnectionsTable() {
     return status === 'connected' ? 'Conectado' : 'No conectado';
   };
 
+  // Check if any connection is disconnected for the warning message
+  const hasDisconnectedConnection = connections.some(connection => connection.status === 'disconnected');
+
   return (
     <div>
       <div className="mb-6">
@@ -130,7 +133,7 @@ export function ConnectionsTable() {
         </table>
       </div>
 
-      {connection.status === 'disconnected' && (
+      {hasDisconnectedConnection && (
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="flex items-center">
             <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
