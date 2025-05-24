@@ -1,3 +1,4 @@
+
 import { MessageSquare, Settings, Shield, Plug } from "lucide-react";
 
 interface SidebarProps {
@@ -22,7 +23,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             <MessageSquare className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-lg text-gray-900">WAZZAP</h1>
+            <h1 className="font-bold text-lg text-gray-900">WhatsFull</h1>
             <p className="text-xs text-gray-500">WhatsApp Manager</p>
           </div>
         </div>
@@ -64,7 +65,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
           </div>
           <div className="flex-1">
             <p className="text-sm font-medium text-gray-900">Admin</p>
-            <p className="text-xs text-gray-500">admin@wazzap.mx</p>
+            <p className="text-xs text-gray-500">admin@whatsfull.mx</p>
           </div>
         </div>
       </div>
