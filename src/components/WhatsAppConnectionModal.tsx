@@ -47,30 +47,32 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     { value: 'qrcode', label: 'Código QR' }
   ];
 
-  const sendWebhookNotification = async (data: any) => {
+  const sendToN8n = async (action: string, data: any) => {
     try {
-      console.log('Enviando datos al webhook:', formData.webhook_url);
+      console.log(`Enviando ${action} a n8n:`, formData.webhook_url);
       const response = await fetch(formData.webhook_url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          event: 'whatsapp_connection_started',
-          session_name: formData.name,
-          phone_number: formData.phone_number,
+          action: action,
           timestamp: new Date().toISOString(),
+          app_source: 'whatsfull_frontend',
           ...data
         }),
       });
 
       if (response.ok) {
-        console.log('Webhook enviado exitosamente');
+        const responseData = await response.json();
+        console.log(`Respuesta de n8n para ${action}:`, responseData);
+        return responseData;
       } else {
-        console.warn('Error al enviar webhook:', response.status);
+        throw new Error(`Error en respuesta de n8n: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error enviando webhook:', error);
+      console.error(`Error enviando ${action} a n8n:`, error);
+      throw error;
     }
   };
 
@@ -79,81 +81,78 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     setLoading(true);
 
     try {
-      // Enviar notificación de webhook al inicio del proceso
-      if (formData.webhook_enabled && formData.webhook_url) {
-        await sendWebhookNotification({
-          status: 'connection_initiated'
-        });
-      }
-
-      // Paso 1: Crear sesión de WhatsApp
-      const createResponse = await fetch('https://app.wasenderapi.com/api/sessions/create-whatsapp-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Enviar toda la información de conexión a n8n
+      const connectionData = {
+        wasender_request: {
+          create_session: {
+            endpoint: 'https://app.wasenderapi.com/api/sessions/create-whatsapp-session',
+            method: 'POST',
+            payload: {
+              name: formData.name,
+              phone_number: formData.phone_number,
+              account_protection: formData.account_protection,
+              log_messages: formData.log_messages,
+              webhook_url: formData.webhook_url,
+              webhook_enabled: formData.webhook_enabled,
+              webhook_events: formData.webhook_events.length > 0 ? formData.webhook_events : undefined
+            }
+          },
+          connect_session: {
+            endpoint: 'https://app.wasenderapi.com/api/sessions/connect-whatsapp-session',
+            method: 'POST',
+            payload: {
+              name: formData.name
+            }
+          }
         },
-        body: JSON.stringify({
+        session_details: {
           name: formData.name,
           phone_number: formData.phone_number,
           account_protection: formData.account_protection,
           log_messages: formData.log_messages,
-          webhook_url: formData.webhook_url || undefined,
+          webhook_url: formData.webhook_url,
           webhook_enabled: formData.webhook_enabled,
-          webhook_events: formData.webhook_events.length > 0 ? formData.webhook_events : undefined
-        }),
-      });
+          webhook_events: formData.webhook_events
+        }
+      };
 
-      if (!createResponse.ok) {
-        throw new Error('Error al crear la sesión de WhatsApp');
-      }
+      const response = await sendToN8n('whatsapp_connection_request', connectionData);
 
-      // Paso 2: Conectar sesión de WhatsApp
-      const connectResponse = await fetch('https://app.wasenderapi.com/api/sessions/connect-whatsapp-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name
-        }),
-      });
-
-      if (!connectResponse.ok) {
-        throw new Error('Error al conectar con WhatsApp');
-      }
-
-      const connectData = await connectResponse.json();
-      
-      if (connectData.qr) {
-        setQrCode(connectData.qr);
+      // Procesar respuesta de n8n
+      if (response.status === 'success' && response.qr_code) {
+        setQrCode(response.qr_code);
         setStep('qr');
         
-        // Enviar webhook con el código QR generado
-        if (formData.webhook_enabled && formData.webhook_url) {
-          await sendWebhookNotification({
-            status: 'qr_generated',
-            qr_code: connectData.qr
-          });
-        }
-
         toast({
           title: "Código QR generado",
           description: "Escanea el código con tu WhatsApp para conectar.",
         });
+      } else if (response.status === 'error') {
+        throw new Error(response.message || 'Error en el proceso de conexión');
       } else {
-        throw new Error('No se recibió el código QR');
+        // Si n8n está procesando en background
+        toast({
+          title: "Procesando conexión",
+          description: "La solicitud se está procesando. Espera el código QR.",
+        });
+        
+        // Simular espera para código QR (esto sería manejado por websockets o polling en producción)
+        setTimeout(() => {
+          setQrCode('sample-qr-code-pending');
+          setStep('qr');
+        }, 3000);
       }
 
     } catch (error) {
       console.error('Error:', error);
       
-      // Enviar webhook de error
-      if (formData.webhook_enabled && formData.webhook_url) {
-        await sendWebhookNotification({
-          status: 'connection_failed',
-          error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-      }
+      // Notificar error a n8n
+      await sendToN8n('whatsapp_connection_error', {
+        session_name: formData.name,
+        phone_number: formData.phone_number,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        form_data: formData
+      });
 
       toast({
         title: "Error de conexión",
@@ -166,25 +165,36 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
   };
 
   const handleSuccess = async () => {
-    // Enviar webhook de conexión exitosa
-    if (formData.webhook_enabled && formData.webhook_url) {
-      await sendWebhookNotification({
-        status: 'connection_successful',
+    try {
+      // Notificar conexión exitosa a n8n
+      await sendToN8n('whatsapp_connection_success', {
         session_name: formData.name,
-        phone_number: formData.phone_number
+        phone_number: formData.phone_number,
+        timestamp: new Date().toISOString(),
+        qr_scanned: true
       });
-    }
 
-    setStep('success');
-    toast({
-      title: "¡Conexión exitosa!",
-      description: "WhatsApp se ha conectado correctamente.",
-    });
-    setTimeout(() => {
-      onConnectionSuccess();
-      onOpenChange(false);
-      resetForm();
-    }, 2000);
+      setStep('success');
+      toast({
+        title: "¡Conexión exitosa!",
+        description: "WhatsApp se ha conectado correctamente.",
+      });
+      
+      setTimeout(() => {
+        onConnectionSuccess();
+        onOpenChange(false);
+        resetForm();
+      }, 2000);
+    } catch (error) {
+      console.error('Error notificando éxito:', error);
+      // Continuar con el flujo aunque falle la notificación
+      setStep('success');
+      setTimeout(() => {
+        onConnectionSuccess();
+        onOpenChange(false);
+        resetForm();
+      }, 2000);
+    }
   };
 
   const resetForm = () => {
@@ -290,7 +300,7 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Conectando...
+                  Procesando en n8n...
                 </>
               ) : (
                 'Conectar WhatsApp'
@@ -303,7 +313,16 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
           <div className="text-center space-y-4">
             <h3 className="text-lg font-medium">Escanea este código con tu WhatsApp</h3>
             <div className="flex justify-center">
-              <QRCodeSVG value={qrCode} size={200} />
+              {qrCode === 'sample-qr-code-pending' ? (
+                <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded">
+                  <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">Generando código QR...</p>
+                  </div>
+                </div>
+              ) : (
+                <QRCodeSVG value={qrCode} size={200} />
+              )}
             </div>
             <p className="text-sm text-gray-600">
               Abre WhatsApp → Configuración → Dispositivos vinculados → Vincular un dispositivo
