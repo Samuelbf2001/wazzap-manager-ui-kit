@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -8,8 +7,9 @@ import { ConfigurationPanel } from "@/components/ConfigurationPanel";
 import { LogsPanel } from "@/components/LogsPanel";
 import { WhatsAppConnectionModal } from "@/components/WhatsAppConnectionModal";
 import { Button } from "@/components/ui/button";
+import PropertiesPage from "../components/PropertiesPage";
 
-type ActiveTab = 'connections' | 'configuration' | 'logs';
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('connections');
@@ -23,13 +23,14 @@ const Index = () => {
         return <ConfigurationPanel />;
       case 'logs':
         return <LogsPanel />;
+      case 'properties':
+        return <PropertiesPage />;
       default:
         return <ConnectionsTable />;
     }
   };
 
   const handleConnectionSuccess = () => {
-    // Aquí podrías actualizar la lista de conexiones
     console.log('Conexión exitosa - actualizar tabla');
   };
 
@@ -82,6 +83,16 @@ const Index = () => {
                   >
                     Registros
                   </button>
+                  <button
+                    onClick={() => setActiveTab('properties')}
+                    className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                      activeTab === 'properties'
+                        ? 'border-green-500 text-green-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Propiedades
+                  </button>
                 </div>
               </div>
               
@@ -93,7 +104,6 @@ const Index = () => {
         </main>
       </div>
       
-      {/* Floating Action Button */}
       {activeTab === 'connections' && (
         <div className="fixed bottom-8 right-8">
           <Button 
@@ -107,7 +117,6 @@ const Index = () => {
         </div>
       )}
 
-      {/* WhatsApp Connection Modal */}
       <WhatsAppConnectionModal
         open={showConnectionModal}
         onOpenChange={setShowConnectionModal}

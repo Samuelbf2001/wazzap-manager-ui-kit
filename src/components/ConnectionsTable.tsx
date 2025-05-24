@@ -1,152 +1,151 @@
-
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Connection {
   id: string;
   number: string;
   name: string;
-  status: 'connected' | 'disconnected';
-  features: {
-    bot: boolean;
-    webhook: boolean;
-    variables: boolean;
-    logs: boolean;
-  };
+  connected: boolean;
+  features: string[];
+  agent: string;
 }
 
+const AGENT_OPTIONS = ["Sin asignar", "Agent A", "Agent B", "Agent C"];
+
 export function ConnectionsTable() {
-  const [connections] = useState<Connection[]>([
+  const [connections, setConnections] = useState<Connection[]>([
     {
       id: '1',
       number: '+34535636325',
       name: 'Nair España',
-      status: 'disconnected',
-      features: { bot: true, webhook: false, variables: true, logs: true }
+      connected: false,
+      features: ['Bot', 'Variables', 'Logs'],
+      agent: 'Sin asignar'
     },
     {
       id: '2',
       number: '+525534394325',
       name: 'Tickets',
-      status: 'connected',
-      features: { bot: true, webhook: true, variables: false, logs: true }
+      connected: true,
+      features: ['Bot', 'Webhook', 'Logs'],
+      agent: 'Agent A'
     },
     {
       id: '3',
       number: '+34917944735',
       name: 'Osim - 8min',
-      status: 'connected',
-      features: { bot: false, webhook: true, variables: true, logs: false }
-    },
-    {
-      id: '4',
-      number: '+5219888585',
-      name: 'Clínica Dental',
-      status: 'connected',
-      features: { bot: true, webhook: true, variables: true, logs: true }
-    },
-    {
-      id: '5',
-      number: '+41498501598',
-      name: 'Inglewood Tech',
-      status: 'connected',
-      features: { bot: false, webhook: false, variables: true, logs: true }
+      connected: true,
+      features: ['Webhook', 'Variables'],
+      agent: 'Agent B'
     }
   ]);
 
-  const getStatusColor = (status: string) => {
-    return status === 'connected' ? 'bg-green-500' : 'bg-red-500';
+  const [editing, setEditing] = useState<Connection | null>(null);
+
+  const handleDelete = (id: string) => {
+    setConnections(prev => prev.filter(conn => conn.id !== id));
   };
 
-  const getStatusText = (status: string) => {
-    return status === 'connected' ? 'Conectado' : 'No conectado';
+  const handleEditSave = () => {
+    if (!editing) return;
+    setConnections(prev => prev.map(conn => (conn.id === editing.id ? editing : conn)));
+    setEditing(null);
   };
-
-  // Check if any connection is disconnected for the warning message
-  const hasDisconnectedConnection = connections.some(connection => connection.status === 'disconnected');
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Números de WhatsApp Conectados</h2>
-        <p className="text-gray-600">Administra tus conexiones de WhatsApp y su estado actual.</p>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-3 px-4 font-medium text-gray-600">Estado</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">Número</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">Nombre</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">Características</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-600">Acciones</th>
+      <h2 className="text-xl font-bold mb-2">Números de WhatsApp Conectados</h2>
+      <p className="text-sm text-gray-600 mb-4">Administra tus conexiones de WhatsApp y su estado actual.</p>
+      
+      <table className="min-w-full text-sm">
+        <thead className="bg-gray-50 text-gray-600">
+          <tr>
+            <th className="px-4 py-2">Estado</th>
+            <th className="px-4 py-2">Número</th>
+            <th className="px-4 py-2">Nombre</th>
+            <th className="px-4 py-2">Características</th>
+            <th className="px-4 py-2">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {connections.map(conn => (
+            <tr key={conn.id} className="border-t">
+              <td className="px-4 py-2">
+                <span className={`inline-block w-3 h-3 rounded-full ${conn.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+              </td>
+              <td className="px-4 py-2">{conn.number}</td>
+              <td className="px-4 py-2">{conn.name}</td>
+              <td className="px-4 py-2 space-x-1">
+                {conn.features.map((f, i) => (
+                  <span
+                    key={i}
+                    className={
+                      `px-2 py-1 rounded-full text-xs font-medium ` +
+                      (f === 'Bot' ? 'bg-blue-100 text-blue-700 ' :
+                       f === 'Webhook' ? 'bg-purple-100 text-purple-700 ' :
+                       f === 'Variables' ? 'bg-yellow-100 text-yellow-800 ' :
+                       f === 'Logs' ? 'bg-green-100 text-green-700 ' : '')
+                    }
+                  >
+                    {f}
+                  </span>
+                ))}
+              </td>
+              <td className="px-4 py-2">
+                <button onClick={() => setEditing(conn)} className="text-blue-600 hover:underline mr-4">Editar</button>
+                <button onClick={() => handleDelete(conn.id)} className="text-red-600 hover:underline">Eliminar</button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {connections.map((connection) => (
-              <tr key={connection.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                <td className="py-4 px-4">
-                  <div className="flex items-center">
-                    <div className={`w-3 h-3 rounded-full ${getStatusColor(connection.status)} mr-2`}></div>
-                    <span className="text-sm text-gray-600">{getStatusText(connection.status)}</span>
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <span className="font-medium text-gray-900">{connection.number}</span>
-                </td>
-                <td className="py-4 px-4">
-                  <span className="text-gray-900">{connection.name}</span>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex space-x-2">
-                    {connection.features.bot && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        🤖 Bot
-                      </span>
-                    )}
-                    {connection.features.webhook && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        🔗 Webhook
-                      </span>
-                    )}
-                    {connection.features.variables && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                        🧩 Variables
-                      </span>
-                    )}
-                    {connection.features.logs && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        📈 Logs
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex space-x-2">
-                    <button className="text-blue-600 hover:text-blue-800 text-sm">Editar</button>
-                    <button className="text-red-600 hover:text-red-800 text-sm">Eliminar</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
 
-      {hasDisconnectedConnection && (
-        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center">
-            <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <span className="text-sm text-yellow-800">
-              <strong>Número Sin conectar:</strong> no está conectado actualmente.
-            </span>
-          </div>
-          <button className="mt-2 px-4 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition-colors">
-            Conectar
-          </button>
-        </div>
+      {/* Modal de edición */}
+      {editing && (
+        <Dialog open={true} onOpenChange={() => setEditing(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar conexión</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input
+                value={editing.name}
+                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                placeholder="Nombre"
+              />
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={editing.connected}
+                  onCheckedChange={(value) => setEditing({ ...editing, connected: value })}
+                />
+                <span>{editing.connected ? 'Conectado' : 'Desconectado'}</span>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Agente IA asignado</label>
+                <Select
+                  value={editing.agent}
+                  onValueChange={(value) => setEditing({ ...editing, agent: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar agente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGENT_OPTIONS.map((a) => (
+                      <SelectItem key={a} value={a}>{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={handleEditSave}>Guardar cambios</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
