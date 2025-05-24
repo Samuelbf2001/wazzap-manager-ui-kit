@@ -1,17 +1,26 @@
-
-import { MessageSquare, Settings, Shield, Plug } from "lucide-react";
+import {
+  MessageSquare,
+  Settings,
+  Shield,
+  Plug,
+  Mail,
+  BotIcon
+} from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
-  onTabChange: (tab: 'connections' | 'configuration' | 'logs') => void;
+  onTabChange: (
+    tab: 'connections' | 'configuration' | 'logs' | 'campañas' | 'suscripcion' | 'whatsia') => void;
 }
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const menuItems = [
     { id: 'connections', label: 'Connections', icon: Plug },
-    { id: 'configuration', label: 'Messages', icon: MessageSquare },
+    { id: 'campañas', label: 'Campañas', icon: MessageSquare },
     { id: 'logs', label: 'Security', icon: Shield },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'suscripcion', label: 'Suscripción', icon: Mail },
+    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'whatsia', label: 'WhatsIA', icon: BotIcon } // usa el ícono que prefieras
   ];
 
   return (
@@ -33,15 +42,13 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
           {menuItems.map((item) => {
-            const isActive = item.id === 'connections' && activeTab === 'connections';
+            const isActive = activeTab === item.id;
             const Icon = item.icon;
-            
+
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => {
-                    if (item.id === 'connections') onTabChange('connections');
-                  }}
+                  onClick={() => onTabChange(item.id as any)}
                   className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                     isActive
                       ? 'bg-green-50 text-green-700 border border-green-200'

@@ -8,8 +8,13 @@ import { LogsPanel } from "@/components/LogsPanel";
 import { WhatsAppConnectionModal } from "@/components/WhatsAppConnectionModal";
 import { Button } from "@/components/ui/button";
 import PropertiesPage from "../components/PropertiesPage";
+import { WhatsIAStatsPanel } from "@/components/WhatsIAStatsPanel";
+import { SubscriptionPanel } from "@/components/SubscriptionPanel";
+import { CampaignsPanel } from "@/components/CampaignsPanel";
 
-type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties';
+
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia';
+
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('connections');
@@ -27,6 +32,13 @@ const Index = () => {
         return <PropertiesPage />;
       default:
         return <ConnectionsTable />;
+        case 'suscripcion':
+  return <SubscriptionPanel />;
+case 'whatsia':
+  return <WhatsIAStatsPanel />;
+  case 'campañas':
+  return <CampaignsPanel />;
+
     }
   };
 
