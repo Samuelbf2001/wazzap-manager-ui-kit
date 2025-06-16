@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { WhatsAppConnectionMonitor } from "./WhatsAppConnectionMonitor";
 
 interface Connection {
   id: string;
@@ -20,11 +21,11 @@ export function ConnectionsTable() {
   const [connections, setConnections] = useState<Connection[]>([
     {
       id: '1',
-      number: '+34535636325',
-      name: 'Nair España',
-      connected: false,
-      features: ['Bot', 'Variables', 'Logs'],
-      agent: 'Sin asignar'
+      number: '+34123456789',
+      name: 'Soporte Principal',
+      connected: true,
+      features: ['Bot', 'Webhook', 'Variables', 'Logs'],
+      agent: 'Juan Pérez'
     },
     {
       id: '2',
@@ -56,6 +57,11 @@ export function ConnectionsTable() {
     setEditing(null);
   };
 
+  const handleReconnect = async (connectionId: string) => {
+    // Aquí iría la lógica para reconectar
+    console.log('Reconectando:', connectionId);
+  };
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-2">Números de WhatsApp Conectados</h2>
@@ -75,7 +81,11 @@ export function ConnectionsTable() {
           {connections.map(conn => (
             <tr key={conn.id} className="border-t">
               <td className="px-4 py-2">
-                <span className={`inline-block w-3 h-3 rounded-full ${conn.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+                <WhatsAppConnectionMonitor
+                  sessionName={conn.name}
+                  phoneNumber={conn.number}
+                  onReconnect={() => handleReconnect(conn.id)}
+                />
               </td>
               <td className="px-4 py-2">{conn.number}</td>
               <td className="px-4 py-2">{conn.name}</td>
@@ -96,8 +106,9 @@ export function ConnectionsTable() {
                 ))}
               </td>
               <td className="px-4 py-2">
-                <button onClick={() => setEditing(conn)} className="text-blue-600 hover:underline mr-4">Editar</button>
-                <button onClick={() => handleDelete(conn.id)} className="text-red-600 hover:underline">Eliminar</button>
+                <Button variant="outline" size="sm">
+                  Configurar
+                </Button>
               </td>
             </tr>
           ))}

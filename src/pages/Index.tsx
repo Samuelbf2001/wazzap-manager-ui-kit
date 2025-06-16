@@ -11,34 +11,47 @@ import PropertiesPage from "../components/PropertiesPage";
 import { WhatsIAStatsPanel } from "@/components/WhatsIAStatsPanel";
 import { SubscriptionPanel } from "@/components/SubscriptionPanel";
 import { CampaignsPanel } from "@/components/CampaignsPanel";
+import { HubSpotIntegration } from "@/components/HubSpotIntegration";
+import { MessageManager } from "@/components/MessageManager";
 
-
-type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia';
-
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia' | 'hubspot' | 'mensajes';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('connections');
   const [showConnectionModal, setShowConnectionModal] = useState(false);
 
-  const renderActiveTab = () => {
+  const renderContent = () => {
     switch (activeTab) {
       case 'connections':
-        return <ConnectionsTable />;
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Conexiones</h2>
+              <Button onClick={() => setShowConnectionModal(true)}>
+                + Nueva conexión
+              </Button>
+            </div>
+            <ConnectionsTable />
+          </div>
+        );
       case 'configuration':
         return <ConfigurationPanel />;
       case 'logs':
         return <LogsPanel />;
       case 'properties':
         return <PropertiesPage />;
+      case 'campañas':
+        return <CampaignsPanel />;
+      case 'suscripcion':
+        return <SubscriptionPanel />;
+      case 'whatsia':
+        return <WhatsIAStatsPanel />;
+      case 'hubspot':
+        return <HubSpotIntegration />;
+      case 'mensajes':
+        return <MessageManager />;
       default:
-        return <ConnectionsTable />;
-        case 'suscripcion':
-  return <SubscriptionPanel />;
-case 'whatsia':
-  return <WhatsIAStatsPanel />;
-  case 'campañas':
-  return <CampaignsPanel />;
-
+        return null;
     }
   };
 
@@ -51,66 +64,18 @@ case 'whatsia':
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       
-      <div className="flex-1 flex flex-col">
-        <DashboardHeader onConnectClick={handleConnectClick} />
-        
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            <MetricsCards />
+      <div className="pl-64">
+        <main className="min-h-screen">
+          <DashboardHeader onConnectClick={handleConnectClick} />
+          
+          <div className="max-w-7xl mx-auto">
+            {activeTab === 'connections' && <MetricsCards />}
             
-            {/* Tab Navigation */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="border-b border-gray-200 px-6 py-4">
-                <div className="flex space-x-8">
-                  <button
-                    onClick={() => setActiveTab('connections')}
-                    className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === 'connections'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Conexiones
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('configuration')}
-                    className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === 'configuration'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Configuración
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('logs')}
-                    className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === 'logs'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Registros
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('properties')}
-                    className={`pb-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === 'properties'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    Propiedades
-                  </button>
-                </div>
-              </div>
-              
-              <div className="p-6">
-                {renderActiveTab()}
-              </div>
+            <div className="p-6">
+              {renderContent()}
             </div>
           </div>
         </main>

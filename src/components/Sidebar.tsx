@@ -1,81 +1,111 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   MessageSquare,
   Settings,
-  Shield,
-  Plug,
-  Mail,
-  BotIcon
+  Activity,
+  Database,
+  Campaign,
+  CreditCard,
+  Brain,
+  HubSpot,
+  Mail
 } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
-  onTabChange: (
-    tab: 'connections' | 'configuration' | 'logs' | 'campañas' | 'suscripcion' | 'whatsia') => void;
+  onTabChange: (tab: string) => void;
 }
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
-  const menuItems = [
-    { id: 'connections', label: 'Connections', icon: Plug },
-    { id: 'campañas', label: 'Campañas', icon: MessageSquare },
-    { id: 'logs', label: 'Security', icon: Shield },
-    { id: 'suscripcion', label: 'Suscripción', icon: Mail },
-    { id: 'settings', label: 'Settings', icon: Settings },
-    { id: 'whatsia', label: 'WhatsIA', icon: BotIcon } // usa el ícono que prefieras
-  ];
-
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-            <MessageSquare className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg text-gray-900">WhatsFull</h1>
-            <p className="text-xs text-gray-500">WhatsApp Manager</p>
-          </div>
-        </div>
+    <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200">
+      <div className="p-6">
+        <h1 className="text-2xl font-bold text-gray-900">WhatsFull</h1>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const isActive = activeTab === item.id;
-            const Icon = item.icon;
+      <nav className="px-4 space-y-1">
+        <Button
+          variant={activeTab === 'connections' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('connections')}
+        >
+          <MessageSquare className="mr-2 h-4 w-4" />
+          Conexiones
+        </Button>
 
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => onTabChange(item.id as any)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    isActive
-                      ? 'bg-green-50 text-green-700 border border-green-200'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <Button
+          variant={activeTab === 'configuration' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('configuration')}
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Configuración
+        </Button>
+
+        <Button
+          variant={activeTab === 'logs' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('logs')}
+        >
+          <Activity className="mr-2 h-4 w-4" />
+          Registros
+        </Button>
+
+        <Button
+          variant={activeTab === 'properties' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('properties')}
+        >
+          <Database className="mr-2 h-4 w-4" />
+          Propiedades
+        </Button>
+
+        <Button
+          variant={activeTab === 'campañas' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('campañas')}
+        >
+          <Campaign className="mr-2 h-4 w-4" />
+          Campañas
+        </Button>
+
+        <Button
+          variant={activeTab === 'suscripcion' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('suscripcion')}
+        >
+          <CreditCard className="mr-2 h-4 w-4" />
+          Suscripción
+        </Button>
+
+        <Button
+          variant={activeTab === 'whatsia' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('whatsia')}
+        >
+          <Brain className="mr-2 h-4 w-4" />
+          WhatsIA
+        </Button>
+
+        <Button
+          variant={activeTab === 'hubspot' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('hubspot')}
+        >
+          <HubSpot className="mr-2 h-4 w-4" />
+          HubSpot
+        </Button>
+
+        <Button
+          variant={activeTab === 'mensajes' ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          onClick={() => onTabChange('mensajes')}
+        >
+          <Mail className="mr-2 h-4 w-4" />
+          Mensajes
+        </Button>
       </nav>
-
-      {/* User Profile */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-700">A</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-900">Admin</p>
-            <p className="text-xs text-gray-500">admin@whatsfull.mx</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </aside>
   );
 }

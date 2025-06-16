@@ -1,0 +1,107 @@
+{
+  "name": "WhatsFull HubSpot Integration",
+  "description": "Integración de WhatsApp con HubSpot para gestión de contactos y mensajes",
+  "public": false,
+  "auth": {
+    "type": "oauth2",
+    "scopes": [
+      "crm.objects.contacts.read",
+      "crm.objects.contacts.write",
+      "crm.objects.companies.read",
+      "crm.objects.companies.write",
+      "crm.objects.deals.read",
+      "crm.objects.deals.write",
+      "crm.schemas.contacts.read",
+      "crm.schemas.contacts.write",
+      "crm.schemas.companies.read",
+      "crm.schemas.companies.write",
+      "crm.schemas.deals.read",
+      "crm.schemas.deals.write"
+    ]
+  },
+  "public_actions": {
+    "sendWhatsAppMessage": {
+      "name": "Enviar mensaje de WhatsApp",
+      "description": "Envía un mensaje de WhatsApp a un contacto",
+      "input_fields": [
+        {
+          "name": "contactId",
+          "label": "ID del contacto",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "message",
+          "label": "Mensaje",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "output_fields": [
+        {
+          "name": "messageId",
+          "label": "ID del mensaje",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "label": "Estado",
+          "type": "string"
+        }
+      ]
+    },
+    "syncContact": {
+      "name": "Sincronizar contacto",
+      "description": "Sincroniza un contacto entre HubSpot y WhatsApp",
+      "input_fields": [
+        {
+          "name": "contactId",
+          "label": "ID del contacto",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "output_fields": [
+        {
+          "name": "whatsappNumber",
+          "label": "Número de WhatsApp",
+          "type": "string"
+        },
+        {
+          "name": "syncStatus",
+          "label": "Estado de sincronización",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "triggers": {
+    "newMessage": {
+      "name": "Nuevo mensaje de WhatsApp",
+      "description": "Se activa cuando se recibe un nuevo mensaje de WhatsApp",
+      "input_fields": [],
+      "output_fields": [
+        {
+          "name": "messageId",
+          "label": "ID del mensaje",
+          "type": "string"
+        },
+        {
+          "name": "contactId",
+          "label": "ID del contacto",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "label": "Mensaje",
+          "type": "string"
+        },
+        {
+          "name": "timestamp",
+          "label": "Fecha y hora",
+          "type": "string"
+        }
+      ]
+    }
+  }
+} 
