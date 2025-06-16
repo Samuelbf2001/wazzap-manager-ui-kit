@@ -336,9 +336,9 @@ export function FlowExecutionDemo() {
   // Responsive Layout
   if (isMobile) {
     return (
-      <div className="h-screen flex flex-col bg-gray-50">
+      <div className="h-full flex flex-col bg-gray-50">
         {/* Header móvil */}
-        <div className="bg-white border-b px-4 py-3">
+        <div className="bg-white border-b px-4 py-3 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold">Demo de Flujos</h1>
             <div className="flex space-x-2">
@@ -357,8 +357,8 @@ export function FlowExecutionDemo() {
         </div>
 
         {/* Tabs móviles */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 m-2">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+          <TabsList className="grid w-full grid-cols-2 m-2 flex-shrink-0">
             <TabsTrigger value="chat" className="flex items-center">
               <MessageSquare className="h-4 w-4 mr-2" />
               Chat
@@ -369,13 +369,13 @@ export function FlowExecutionDemo() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="chat" className="flex-1 m-2">
+          <TabsContent value="chat" className="flex-1 m-2 min-h-0">
             <Card className="h-full">
               <ChatInterface />
             </Card>
           </TabsContent>
 
-          <TabsContent value="debug" className="flex-1 m-2 overflow-auto">
+          <TabsContent value="debug" className="flex-1 m-2 overflow-auto min-h-0">
             <DebugPanel />
           </TabsContent>
         </Tabs>
@@ -385,11 +385,11 @@ export function FlowExecutionDemo() {
 
   // Desktop Layout
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div className="h-full flex bg-gray-50">
       {/* Panel de control lateral */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
         {/* Header de controles */}
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex-shrink-0">
           <h2 className="text-lg font-semibold mb-4">Demo de Flujos</h2>
           
           <div className="space-y-2">
@@ -425,8 +425,8 @@ export function FlowExecutionDemo() {
       </div>
 
       {/* Área principal de chat */}
-      <div className="flex-1 flex flex-col">
-        <div className="bg-white border-b px-6 py-4">
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="bg-white border-b px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
@@ -451,7 +451,7 @@ export function FlowExecutionDemo() {
           </div>
         </div>
 
-        <div className="flex-1 max-w-4xl mx-auto w-full p-6">
+        <div className="flex-1 max-w-4xl mx-auto w-full p-6 min-h-0">
           <Card className="h-full shadow-lg">
             <ChatInterface />
           </Card>

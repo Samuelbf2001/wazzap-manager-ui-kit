@@ -574,9 +574,9 @@ export function FlowBuilder() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-gray-50">
       {/* Header responsivo */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Botón de menú móvil */}
@@ -620,10 +620,10 @@ export function FlowBuilder() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Panel de herramientas - Desktop */}
         {!isMobile && (
-          <div className="w-80 bg-gray-50 border-r border-gray-200 overflow-hidden">
+          <div className="w-80 bg-gray-50 border-r border-gray-200 overflow-hidden flex-shrink-0">
             {renderToolbox()}
           </div>
         )}
@@ -644,7 +644,7 @@ export function FlowBuilder() {
         )}
 
         {/* Área de trabajo principal */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-w-0">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -656,7 +656,7 @@ export function FlowBuilder() {
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
             fitView
-            className="bg-gray-50"
+            className="w-full h-full"
           >
             <Background 
               variant={BackgroundVariant.Dots} 

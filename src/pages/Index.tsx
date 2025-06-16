@@ -69,6 +69,9 @@ function IndexContent() {
     }
   };
 
+  // Verificar si la pestaña actual necesita altura completa
+  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo';
+
   const handleConnectionSuccess = () => {
     console.log('Conexión exitosa - actualizar tabla');
   };
@@ -84,6 +87,38 @@ function IndexContent() {
     }
     return isCollapsed ? "ml-16" : "ml-64"; // En desktop, ajustar según sidebar
   };
+
+  // Renderizado especial para tabs de altura completa
+  if (isFullHeightTab) {
+    return (
+      <div className="h-screen bg-gray-50 flex flex-col">
+        <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${getMainContentClasses()}`}>
+          {/* Header móvil con botón de menú */}
+          {isMobile && (
+            <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleOpen}
+                className="p-2"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+              <h1 className="text-lg font-semibold">WhatsFull</h1>
+              <div className="w-9" /> {/* Spacer para centrar el título */}
+            </div>
+          )}
+
+          {/* Contenido de altura completa */}
+          <div className="flex-1 overflow-hidden">
+            {renderContent()}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
