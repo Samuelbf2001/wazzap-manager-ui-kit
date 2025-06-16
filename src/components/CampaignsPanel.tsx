@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import FlowVisualBuilder from "@/components/FlowVisualBuilder"; // <--- Ajusta la ruta según tu estructura
 
 type CampaignType = "masivo" | "flujo" | "ia" | "webhooks";
 
@@ -144,7 +143,25 @@ export function CampaignsPanel() {
 
         {/* Flujos */}
         <TabsContent value="flujo">
-          <FlowVisualBuilder />
+          <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div className="space-y-4">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Constructor de Flujos Mejorado</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Ahora puedes crear flujos más avanzados en el nuevo Constructor de Flujos del sidebar.
+                </p>
+                <p className="text-xs text-gray-500">
+                  Ve a "Constructor de Flujos" en el menú lateral para acceder a todas las herramientas avanzadas.
+                </p>
+              </div>
+            </div>
+          </div>
+          
           {filteredCampaigns.length === 0 ? (
             <div className="text-sm text-gray-500 mt-4">No hay campañas de este tipo.</div>
           ) : (
