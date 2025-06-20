@@ -1,107 +1,80 @@
 {
-  "name": "WhatsFull HubSpot Integration",
-  "description": "Integración de WhatsApp con HubSpot para gestión de contactos y mensajes",
-  "public": false,
-  "auth": {
-    "type": "oauth2",
-    "scopes": [
-      "crm.objects.contacts.read",
-      "crm.objects.contacts.write",
-      "crm.objects.companies.read",
-      "crm.objects.companies.write",
-      "crm.objects.deals.read",
-      "crm.objects.deals.write",
-      "crm.schemas.contacts.read",
-      "crm.schemas.contacts.write",
-      "crm.schemas.companies.read",
-      "crm.schemas.companies.write",
-      "crm.schemas.deals.read",
-      "crm.schemas.deals.write"
-    ]
-  },
-  "public_actions": {
-    "sendWhatsAppMessage": {
-      "name": "Enviar mensaje de WhatsApp",
-      "description": "Envía un mensaje de WhatsApp a un contacto",
-      "input_fields": [
-        {
-          "name": "contactId",
-          "label": "ID del contacto",
-          "type": "string",
-          "required": true
-        },
-        {
-          "name": "message",
-          "label": "Mensaje",
-          "type": "string",
-          "required": true
-        }
+  "name": "WhatsApp Manager",
+  "version": "2.0.0",
+  "description": "Gestión completa de conversaciones de WhatsApp integrada con HubSpot",
+  "author": "Tu Empresa",
+  "permissions": [
+    "contacts",
+    "deals", 
+    "companies",
+    "tickets",
+    "communications"
+  ],
+  "extensions": [
+    {
+      "name": "whatsapp-inbox",
+      "label": "Bandeja WhatsApp",
+      "url": "/hubspot-inbox",
+      "type": "iframe",
+      "placement": [
+        "contact.sidebar",
+        "deal.sidebar", 
+        "company.sidebar",
+        "ticket.sidebar"
       ],
-      "output_fields": [
-        {
-          "name": "messageId",
-          "label": "ID del mensaje",
-          "type": "string"
-        },
-        {
-          "name": "status",
-          "label": "Estado",
-          "type": "string"
-        }
-      ]
+      "width": 400,
+      "height": 600,
+      "resizable": true
     },
-    "syncContact": {
-      "name": "Sincronizar contacto",
-      "description": "Sincroniza un contacto entre HubSpot y WhatsApp",
-      "input_fields": [
-        {
-          "name": "contactId",
-          "label": "ID del contacto",
-          "type": "string",
-          "required": true
-        }
+    {
+      "name": "whatsapp-integration",
+      "label": "WhatsApp Integration",
+      "url": "/hubspot-integration",
+      "type": "iframe", 
+      "placement": [
+        "contact.tab",
+        "deal.tab"
       ],
-      "output_fields": [
-        {
-          "name": "whatsappNumber",
-          "label": "Número de WhatsApp",
-          "type": "string"
-        },
-        {
-          "name": "syncStatus",
-          "label": "Estado de sincronización",
-          "type": "string"
-        }
-      ]
+      "width": 800,
+      "height": 600
     }
-  },
-  "triggers": {
-    "newMessage": {
-      "name": "Nuevo mensaje de WhatsApp",
-      "description": "Se activa cuando se recibe un nuevo mensaje de WhatsApp",
-      "input_fields": [],
-      "output_fields": [
-        {
-          "name": "messageId",
-          "label": "ID del mensaje",
-          "type": "string"
-        },
-        {
-          "name": "contactId",
-          "label": "ID del contacto",
-          "type": "string"
-        },
-        {
-          "name": "message",
-          "label": "Mensaje",
-          "type": "string"
-        },
-        {
-          "name": "timestamp",
-          "label": "Fecha y hora",
-          "type": "string"
-        }
-      ]
+  ],
+  "webhooks": [
+    {
+      "name": "whatsapp-message-received",
+      "url": "/webhooks/hubspot/message-received",
+      "events": ["message.received"]
+    },
+    {
+      "name": "whatsapp-conversation-resolved", 
+      "url": "/webhooks/hubspot/conversation-resolved",
+      "events": ["conversation.resolved"]
+    }
+  ],
+  "settings": {
+    "api_endpoint": {
+      "label": "API Endpoint",
+      "type": "string",
+      "required": true,
+      "description": "URL base de tu API de WhatsApp"
+    },
+    "api_key": {
+      "label": "API Key",
+      "type": "string",
+      "required": true,
+      "sensitive": true,
+      "description": "Clave de API para autenticación"
+    },
+    "auto_create_contacts": {
+      "label": "Crear contactos automáticamente",
+      "type": "boolean",
+      "default": true,
+      "description": "Crear contactos en HubSpot automáticamente para números nuevos"
+    },
+    "default_pipeline": {
+      "label": "Pipeline por defecto",
+      "type": "string",
+      "description": "Pipeline por defecto para nuevos deals creados desde WhatsApp"
     }
   }
 } 

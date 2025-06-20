@@ -321,11 +321,11 @@ export function DatabaseNode({ data, selected }: DatabaseNodeProps) {
                 </DialogHeader>
                 
                 <Tabs defaultValue="fields" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="fields">Campos</TabsTrigger>
-                    <TabsTrigger value="ai">IA & Extracción</TabsTrigger>
-                    <TabsTrigger value="settings">Configuración</TabsTrigger>
-                    <TabsTrigger value="advanced">Avanzado</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-4 h-auto">
+                    <TabsTrigger value="fields" className="text-xs py-2 px-2">Campos</TabsTrigger>
+                    <TabsTrigger value="ai" className="text-xs py-2 px-2">IA & Extract</TabsTrigger>
+                    <TabsTrigger value="settings" className="text-xs py-2 px-1">Config</TabsTrigger>
+                    <TabsTrigger value="advanced" className="text-xs py-2 px-1">Avanzado</TabsTrigger>
                   </TabsList>
                   
                   {/* Tab: Configuración de Campos */}

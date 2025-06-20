@@ -16,9 +16,10 @@ import { HubSpotIntegration } from "@/components/HubSpotIntegration";
 import { MessageManager } from "@/components/MessageManager";
 import { FlowBuilder } from "@/components/FlowBuilder/FlowBuilder";
 import { FlowExecutionDemo } from "@/components/FlowExecutionDemo";
+import { LiveInbox } from "@/components/LiveInbox";
 import { Menu, Plus } from "lucide-react";
 
-type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia' | 'hubspot' | 'mensajes' | 'flujos' | 'demo';
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
 
 // Componente interno que usa el contexto del sidebar
 function IndexContent() {
@@ -64,13 +65,15 @@ function IndexContent() {
         return <FlowBuilder />;
       case 'demo':
         return <FlowExecutionDemo />;
+      case 'bandeja':
+        return <LiveInbox />;
       default:
         return null;
     }
   };
 
   // Verificar si la pestaña actual necesita altura completa
-  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo';
+  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo' || activeTab === 'bandeja';
 
   const handleConnectionSuccess = () => {
     console.log('Conexión exitosa - actualizar tabla');

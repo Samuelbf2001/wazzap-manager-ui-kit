@@ -342,13 +342,13 @@ export function HttpRequestNode({ data, selected }: NodeProps<HttpRequestData>) 
             
             <CardContent>
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="basic">Básico</TabsTrigger>
-                  <TabsTrigger value="auth">Auth</TabsTrigger>
-                  <TabsTrigger value="body">Body</TabsTrigger>
-                  <TabsTrigger value="response">Respuesta</TabsTrigger>
-                  <TabsTrigger value="variables">Variables</TabsTrigger>
-                  <TabsTrigger value="advanced">Avanzado</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-6 h-auto">
+                  <TabsTrigger value="basic" className="text-xs py-2 px-1">Básico</TabsTrigger>
+                  <TabsTrigger value="auth" className="text-xs py-2 px-1">Auth</TabsTrigger>
+                  <TabsTrigger value="body" className="text-xs py-2 px-1">Body</TabsTrigger>
+                  <TabsTrigger value="response" className="text-xs py-2 px-1">Response</TabsTrigger>
+                  <TabsTrigger value="variables" className="text-xs py-2 px-1">Variables</TabsTrigger>
+                  <TabsTrigger value="advanced" className="text-xs py-2 px-1">Avanzado</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-4">

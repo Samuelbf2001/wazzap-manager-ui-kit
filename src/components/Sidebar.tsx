@@ -107,6 +107,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       icon: Mail,
       label: 'Mensajes',
       description: 'Gestión de mensajes y conversaciones'
+    },
+    {
+      id: 'bandeja',
+      icon: MessageSquare,
+      label: 'Bandeja de Entrada',
+      description: 'Conversaciones en vivo y chat en tiempo real'
     }
   ];
 

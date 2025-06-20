@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PropertiesPage from "./components/PropertiesPage";
 import FlowBuilderPage from "./pages/FlowBuilderPage";
+import { LiveInboxPage } from "./pages/LiveInboxPage";
+import { HubSpotInboxMount } from "./components/HubSpotInboxWidget";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/propiedades" element={<PropertiesPage />} />
           <Route path="/constructor" element={<FlowBuilderPage />} />
+          <Route path="/bandeja" element={<LiveInboxPage />} />
+          <Route path="/hubspot-inbox" element={<HubSpotInboxMount />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

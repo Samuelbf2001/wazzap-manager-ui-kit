@@ -12,6 +12,8 @@ import ReactFlow, {
   MiniMap,
   BackgroundVariant,
   ConnectionMode,
+  ConnectionLineType,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Button } from '@/components/ui/button';
@@ -65,7 +67,6 @@ import { CustomerStageNode } from './nodes/CustomerStageNode';
 import { AdvancedConditionNode } from './nodes/AdvancedConditionNode';
 import { AIResponseNode } from './nodes/AIResponseNode';
 import { WebhookNode } from './nodes/WebhookNode';
-import { ButtonsNode } from './nodes/ButtonsNode';
 import { SurveyNode } from './nodes/SurveyNode';
 import { DatabaseNode } from './nodes/DatabaseNode';
 import { LocationNode } from './nodes/LocationNode';
@@ -89,7 +90,6 @@ const nodeTypes = {
   // Comunicación WhatsApp
   enhancedMessage: MessageNode,
   typing: TypingNode,
-  buttons: ButtonsNode,
   survey: SurveyNode,
   location: LocationNode,
   whatsappFlow: WhatsAppFlowNode,
@@ -129,43 +129,34 @@ const nodeCategories = {
     nodes: [
       {
         type: 'enhancedMessage',
-        title: 'Mensaje Avanzado',
-        description: 'Mensaje con formato y variables',
+        title: 'Mensaje Interactivo',
+        description: 'Mensaje con botones, listas y media',
         icon: MessageSquare,
         color: 'text-green-600',
         defaultData: {
           label: 'Mensaje',
           message: 'Hola, ¿cómo puedo ayudarte?',
-          typing: true,
-          delay: 1000,
+          messageType: 'text',
+          interactiveType: 'none',
+          hasButtons: false,
+          buttons: [],
+          hasListMenu: false,
+          listMenu: { title: '', sections: [] },
           variables: [],
           formatting: { bold: false, emoji: true }
         }
       },
       {
         type: 'typing',
-        title: 'Tipificación',
-        description: 'Simula que el bot está escribiendo',
-        icon: MoreHorizontal,
-        color: 'text-yellow-600',
+        title: 'Clasificación IA',
+        description: 'Clasifica intenciones y estados',
+        icon: Brain,
+        color: 'text-purple-600',
         defaultData: {
-          label: 'Escribiendo...',
-          duration: 2000
-        }
-      },
-      {
-        type: 'buttons',
-        title: 'Botones',
-        description: 'Botones interactivos de WhatsApp',
-        icon: MousePointer,
-        color: 'text-blue-600',
-        defaultData: {
-          label: 'Botones',
-          message: 'Selecciona una opción:',
-          buttons: [
-            { type: 'reply', text: 'Opción 1' },
-            { type: 'reply', text: 'Opción 2' }
-          ]
+          label: 'Clasificación',
+          classificationTypes: ['intention', 'sentiment'],
+          confidence: 0.8,
+          aiProvider: 'openai'
         }
       },
       {
@@ -408,10 +399,97 @@ export function FlowBuilder() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Función mejorada para manejar conexiones
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params: Connection) => {
+      // Configurar el estilo de la conexión
+      const newEdge = {
+        ...params,
+        type: 'smoothstep',
+        animated: true,
+        style: { 
+          stroke: '#3b82f6', 
+          strokeWidth: 2,
+          strokeDasharray: '0'
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: '#3b82f6',
+          width: 20,
+          height: 20,
+        },
+        // Configuraciones para mejorar la experiencia de conexión
+        deletable: true,
+        focusable: true,
+      };
+      
+      setEdges((eds) => addEdge(newEdge, eds));
+    },
     [setEdges]
   );
+
+  // Función para validar conexiones (opcional - permite más flexibilidad)
+  const isValidConnection = useCallback((connection: Connection) => {
+    // Permitir todas las conexiones por defecto para mayor flexibilidad
+    // Aquí se pueden agregar validaciones específicas si es necesario
+    return true;
+  }, []);
+
+  // Función para manejar clics en edges (para facilitar desconexión)
+  const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    event.stopPropagation();
+    // Agregar confirmación visual antes de eliminar
+    const shouldDelete = window.confirm('¿Deseas eliminar esta conexión?');
+    if (shouldDelete) {
+      setEdges((edges) => edges.filter((e) => e.id !== edge.id));
+    }
+  }, [setEdges]);
+
+  // Función para manejar hover en edges
+  const onEdgeMouseEnter = useCallback((event: React.MouseEvent, edge: Edge) => {
+    // Cambiar el cursor para indicar que es clickeable
+    (event.currentTarget as HTMLElement).style.cursor = 'pointer';
+    // Resaltar visualmente la conexión
+    setEdges((edges) => 
+      edges.map((e) => 
+        e.id === edge.id 
+          ? { ...e, style: { ...e.style, strokeWidth: 3, stroke: '#ef4444' } }
+          : e
+      )
+    );
+  }, [setEdges]);
+
+  const onEdgeMouseLeave = useCallback((event: React.MouseEvent, edge: Edge) => {
+    // Restaurar el estilo original
+    setEdges((edges) => 
+      edges.map((e) => 
+        e.id === edge.id 
+          ? { ...e, style: { ...e.style, strokeWidth: 2, stroke: '#3b82f6' } }
+          : e
+      )
+    );
+  }, [setEdges]);
+
+  // Configuración del estilo de conexión mientras se arrastra
+  const connectionLineStyle = {
+    stroke: '#3b82f6',
+    strokeWidth: 3,
+    strokeDasharray: '5,5',
+  };
+
+  // Configuraciones por defecto para los edges
+  const defaultEdgeOptions = {
+    type: 'smoothstep',
+    animated: true,
+    style: { 
+      stroke: '#3b82f6', 
+      strokeWidth: 2 
+    },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: '#3b82f6',
+    },
+  };
 
   const onDragStart = (event: React.DragEvent, nodeType: string, defaultData: any) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -506,9 +584,9 @@ export function FlowBuilder() {
 
   // Render del panel de herramientas
   const renderToolbox = () => (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header del toolbox */}
-      <div className="p-4 border-b bg-white">
+      <div className="p-4 border-b bg-white flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-gray-900">Módulos</h3>
           {isMobile && (
@@ -535,48 +613,50 @@ export function FlowBuilder() {
       </div>
 
       {/* Lista de categorías */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {Object.entries(filteredCategories).map(([categoryKey, category]: [string, any]) => (
-            <Card key={categoryKey} className={`${category.color} border-2`}>
-              <div className="p-3">
-                <div className="flex items-center space-x-2 mb-3">
-                  <category.icon className="h-5 w-5" />
-                  <h4 className="font-medium text-sm">{category.title}</h4>
-                </div>
-                
-                <div className="grid gap-2">
-                  {category.nodes.map((node: any) => (
-                    <div
-                      key={node.type}
-                      draggable
-                      onDragStart={(e) => onDragStart(e, node.type, node.defaultData)}
-                      className="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200 cursor-move hover:shadow-sm hover:border-gray-300 transition-all"
-                    >
-                      <node.icon className={`h-4 w-4 ${node.color}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {node.title}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {node.description}
-                        </p>
+      <div className="flex-1 overflow-y-auto">
+        <ScrollArea className="h-full toolbox-scroll">
+          <div className="p-4 space-y-4">
+            {Object.entries(filteredCategories).map(([categoryKey, category]: [string, any]) => (
+              <Card key={categoryKey} className={`${category.color} border-2`}>
+                <div className="p-3">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <category.icon className="h-5 w-5" />
+                    <h4 className="font-medium text-sm">{category.title}</h4>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    {category.nodes.map((node: any) => (
+                      <div
+                        key={node.type}
+                        draggable
+                        onDragStart={(e) => onDragStart(e, node.type, node.defaultData)}
+                        className="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200 cursor-move hover:shadow-sm hover:border-gray-300 transition-all"
+                      >
+                        <node.icon className={`h-4 w-4 ${node.color}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {node.title}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {node.description}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </ScrollArea>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden">
       {/* Header responsivo */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 min-h-[60px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Botón de menú móvil */}
@@ -620,10 +700,10 @@ export function FlowBuilder() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0" style={{ height: 'calc(100vh - 60px)' }}>
         {/* Panel de herramientas - Desktop */}
         {!isMobile && (
-          <div className="w-80 bg-gray-50 border-r border-gray-200 overflow-hidden flex-shrink-0">
+          <div className="w-80 bg-gray-50 border-r border-gray-200 overflow-hidden flex-shrink-0 h-full">
             {renderToolbox()}
           </div>
         )}
@@ -631,7 +711,7 @@ export function FlowBuilder() {
         {/* Panel de herramientas - Mobile (Sheet) */}
         {isMobile && (
           <Sheet open={isToolboxOpen} onOpenChange={setIsToolboxOpen}>
-            <SheetContent side="left" className="w-80 p-0">
+            <SheetContent side="left" className="w-80 p-0 h-full">
               <SheetHeader className="p-4 border-b">
                 <SheetTitle>Módulos del Flujo</SheetTitle>
                 <SheetDescription>
@@ -644,7 +724,7 @@ export function FlowBuilder() {
         )}
 
         {/* Área de trabajo principal */}
-        <div className="flex-1 relative min-w-0">
+        <div className="flex-1 relative min-w-0 h-full">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -655,8 +735,30 @@ export function FlowBuilder() {
             onDragOver={onDragOver}
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
+            connectionLineType={ConnectionLineType.SmoothStep}
+            connectionLineStyle={connectionLineStyle}
+            defaultEdgeOptions={defaultEdgeOptions}
+            isValidConnection={isValidConnection}
+            onEdgeClick={onEdgeClick}
+            onEdgeMouseEnter={onEdgeMouseEnter}
+            onEdgeMouseLeave={onEdgeMouseLeave}
+            snapToGrid={true}
+            snapGrid={[15, 15]}
+            nodesDraggable={true}
+            nodesConnectable={true}
+            elementsSelectable={true}
+            selectNodesOnDrag={false}
+            panOnDrag={true}
+            zoomOnDoubleClick={false}
+            deleteKeyCode={['Backspace', 'Delete']}
+            multiSelectionKeyCode={['Control', 'Meta']}
             fitView
+            fitViewOptions={{
+              padding: 0.2,
+              includeHiddenNodes: false,
+            }}
             className="w-full h-full"
+            style={{ height: '100%', width: '100%' }}
           >
             <Background 
               variant={BackgroundVariant.Dots} 

@@ -342,12 +342,12 @@ export function RecognitionNode({ data, selected }: NodeProps<RecognitionData>) 
             
             <CardContent>
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="basic">Básico</TabsTrigger>
-                  <TabsTrigger value="criteria">Criterios</TabsTrigger>
-                  <TabsTrigger value="properties">Propiedades</TabsTrigger>
-                  <TabsTrigger value="results">Resultados</TabsTrigger>
-                  <TabsTrigger value="advanced">Avanzado</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-5 h-auto">
+                  <TabsTrigger value="basic" className="text-xs py-2 px-1">Básico</TabsTrigger>
+                  <TabsTrigger value="criteria" className="text-xs py-2 px-1">Criterios</TabsTrigger>
+                  <TabsTrigger value="properties" className="text-xs py-2 px-1">Props</TabsTrigger>
+                  <TabsTrigger value="results" className="text-xs py-2 px-1">Results</TabsTrigger>
+                  <TabsTrigger value="advanced" className="text-xs py-2 px-1">Avanzado</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-4">

@@ -183,26 +183,31 @@ export function SmartonNode({ data, selected }: NodeProps<SmartonData>) {
     <>
       <Handle type="target" position={Position.Top} />
       
-      <Card className={`w-80 ${selected ? 'ring-2 ring-blue-500' : ''} ${getSmartonColor()}`}>
-        <CardHeader className="pb-2">
+      <Card className={`w-80 ${selected ? 'ring-2 ring-blue-500' : ''} ${getSmartonColor()} border-l-4 shadow-sm hover:shadow-md transition-shadow`}>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <SmartonIcon className="h-4 w-4" />
-              <CardTitle className="text-sm font-medium">{localData.label}</CardTitle>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="p-1.5 bg-white/50 rounded-full flex-shrink-0">
+                <SmartonIcon className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="text-sm font-medium text-gray-900 truncate">{localData.label}</CardTitle>
+                <Badge variant="secondary" className="text-xs mt-1">
+                  {localData.smartonType === 'generic' && 'Genérico'}
+                  {localData.smartonType === 'catalog' && 'Catálogo'}
+                  {localData.smartonType === 'fieldSaver' && 'Guardado de Campos'}
+                </Badge>
+              </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsConfigOpen(true)}
+              className="h-8 w-8 p-0 flex-shrink-0"
             >
               <Settings className="h-3 w-3" />
             </Button>
           </div>
-          <Badge variant="secondary" className="w-fit text-xs">
-            {localData.smartonType === 'generic' && 'Genérico'}
-            {localData.smartonType === 'catalog' && 'Catálogo'}
-            {localData.smartonType === 'fieldSaver' && 'Guardado de Campos'}
-          </Badge>
         </CardHeader>
         
         <CardContent className="pt-0">
@@ -279,12 +284,12 @@ export function SmartonNode({ data, selected }: NodeProps<SmartonData>) {
             
             <CardContent>
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="basic">Básico</TabsTrigger>
-                  <TabsTrigger value="prompt">Prompt</TabsTrigger>
-                  <TabsTrigger value="intentions">Intenciones</TabsTrigger>
-                  <TabsTrigger value="fields">Campos</TabsTrigger>
-                  <TabsTrigger value="advanced">Avanzado</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-5 h-auto">
+                  <TabsTrigger value="basic" className="text-xs py-2 px-1">Básico</TabsTrigger>
+                  <TabsTrigger value="prompt" className="text-xs py-2 px-1">Prompt</TabsTrigger>
+                  <TabsTrigger value="intentions" className="text-xs py-2 px-1">Intents</TabsTrigger>
+                  <TabsTrigger value="fields" className="text-xs py-2 px-1">Campos</TabsTrigger>
+                  <TabsTrigger value="advanced" className="text-xs py-2 px-1">Avanzado</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-4">

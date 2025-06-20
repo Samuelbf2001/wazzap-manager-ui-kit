@@ -321,13 +321,13 @@ export function MetaConversionsNode({ data, selected }: NodeProps<MetaConversion
             
             <CardContent>
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-6">
-                  <TabsTrigger value="basic">Básico</TabsTrigger>
-                  <TabsTrigger value="event">Evento</TabsTrigger>
-                  <TabsTrigger value="user">Usuario</TabsTrigger>
-                  <TabsTrigger value="custom">Personalizado</TabsTrigger>
-                  <TabsTrigger value="mapping">Mapeo</TabsTrigger>
-                  <TabsTrigger value="advanced">Avanzado</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-6 h-auto">
+                  <TabsTrigger value="basic" className="text-xs py-2 px-1">Básico</TabsTrigger>
+                  <TabsTrigger value="event" className="text-xs py-2 px-1">Evento</TabsTrigger>
+                  <TabsTrigger value="user" className="text-xs py-2 px-1">Usuario</TabsTrigger>
+                  <TabsTrigger value="custom" className="text-xs py-2 px-1">Custom</TabsTrigger>
+                  <TabsTrigger value="mapping" className="text-xs py-2 px-1">Mapeo</TabsTrigger>
+                  <TabsTrigger value="advanced" className="text-xs py-2 px-1">Avanzado</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-4">

@@ -13,24 +13,24 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.5rem;
 
@@ -49,6 +49,12 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
@@ -61,8 +67,8 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -78,7 +84,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 224.3 76.3% 94.1%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -87,6 +93,12 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -95,7 +107,278 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos específicos para ReactFlow y FlowBuilder */
+@layer components {
+  .react-flow__viewport {
+    height: 100% !important;
+  }
+  
+  .react-flow__container {
+    height: 100% !important;
+    width: 100% !important;
+  }
+  
+  .react-flow__pane {
+    height: 100% !important;
+  }
+  
+  /* Estilos para los nodos */
+  .react-flow__node {
+    font-family: inherit;
+  }
+  
+  /* Scroll personalizado para el toolbox */
+  .toolbox-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .toolbox-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .toolbox-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .toolbox-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* Estilos personalizados para ReactFlow - Conexiones mejoradas */
+.react-flow {
+  background-color: #f9fafb;
+}
+
+/* Handles sin efectos problemáticos */
+.react-flow__handle {
+  width: 12px !important;
+  height: 12px !important;
+  border: 2px solid #ffffff !important;
+  background: #3b82f6 !important;
+  border-radius: 50% !important;
+  opacity: 0.8 !important;
+  transition: none !important;
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hover en handles sin efectos de escala */
+.react-flow__handle:hover {
+  opacity: 1 !important;
+  background: #2563eb !important;
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.react-flow__handle:active {
+  transform: none !important;
+}
+
+/* Handle de conexión activo */
+.react-flow__handle.connecting {
+  background: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3) !important;
+  animation: pulse 1s infinite !important;
+}
+
+/* Handles de source (salida) */
+.react-flow__handle-bottom {
+  background: #059669 !important;
+}
+
+.react-flow__handle-bottom:hover {
+  background: #047857 !important;
+}
+
+/* Handles de target (entrada) */
+.react-flow__handle-top {
+  background: #dc2626 !important;
+}
+
+.react-flow__handle-top:hover {
+  background: #b91c1c !important;
+}
+
+/* Líneas de conexión mejoradas */
+.react-flow__edge-path {
+  stroke-width: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 4px !important;
+  stroke: #ef4444 !important;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4)) !important;
+}
+
+/* Marcadores de flecha mejorados */
+.react-flow__arrowhead {
+  fill: #3b82f6 !important;
+}
+
+.react-flow__edge:hover .react-flow__arrowhead {
+  fill: #ef4444 !important;
+}
+
+/* Línea de conexión mientras se arrastra */
+.react-flow__connectionline {
+  stroke: #3b82f6 !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 5,5 !important;
+  opacity: 0.8 !important;
+  animation: dash 1s linear infinite !important;
+}
+
+/* Nodos - Configuración base sin efectos problemáticos */
+.react-flow__node {
+  /* Reglas básicas para funcionamiento normal */
+}
+
+.react-flow__node:hover {
+  /* Sin efectos de hover problemáticos */
+}
+
+.react-flow__node.selected {
+  /* Solo borde de selección */
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+.react-flow__node.dragging {
+  /* Opacidad durante drag */
+  opacity: 0.8;
+}
+
+.react-flow__node:active {
+  /* Sin efectos en active */
+}
+
+/* Controles mejorados */
+.react-flow__controls {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.react-flow__controls-button {
+  background: transparent !important;
+  border: none !important;
+  color: #374151 !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #f3f4f6 !important;
+}
+
+/* Minimapa mejorado */
+.react-flow__minimap {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Panel mejorado */
+.react-flow__panel {
+  background: transparent !important;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Tooltip para conexiones */
+.connection-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  transform: translate(-50%, -100%);
+  margin-top: -5px;
+}
+
+/* Animación para conexiones */
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 5;
+  animation: flowAnimation 0.5s ease-in-out;
+}
+
+@keyframes flowAnimation {
+  0% {
+    stroke-dashoffset: 10;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Handle cuando es target válido */
+.react-flow__handle.valid-target {
+  animation: validPulse 1s infinite !important;
+  background: #10b981 !important;
+}
+
+@keyframes validPulse {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scrollbar para el toolbox */
+.toolbox-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.toolbox-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.toolbox-scroll::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 3px;
+}
+
+.toolbox-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.toolbox-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+
+
+
