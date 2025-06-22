@@ -15,7 +15,8 @@ import {
   Menu,
   ChevronLeft,
   X,
-  Play
+  Play,
+  Bot
 } from "lucide-react";
 
 interface SidebarProps {
@@ -95,6 +96,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       icon: Brain,
       label: 'WhatsIA',
       description: 'Asistente de inteligencia artificial'
+    },
+    {
+      id: 'agentes',
+      icon: Bot,
+      label: 'Agentes IA',
+      description: 'Gestión de agentes de inteligencia artificial'
     },
     {
       id: 'hubspot',
