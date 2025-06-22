@@ -1,4 +1,5 @@
 import { NodeExecutor, NodeExecutionContext, NodeExecutionResult, DatabaseNodeData } from '@/types/conversation';
+import { db, DatabaseHelpers } from '@/lib/database';
 
 /**
  * Ejecutor para nodos de base de datos
@@ -69,14 +70,22 @@ export class DatabaseExecutor implements NodeExecutor {
   private async executeSelect(data: DatabaseNodeData, context: NodeExecutionContext): Promise<any[]> {
     console.log(`📊 Ejecutando SELECT en tabla: ${data.table}`);
     
-    // Procesar condiciones con variables
-    const processedConditions = this.processConditions(data.conditions, context);
-    
-    // Simular consulta a base de datos
-    const mockData = await this.simulateDatabase(data.table, 'select', processedConditions);
-    
-    console.log(`✅ SELECT completado: ${mockData.length} registros encontrados`);
-    return mockData;
+    try {
+      // Procesar condiciones con variables
+      const processedConditions = this.processConditions(data.conditions, context);
+      
+      // Construir query dinámicamente
+      const { query, values } = this.buildSelectQuery(data.table, processedConditions);
+      
+      // Ejecutar query
+      const result = await db.query(query, values);
+      
+      console.log(`✅ SELECT completado: ${result.rows.length} registros encontrados`);
+      return result.rows;
+    } catch (error) {
+      console.error('Error en SELECT:', error);
+      throw error;
+    }
   }
 
   /**
@@ -85,14 +94,22 @@ export class DatabaseExecutor implements NodeExecutor {
   private async executeInsert(data: DatabaseNodeData, context: NodeExecutionContext): Promise<any> {
     console.log(`📝 Ejecutando INSERT en tabla: ${data.table}`);
     
-    // Procesar datos a insertar con variables
-    const processedData = this.processInsertData(data, context);
-    
-    // Simular inserción
-    const result = await this.simulateDatabase(data.table, 'insert', processedData);
-    
-    console.log(`✅ INSERT completado: registro insertado con ID ${result.id}`);
-    return result;
+    try {
+      // Procesar datos a insertar con variables
+      const processedData = this.processInsertData(data, context);
+      
+      // Construir query dinámicamente
+      const { query, values } = this.buildInsertQuery(data.table, processedData);
+      
+      // Ejecutar query
+      const result = await db.query(query, values);
+      
+      console.log(`✅ INSERT completado: registro insertado con ID ${result.rows[0].id}`);
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error en INSERT:', error);
+      throw error;
+    }
   }
 
   /**
@@ -101,14 +118,22 @@ export class DatabaseExecutor implements NodeExecutor {
   private async executeUpdate(data: DatabaseNodeData, context: NodeExecutionContext): Promise<any> {
     console.log(`✏️ Ejecutando UPDATE en tabla: ${data.table}`);
     
-    const processedConditions = this.processConditions(data.conditions, context);
-    const processedData = this.processInsertData(data, context);
-    
-    // Simular actualización
-    const result = await this.simulateDatabase(data.table, 'update', { ...processedData, ...processedConditions });
-    
-    console.log(`✅ UPDATE completado: ${result.rowsAffected} registros actualizados`);
-    return result;
+    try {
+      const processedConditions = this.processConditions(data.conditions, context);
+      const processedData = this.processInsertData(data, context);
+      
+      // Construir query dinámicamente
+      const { query, values } = this.buildUpdateQuery(data.table, processedData, processedConditions);
+      
+      // Ejecutar query
+      const result = await db.query(query, values);
+      
+      console.log(`✅ UPDATE completado: ${result.rowCount} registros actualizados`);
+      return { rowsAffected: result.rowCount };
+    } catch (error) {
+      console.error('Error en UPDATE:', error);
+      throw error;
+    }
   }
 
   /**
@@ -117,13 +142,127 @@ export class DatabaseExecutor implements NodeExecutor {
   private async executeDelete(data: DatabaseNodeData, context: NodeExecutionContext): Promise<any> {
     console.log(`🗑️ Ejecutando DELETE en tabla: ${data.table}`);
     
-    const processedConditions = this.processConditions(data.conditions, context);
+    try {
+      const processedConditions = this.processConditions(data.conditions, context);
+      
+      // Construir query dinámicamente
+      const { query, values } = this.buildDeleteQuery(data.table, processedConditions);
+      
+      // Ejecutar query
+      const result = await db.query(query, values);
+      
+      console.log(`✅ DELETE completado: ${result.rowCount} registros eliminados`);
+      return { rowsAffected: result.rowCount };
+    } catch (error) {
+      console.error('Error en DELETE:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Construir query SELECT dinámicamente
+   */
+  private buildSelectQuery(table: string, conditions: Record<string, any>): { query: string; values: any[] } {
+    let query = `SELECT * FROM ${table}`;
+    const values: any[] = [];
     
-    // Simular eliminación
-    const result = await this.simulateDatabase(data.table, 'delete', processedConditions);
+    if (Object.keys(conditions).length > 0) {
+      const whereConditions: string[] = [];
+      let paramIndex = 1;
+      
+      Object.entries(conditions).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          whereConditions.push(`${key} = $${paramIndex}`);
+          values.push(value);
+          paramIndex++;
+        }
+      });
+      
+      if (whereConditions.length > 0) {
+        query += ` WHERE ${whereConditions.join(' AND ')}`;
+      }
+    }
     
-    console.log(`✅ DELETE completado: ${result.rowsAffected} registros eliminados`);
-    return result;
+    query += ' ORDER BY created_at DESC';
+    
+    return { query, values };
+  }
+
+  /**
+   * Construir query INSERT dinámicamente
+   */
+  private buildInsertQuery(table: string, data: Record<string, any>): { query: string; values: any[] } {
+    const keys = Object.keys(data).filter(key => data[key] !== undefined);
+    const values = keys.map(key => data[key]);
+    const placeholders = keys.map((_, index) => `$${index + 1}`).join(', ');
+    
+    const query = `
+      INSERT INTO ${table} (${keys.join(', ')})
+      VALUES (${placeholders})
+      RETURNING *
+    `;
+    
+    return { query, values };
+  }
+
+  /**
+   * Construir query UPDATE dinámicamente
+   */
+  private buildUpdateQuery(
+    table: string, 
+    data: Record<string, any>, 
+    conditions: Record<string, any>
+  ): { query: string; values: any[] } {
+    const dataKeys = Object.keys(data).filter(key => data[key] !== undefined);
+    const values: any[] = [];
+    let paramIndex = 1;
+    
+    // SET clause
+    const setClause = dataKeys.map(key => {
+      values.push(data[key]);
+      return `${key} = $${paramIndex++}`;
+    }).join(', ');
+    
+    // WHERE clause
+    const whereConditions: string[] = [];
+    Object.entries(conditions).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        whereConditions.push(`${key} = $${paramIndex}`);
+        values.push(value);
+        paramIndex++;
+      }
+    });
+    
+    let query = `UPDATE ${table} SET ${setClause}`;
+    if (whereConditions.length > 0) {
+      query += ` WHERE ${whereConditions.join(' AND ')}`;
+    }
+    
+    return { query, values };
+  }
+
+  /**
+   * Construir query DELETE dinámicamente
+   */
+  private buildDeleteQuery(table: string, conditions: Record<string, any>): { query: string; values: any[] } {
+    const values: any[] = [];
+    const whereConditions: string[] = [];
+    let paramIndex = 1;
+    
+    Object.entries(conditions).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        whereConditions.push(`${key} = $${paramIndex}`);
+        values.push(value);
+        paramIndex++;
+      }
+    });
+    
+    let query = `DELETE FROM ${table}`;
+    if (whereConditions.length > 0) {
+      query += ` WHERE ${whereConditions.join(' AND ')}`;
+    }
+    
+    return { query, values };
   }
 
   /**
@@ -164,70 +303,6 @@ export class DatabaseExecutor implements NodeExecutor {
     processedData.thread_id = context.threadId;
     
     return processedData;
-  }
-
-  /**
-   * Simula operaciones de base de datos (placeholder)
-   */
-  private async simulateDatabase(table: string, operation: string, data: any): Promise<any> {
-    // Simular delay de base de datos
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    switch (operation) {
-      case 'select':
-        return this.getMockData(table, data);
-      case 'insert':
-        return {
-          id: Math.floor(Math.random() * 10000),
-          ...data,
-          created_at: new Date().toISOString()
-        };
-      case 'update':
-        return { rowsAffected: Math.floor(Math.random() * 5) + 1 };
-      case 'delete':
-        return { rowsAffected: Math.floor(Math.random() * 3) + 1 };
-      default:
-        return null;
-    }
-  }
-
-  /**
-   * Genera datos mock para simulación
-   */
-  private getMockData(table: string, conditions: any): any[] {
-    const mockTables: Record<string, any[]> = {
-      users: [
-        { id: 1, name: 'Juan Pérez', email: 'juan@example.com', phone: '+1234567890', created_at: '2024-01-01T00:00:00Z' },
-        { id: 2, name: 'María García', email: 'maria@example.com', phone: '+1234567891', created_at: '2024-01-02T00:00:00Z' },
-        { id: 3, name: 'Carlos López', email: 'carlos@example.com', phone: '+1234567892', created_at: '2024-01-03T00:00:00Z' }
-      ],
-      products: [
-        { id: 1, name: 'Producto A', price: 100, category: 'electronics', stock: 50 },
-        { id: 2, name: 'Producto B', price: 200, category: 'clothing', stock: 30 },
-        { id: 3, name: 'Producto C', price: 150, category: 'electronics', stock: 20 }
-      ],
-      orders: [
-        { id: 1, user_id: 1, product_id: 1, quantity: 2, status: 'pending', total: 200, created_at: '2024-01-01T10:00:00Z' },
-        { id: 2, user_id: 2, product_id: 2, quantity: 1, status: 'completed', total: 200, created_at: '2024-01-02T10:00:00Z' }
-      ],
-      conversations: [
-        { id: 1, thread_id: 'thread_123', user_id: 1, status: 'active', started_at: '2024-01-01T08:00:00Z' },
-        { id: 2, thread_id: 'thread_456', user_id: 2, status: 'completed', started_at: '2024-01-02T08:00:00Z' }
-      ]
-    };
-
-    const tableData = mockTables[table] || [];
-    
-    // Filtrar por condiciones si existen
-    if (conditions && Object.keys(conditions).length > 0) {
-      return tableData.filter(row => {
-        return Object.entries(conditions).every(([key, value]) => {
-          return row[key] === value;
-        });
-      });
-    }
-    
-    return tableData;
   }
 }
 
@@ -286,28 +361,50 @@ export class HubSpotDatabaseExecutor extends DatabaseExecutor {
   }
 
   /**
-   * Crea un contacto en HubSpot
+   * Crea un contacto en HubSpot y guarda en BD local
    */
   private async createHubSpotContact(data: any, context: NodeExecutionContext): Promise<any> {
     const contactData = {
       email: context.getVariable('email') || context.getVariable('userEmail'),
-      firstname: context.getVariable('firstName') || context.getVariable('nombre'),
-      lastname: context.getVariable('lastName') || context.getVariable('apellido'),
+      first_name: context.getVariable('firstName') || context.getVariable('nombre'),
+      last_name: context.getVariable('lastName') || context.getVariable('apellido'),
       phone: context.getVariable('phoneNumber'),
-      lifecyclestage: 'lead',
-      whatsapp_thread_id: context.threadId
+      whatsapp_number: context.getVariable('phoneNumber'),
+      source: 'whatsapp',
+      thread_id: context.threadId,
+      custom_fields: {
+        lifecyclestage: 'lead',
+        whatsapp_thread_id: context.threadId
+      }
     };
 
     console.log('👤 Creando contacto HubSpot:', contactData);
     
-    // Simular API call a HubSpot
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return {
-      id: Math.floor(Math.random() * 100000),
-      ...contactData,
-      created_at: new Date().toISOString()
-    };
+    try {
+      // Crear contacto en base de datos local
+      const localContact = await DatabaseHelpers.createContact(contactData);
+      
+      // Aquí iría la llamada real a HubSpot API
+      // const hubspotContact = await this.callHubSpotAPI(contactData);
+      
+      // Simular respuesta de HubSpot por ahora
+      const hubspotResponse = {
+        id: Math.floor(Math.random() * 100000),
+        ...contactData,
+        created_at: new Date().toISOString()
+      };
+      
+      // Actualizar contacto local con ID de HubSpot
+      await db.query(
+        'UPDATE contacts SET hubspot_contact_id = $1 WHERE id = $2',
+        [hubspotResponse.id.toString(), localContact.id]
+      );
+      
+      return { ...localContact, hubspot_contact_id: hubspotResponse.id };
+    } catch (error) {
+      console.error('Error creando contacto HubSpot:', error);
+      throw error;
+    }
   }
 
   /**
@@ -319,6 +416,7 @@ export class HubSpotDatabaseExecutor extends DatabaseExecutor {
     
     console.log(`✏️ Actualizando contacto HubSpot ${contactId}:`, updateData);
     
+    // Simular delay de API
     await new Promise(resolve => setTimeout(resolve, 800));
     
     return {
@@ -343,6 +441,7 @@ export class HubSpotDatabaseExecutor extends DatabaseExecutor {
 
     console.log('💼 Creando deal HubSpot:', dealData);
     
+    // Simular delay de API
     await new Promise(resolve => setTimeout(resolve, 1200));
     
     return {
@@ -360,17 +459,32 @@ export class HubSpotDatabaseExecutor extends DatabaseExecutor {
     
     console.log(`🔍 Buscando contacto HubSpot por email: ${email}`);
     
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // Simular respuesta
-    return {
-      id: Math.floor(Math.random() * 100000),
-      email,
-      firstname: 'Usuario',
-      lastname: 'Demo',
-      phone: context.getVariable('phoneNumber'),
-      lifecyclestage: 'lead',
-      found: true
-    };
+    try {
+      // Buscar primero en BD local
+      const localContact = await db.query(
+        'SELECT * FROM contacts WHERE email = $1',
+        [email]
+      );
+      
+      if (localContact.rows.length > 0) {
+        return localContact.rows[0];
+      }
+      
+      // Si no existe, simular búsqueda en HubSpot
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      return {
+        id: Math.floor(Math.random() * 100000),
+        email,
+        first_name: 'Usuario',
+        last_name: 'Demo',
+        phone: context.getVariable('phoneNumber'),
+        lifecyclestage: 'lead',
+        found: true
+      };
+    } catch (error) {
+      console.error('Error obteniendo contacto HubSpot:', error);
+      throw error;
+    }
   }
 } 
