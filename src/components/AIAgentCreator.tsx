@@ -31,7 +31,9 @@ import {
   Code,
   Upload,
   X,
-  File
+  File,
+  Link,
+  Building2
 } from 'lucide-react';
 
 interface AIAgent {
@@ -62,7 +64,7 @@ interface KnowledgeBase {
 interface Tool {
   id: string;
   name: string;
-  type: 'search' | 'database' | 'api' | 'calculator' | 'file' | 'webhook' | 'custom';
+  type: 'search' | 'database' | 'api' | 'calculator' | 'file' | 'webhook' | 'mcp' | 'hubspot' | 'custom';
   description: string;
   config: Record<string, any>;
   enabled: boolean;
@@ -100,6 +102,10 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Estados para configuración de herramientas
+  const [showToolConfig, setShowToolConfig] = useState(false);
+  const [selectedToolType, setSelectedToolType] = useState<string | null>(null);
 
   // Estado para nueva KB
   const [newKBData, setNewKBData] = useState({
@@ -164,7 +170,9 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
     { id: 'api', name: 'API Externa', type: 'api' as const, description: 'Integrar con APIs externas', icon: Globe },
     { id: 'calculator', name: 'Calculadora', type: 'calculator' as const, description: 'Realizar cálculos matemáticos', icon: Calculator },
     { id: 'file', name: 'Procesador de Archivos', type: 'file' as const, description: 'Procesar y analizar archivos', icon: FileText },
-    { id: 'webhook', name: 'Webhook', type: 'webhook' as const, description: 'Enviar notificaciones HTTP', icon: Code }
+    { id: 'webhook', name: 'Webhook', type: 'webhook' as const, description: 'Enviar notificaciones HTTP', icon: Code },
+    { id: 'mcp', name: 'MCP (Model Context Protocol)', type: 'mcp' as const, description: 'Conectar con herramientas MCP estándar', icon: Link },
+    { id: 'hubspot', name: 'HubSpot CRM', type: 'hubspot' as const, description: 'Integración con HubSpot para gestión de contactos y deals', icon: Building2 }
   ];
 
   const prompts = {
@@ -180,6 +188,13 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
   };
 
   const addTool = (toolTemplate: any) => {
+    // Para herramientas que requieren configuración especial, abrir modal
+    if (toolTemplate.type === 'mcp' || toolTemplate.type === 'hubspot') {
+      setSelectedToolType(toolTemplate.type);
+      setShowToolConfig(true);
+      return;
+    }
+
     const newTool: Tool = {
       id: Date.now().toString(),
       name: toolTemplate.name,
@@ -193,6 +208,34 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
 
   const removeTool = (toolId: string) => {
     updateAgentData({ tools: agentData.tools.filter(t => t.id !== toolId) });
+  };
+
+  const handleToolConfig = (config: any) => {
+    if (!selectedToolType) return;
+
+    let toolName = '';
+    let description = '';
+    
+    if (selectedToolType === 'mcp') {
+      toolName = `MCP: ${config.serverName || 'Servidor MCP'}`;
+      description = `Conexión con servidor MCP: ${config.serverUrl || 'URL no especificada'}`;
+    } else if (selectedToolType === 'hubspot') {
+      toolName = `HubSpot: ${config.features?.join(', ') || 'CRM'}`;
+      description = `Integración HubSpot para ${config.features?.join(', ') || 'gestión general'}`;
+    }
+
+    const newTool: Tool = {
+      id: Date.now().toString(),
+      name: toolName,
+      type: selectedToolType as any,
+      description: description,
+      config: config,
+      enabled: true
+    };
+
+    updateAgentData({ tools: [...agentData.tools, newTool] });
+    setShowToolConfig(false);
+    setSelectedToolType(null);
   };
 
   const createAgent = () => {
@@ -238,8 +281,17 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
   };
 
   const getToolIcon = (type: string) => {
-    const tool = availableTools.find(t => t.type === type);
-    return tool?.icon || Code;
+    switch (type) {
+      case 'search': return Search;
+      case 'database': return Database;
+      case 'api': return Globe;
+      case 'calculator': return Calculator;
+      case 'file': return FileText;
+      case 'webhook': return Code;
+      case 'mcp': return Link;
+      case 'hubspot': return Building2;
+      default: return Code;
+    }
   };
 
   // Funciones para manejo de Knowledge Base en wizard
@@ -1077,6 +1129,232 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
           </Card>
         </div>
       )}
+
+      {/* Modal para configuración de herramientas MCP/HubSpot */}
+      {showToolConfig && selectedToolType && (
+        <ToolConfigModal
+          toolType={selectedToolType}
+          onSave={handleToolConfig}
+          onCancel={() => {
+            setShowToolConfig(false);
+            setSelectedToolType(null);
+          }}
+        />
+      )}
     </div>
   );
+}
+
+// Componente para configuración de herramientas
+interface ToolConfigModalProps {
+  toolType: string;
+  onSave: (config: any) => void;
+  onCancel: () => void;
+}
+
+function ToolConfigModal({ toolType, onSave, onCancel }: ToolConfigModalProps) {
+  const [config, setConfig] = useState<any>({});
+
+  const handleSave = () => {
+    onSave(config);
+  };
+
+  if (toolType === 'mcp') {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Link className="h-5 w-5" />
+                Configurar MCP (Model Context Protocol)
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={onCancel}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="serverName">Nombre del Servidor MCP</Label>
+              <Input
+                id="serverName"
+                value={config.serverName || ''}
+                onChange={(e) => setConfig(prev => ({ ...prev, serverName: e.target.value }))}
+                placeholder="Ej: servidor-datos-empresa"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="serverUrl">URL del Servidor</Label>
+              <Input
+                id="serverUrl"
+                value={config.serverUrl || ''}
+                onChange={(e) => setConfig(prev => ({ ...prev, serverUrl: e.target.value }))}
+                placeholder="Ej: https://mcp-server.empresa.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="authToken">Token de Autenticación (opcional)</Label>
+              <Input
+                id="authToken"
+                type="password"
+                value={config.authToken || ''}
+                onChange={(e) => setConfig(prev => ({ ...prev, authToken: e.target.value }))}
+                placeholder="Token para autenticación"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Descripción</Label>
+              <Textarea
+                id="description"
+                value={config.description || ''}
+                onChange={(e) => setConfig(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe qué tipo de herramientas o funcionalidades proporciona este servidor MCP..."
+                rows={3}
+              />
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 mb-2">¿Qué es MCP?</h4>
+              <p className="text-sm text-blue-700">
+                Model Context Protocol permite a los agentes conectarse con herramientas y recursos externos 
+                de manera estándar. Esto incluye bases de datos, APIs, sistemas de archivos y más.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={onCancel}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={!config.serverName || !config.serverUrl}
+                className="flex items-center gap-2"
+              >
+                <Link className="h-4 w-4" />
+                Configurar MCP
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (toolType === 'hubspot') {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Configurar Integración HubSpot
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={onCancel}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Funcionalidades de HubSpot</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { id: 'contacts', label: 'Gestión de Contactos' },
+                  { id: 'deals', label: 'Gestión de Deals' },
+                  { id: 'companies', label: 'Gestión de Empresas' },
+                  { id: 'tickets', label: 'Tickets de Soporte' },
+                  { id: 'tasks', label: 'Tareas y Actividades' },
+                  { id: 'notes', label: 'Notas y Comentarios' },
+                  { id: 'emails', label: 'Envío de Emails' },
+                  { id: 'reports', label: 'Reportes y Analytics' }
+                ].map((feature) => (
+                  <div key={feature.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={feature.id}
+                      checked={config.features?.includes(feature.id) || false}
+                      onChange={(e) => {
+                        const features = config.features || [];
+                        if (e.target.checked) {
+                          setConfig(prev => ({ 
+                            ...prev, 
+                            features: [...features, feature.id] 
+                          }));
+                        } else {
+                          setConfig(prev => ({ 
+                            ...prev, 
+                            features: features.filter((f: string) => f !== feature.id) 
+                          }));
+                        }
+                      }}
+                      className="rounded border-gray-300"
+                    />
+                    <Label htmlFor={feature.id} className="text-sm">
+                      {feature.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="apiKey">API Key de HubSpot (opcional)</Label>
+              <Input
+                id="apiKey"
+                type="password"
+                value={config.apiKey || ''}
+                onChange={(e) => setConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                placeholder="Su API key de HubSpot"
+              />
+              <p className="text-xs text-gray-500">
+                Si no se proporciona, se usará la configuración global de HubSpot
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="portal">Portal ID (opcional)</Label>
+              <Input
+                id="portal"
+                value={config.portalId || ''}
+                onChange={(e) => setConfig(prev => ({ ...prev, portalId: e.target.value }))}
+                placeholder="ID del portal de HubSpot"
+              />
+            </div>
+
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <h4 className="font-medium text-orange-900 mb-2">Integración HubSpot</h4>
+              <p className="text-sm text-orange-700">
+                Esta integración permite al agente interactuar con tu CRM HubSpot para gestionar 
+                contactos, deals, empresas y más. El agente podrá consultar y actualizar información 
+                según los permisos configurados.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={onCancel}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={!config.features || config.features.length === 0}
+                className="flex items-center gap-2"
+              >
+                <Building2 className="h-4 w-4" />
+                Configurar HubSpot
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return null;
 }
