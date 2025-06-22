@@ -29,7 +29,11 @@ import {
   Target,
   Workflow,
   GitBranch,
-  Play
+  Play,
+  Link,
+  Building2,
+  ExternalLink,
+  CheckCircle2
 } from 'lucide-react';
 
 interface AIAgentData {
@@ -42,11 +46,15 @@ interface AIAgentData {
   maxTokens: number;
   systemPrompt: string;
   
+  // Agente existente (opcional)
+  useExistingAgent: boolean;
+  existingAgentId?: string;
+
   // Herramientas disponibles
   tools: Array<{
     id: string;
     name: string;
-    type: 'search' | 'database' | 'api' | 'calculator' | 'file' | 'webhook' | 'custom';
+    type: 'search' | 'database' | 'api' | 'calculator' | 'file' | 'webhook' | 'mcp' | 'hubspot' | 'custom';
     description: string;
     config: Record<string, any>;
     enabled: boolean;
@@ -101,6 +109,16 @@ interface AIAgentData {
 
 export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: boolean }) {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  
+  // Simulamos una lista de agentes existentes (en una implementación real, esto vendría de un contexto o API)
+  const existingAgents = [
+    { id: '1', name: 'Asistente de Ventas', type: 'conversational' },
+    { id: '2', name: 'Agente de Soporte', type: 'tool_using' },
+    { id: '3', name: 'Analista de Datos', type: 'reasoning' },
+    { id: '4', name: 'Coordinador de Flujo', type: 'workflow' },
+    { id: '5', name: 'Sistema Multi-Agente', type: 'multi_agent' }
+  ];
+
   const [localData, setLocalData] = useState<AIAgentData>({
     label: 'Agente IA',
     agentType: 'conversational',
@@ -108,6 +126,8 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
     temperature: 0.7,
     maxTokens: 2000,
     systemPrompt: '',
+    useExistingAgent: false,
+    existingAgentId: undefined,
     tools: [],
     useMemory: true,
     memoryType: 'conversation',
@@ -134,18 +154,81 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
     setLocalData(prev => ({ ...prev, ...updates }));
   };
 
-  const addTool = () => {
+  const loadExistingAgent = (agentId: string) => {
+    const agent = existingAgents.find(a => a.id === agentId);
+    if (agent) {
+      // En una implementación real, aquí cargaríamos todos los datos del agente desde el API
+      updateData({
+        label: agent.name,
+        agentType: agent.type as any,
+        existingAgentId: agentId,
+        useExistingAgent: true,
+        // Aquí cargaríamos el resto de configuraciones del agente
+        systemPrompt: `Configuración cargada desde agente existente: ${agent.name}`,
+      });
+    }
+  };
+
+  const addTool = (toolType: string = 'search') => {
     const newTool = {
       id: Date.now().toString(),
-      name: '',
-      type: 'search' as const,
-      description: '',
-      config: {},
+      name: getToolDefaultName(toolType),
+      type: toolType as any,
+      description: getToolDefaultDescription(toolType),
+      config: getToolDefaultConfig(toolType),
       enabled: true
     };
     updateData({
       tools: [...localData.tools, newTool]
     });
+  };
+
+  const getToolDefaultName = (type: string) => {
+    switch (type) {
+      case 'search': return 'Búsqueda Web';
+      case 'database': return 'Base de Datos';
+      case 'api': return 'API Externa';
+      case 'calculator': return 'Calculadora';
+      case 'file': return 'Procesador de Archivos';
+      case 'webhook': return 'Webhook';
+      case 'mcp': return 'Servidor MCP';
+      case 'hubspot': return 'HubSpot CRM';
+      default: return 'Herramienta Personalizada';
+    }
+  };
+
+  const getToolDefaultDescription = (type: string) => {
+    switch (type) {
+      case 'search': return 'Buscar información en internet';
+      case 'database': return 'Consultar bases de datos';
+      case 'api': return 'Integrar con APIs externas';
+      case 'calculator': return 'Realizar cálculos matemáticos';
+      case 'file': return 'Procesar y analizar archivos';
+      case 'webhook': return 'Enviar notificaciones HTTP';
+      case 'mcp': return 'Conectar con servidor MCP';
+      case 'hubspot': return 'Gestionar CRM HubSpot';
+      default: return 'Herramienta personalizada';
+    }
+  };
+
+  const getToolDefaultConfig = (type: string) => {
+    switch (type) {
+      case 'mcp':
+        return {
+          serverName: '',
+          serverUrl: '',
+          authToken: '',
+          description: ''
+        };
+      case 'hubspot':
+        return {
+          features: ['contacts'],
+          apiKey: '',
+          portalId: ''
+        };
+      default:
+        return {};
+    }
   };
 
   const removeTool = (id: string) => {
@@ -225,6 +308,8 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
       case 'calculator': return Calculator;
       case 'file': return FileText;
       case 'webhook': return Zap;
+      case 'mcp': return Link;
+      case 'hubspot': return Building2;
       default: return Code;
     }
   };
@@ -259,6 +344,13 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
         
         <CardContent className="pt-0">
           <div className="space-y-2 text-xs text-gray-600">
+            {localData.useExistingAgent && (
+              <div className="flex items-center gap-1">
+                <ExternalLink className="h-3 w-3 text-green-600" />
+                <span className="text-green-600 font-medium">Agente Existente</span>
+              </div>
+            )}
+            
             <div className="flex items-center gap-1">
               <Brain className="h-3 w-3" />
               <span>Modelo: {localData.model}</span>
@@ -357,61 +449,107 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="label">Nombre del Agente</Label>
-                      <Input
-                        id="label"
-                        value={localData.label}
-                        onChange={(e) => updateData({ label: e.target.value })}
-                        placeholder="Ej: Asistente de Ventas IA"
+                  {/* Selector de modo: nuevo agente vs existente */}
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={localData.useExistingAgent}
+                        onCheckedChange={(checked) => updateData({ useExistingAgent: checked })}
                       />
+                      <Label>Usar agente existente</Label>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Tipo de Agente</Label>
-                      <Select
-                        value={localData.agentType}
-                        onValueChange={(value: any) => updateData({ agentType: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="z-[10000]">
-                          <SelectItem value="conversational">
-                            <div className="flex items-center gap-2">
-                              <MessageCircle className="h-4 w-4" />
-                              Conversacional
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="tool_using">
-                            <div className="flex items-center gap-2">
-                              <Zap className="h-4 w-4" />
-                              Con Herramientas
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="reasoning">
-                            <div className="flex items-center gap-2">
-                              <Brain className="h-4 w-4" />
-                              Razonamiento
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="workflow">
-                            <div className="flex items-center gap-2">
-                              <Workflow className="h-4 w-4" />
-                              Flujo de Trabajo
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="multi_agent">
-                            <div className="flex items-center gap-2">
-                              <Bot className="h-4 w-4" />
-                              Multi-Agente
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {localData.useExistingAgent && (
+                      <div className="space-y-2">
+                        <Label>Seleccionar Agente Existente</Label>
+                        <Select
+                          value={localData.existingAgentId || ''}
+                          onValueChange={(value) => loadExistingAgent(value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un agente..." />
+                          </SelectTrigger>
+                          <SelectContent className="z-[10000]">
+                            {existingAgents.map((agent) => (
+                              <SelectItem key={agent.id} value={agent.id}>
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                  {agent.name}
+                                  <span className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                    {agent.type}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-sm text-gray-500">
+                          Selecciona un agente creado desde el módulo de Agentes IA
+                        </p>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Configuración manual solo si no se usa agente existente */}
+                  {!localData.useExistingAgent && (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="label">Nombre del Agente</Label>
+                          <Input
+                            id="label"
+                            value={localData.label}
+                            onChange={(e) => updateData({ label: e.target.value })}
+                            placeholder="Ej: Asistente de Ventas IA"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Tipo de Agente</Label>
+                          <Select
+                            value={localData.agentType}
+                            onValueChange={(value: any) => updateData({ agentType: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="z-[10000]">
+                              <SelectItem value="conversational">
+                                <div className="flex items-center gap-2">
+                                  <MessageCircle className="h-4 w-4" />
+                                  Conversacional
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="tool_using">
+                                <div className="flex items-center gap-2">
+                                  <Zap className="h-4 w-4" />
+                                  Con Herramientas
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="reasoning">
+                                <div className="flex items-center gap-2">
+                                  <Brain className="h-4 w-4" />
+                                  Razonamiento
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="workflow">
+                                <div className="flex items-center gap-2">
+                                  <Workflow className="h-4 w-4" />
+                                  Flujo de Trabajo
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="multi_agent">
+                                <div className="flex items-center gap-2">
+                                  <Bot className="h-4 w-4" />
+                                  Multi-Agente
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
@@ -516,11 +654,53 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
                 </TabsContent>
 
                 <TabsContent value="tools" className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4">
                     <Label className="text-lg font-medium">Herramientas del Agente</Label>
-                    <Button onClick={addTool} size="sm">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Agregar Herramienta
+                    <div className="flex items-center gap-2">
+                      <Button onClick={() => addTool()} size="sm" variant="outline">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Agregar
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Herramientas de acceso rápido */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => addTool('search')}
+                      className="flex items-center gap-2 h-auto py-2"
+                    >
+                      <Search className="h-4 w-4" />
+                      <span className="text-xs">Búsqueda</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => addTool('database')}
+                      className="flex items-center gap-2 h-auto py-2"
+                    >
+                      <Database className="h-4 w-4" />
+                      <span className="text-xs">Base Datos</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => addTool('mcp')}
+                      className="flex items-center gap-2 h-auto py-2"
+                    >
+                      <Link className="h-4 w-4" />
+                      <span className="text-xs">MCP</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => addTool('hubspot')}
+                      className="flex items-center gap-2 h-auto py-2"
+                    >
+                      <Building2 className="h-4 w-4" />
+                      <span className="text-xs">HubSpot</span>
                     </Button>
                   </div>
 
@@ -592,6 +772,8 @@ export function AIAgentNode({ data, selected }: { data: AIAgentData; selected?: 
                                     <SelectItem value="calculator">Calculadora</SelectItem>
                                     <SelectItem value="file">Archivo</SelectItem>
                                     <SelectItem value="webhook">Webhook</SelectItem>
+                                    <SelectItem value="mcp">MCP Server</SelectItem>
+                                    <SelectItem value="hubspot">HubSpot CRM</SelectItem>
                                     <SelectItem value="custom">Personalizado</SelectItem>
                                   </SelectContent>
                                 </Select>
