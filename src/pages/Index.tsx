@@ -13,6 +13,7 @@ import { WhatsIAStatsPanel } from "@/components/WhatsIAStatsPanel";
 import { SubscriptionPanel } from "@/components/SubscriptionPanel";
 import { CampaignsPanel } from "@/components/CampaignsPanel";
 import { HubSpotIntegration } from "@/components/HubSpotIntegration";
+import { HubSpotConfigurationPanel } from "@/components/HubSpotConfigurationPanel";
 import { MessageManager } from "@/components/MessageManager";
 import { FlowBuilder } from "@/components/FlowBuilder/FlowBuilder";
 import { FlowExecutionDemo } from "@/components/FlowExecutionDemo";
@@ -58,7 +59,7 @@ function IndexContent() {
       case 'whatsia':
         return <WhatsIAStatsPanel />;
       case 'hubspot':
-        return <HubSpotIntegration />;
+        return <HubSpotConfigurationPanel />;
       case 'mensajes':
         return <MessageManager />;
       case 'flujos':
