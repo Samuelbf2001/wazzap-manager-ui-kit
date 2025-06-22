@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,10 @@ import {
   Globe,
   Calculator,
   FileText,
-  Code
+  Code,
+  Upload,
+  X,
+  File
 } from 'lucide-react';
 
 interface AIAgent {
@@ -88,6 +91,24 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
     contentFilter: true,
     rateLimiting: true,
     maxRequestsPerMinute: 60
+  });
+
+  // Estados para manejo de Knowledge Base en el wizard
+  const [showCreateKB, setShowCreateKB] = useState(false);
+  const [showUploadDocs, setShowUploadDocs] = useState(false);
+  const [selectedKBForUpload, setSelectedKBForUpload] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Estado para nueva KB
+  const [newKBData, setNewKBData] = useState({
+    name: '',
+    description: '',
+    chunkSize: 1000,
+    overlap: 200,
+    embeddingModel: 'text-embedding-ada-002',
+    indexType: 'hybrid' as 'semantic' | 'keyword' | 'hybrid'
   });
 
   const steps = [
@@ -219,6 +240,82 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
   const getToolIcon = (type: string) => {
     const tool = availableTools.find(t => t.type === type);
     return tool?.icon || Code;
+  };
+
+  // Funciones para manejo de Knowledge Base en wizard
+  const handleCreateKB = () => {
+    // Simular creación de KB
+    const newKB: KnowledgeBase = {
+      id: Date.now().toString(),
+      name: newKBData.name,
+      description: newKBData.description,
+      documentsCount: 0,
+      size: '0 MB',
+      created: new Date(),
+      lastUpdated: new Date(),
+      status: 'ready'
+    };
+
+    // Agregar a la lista de KBs disponibles (simulado)
+    knowledgeBases.push(newKB);
+    
+    // Seleccionar automáticamente la nueva KB
+    updateAgentData({ 
+      knowledgeBases: [...agentData.knowledgeBases, newKB.id] 
+    });
+
+    // Resetear formulario y cerrar modal
+    setNewKBData({
+      name: '',
+      description: '',
+      chunkSize: 1000,
+      overlap: 200,
+      embeddingModel: 'text-embedding-ada-002',
+      indexType: 'hybrid' as 'semantic' | 'keyword' | 'hybrid'
+    });
+    setShowCreateKB(false);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || !selectedKBForUpload) return;
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Simular upload progresivo
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      await new Promise((resolve) => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          setUploadProgress((i / files.length) * 100 + (progress / files.length));
+          if (progress >= 100) {
+            clearInterval(interval);
+            resolve(true);
+          }
+        }, 200);
+      });
+
+      // Actualizar contador de documentos en la KB
+      const kbIndex = knowledgeBases.findIndex(kb => kb.id === selectedKBForUpload);
+      if (kbIndex !== -1) {
+        knowledgeBases[kbIndex].documentsCount += 1;
+        knowledgeBases[kbIndex].lastUpdated = new Date();
+      }
+    }
+
+    setIsUploading(false);
+    setUploadProgress(0);
+    setShowUploadDocs(false);
+    setSelectedKBForUpload(null);
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -421,8 +518,31 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
 
           {currentStep === 3 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Bases de Conocimiento</h2>
-              <p className="text-gray-600">Selecciona las bases de conocimiento que el agente debe usar</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Bases de Conocimiento</h2>
+                  <p className="text-gray-600">Selecciona, crea o actualiza las bases de conocimiento que el agente debe usar</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowCreateKB(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Nueva KB
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowUploadDocs(true)}
+                    disabled={agentData.knowledgeBases.length === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Subir Documentos
+                  </Button>
+                </div>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {knowledgeBases.map((kb) => {
@@ -450,7 +570,21 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
                               <p className="text-sm text-gray-600">{kb.description}</p>
                             </div>
                           </div>
-                          {isSelected && <Check className="h-5 w-5 text-blue-600" />}
+                          <div className="flex items-center gap-2">
+                            {isSelected && <Check className="h-5 w-5 text-blue-600" />}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedKBForUpload(kb.id);
+                                setShowUploadDocs(true);
+                              }}
+                              className="p-1 h-auto"
+                            >
+                              <Upload className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 text-xs">
@@ -463,17 +597,54 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
                             <span className="font-medium ml-1">{kb.size}</span>
                           </div>
                         </div>
+                        
+                        <div className="mt-2 text-xs text-gray-500">
+                          Actualizado: {kb.lastUpdated.toLocaleDateString()}
+                        </div>
                       </CardContent>
                     </Card>
                   );
                 })}
               </div>
               
-              {agentData.knowledgeBases.length === 0 && (
+              {agentData.knowledgeBases.length === 0 && knowledgeBases.length > 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <Database className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>No hay bases de conocimiento seleccionadas</p>
                   <p className="text-sm">El agente usará solo su conocimiento base</p>
+                </div>
+              )}
+
+              {knowledgeBases.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  <Database className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium mb-2">No hay bases de conocimiento disponibles</p>
+                  <p className="text-sm mb-4">Crea tu primera base de conocimiento para potenciar tu agente</p>
+                  <Button onClick={() => setShowCreateKB(true)} className="flex items-center gap-2 mx-auto">
+                    <Plus className="h-4 w-4" />
+                    Crear Primera Knowledge Base
+                  </Button>
+                </div>
+              )}
+
+              {agentData.knowledgeBases.length > 0 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-900 mb-2">
+                    Knowledge Bases Seleccionadas ({agentData.knowledgeBases.length})
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {agentData.knowledgeBases.map(kbId => {
+                      const kb = knowledgeBases.find(k => k.id === kbId);
+                      if (!kb) return null;
+                      return (
+                        <div key={kbId} className="flex items-center gap-2 bg-white px-3 py-1 rounded-full">
+                          <Database className="h-3 w-3 text-blue-600" />
+                          <span className="text-sm">{kb.name}</span>
+                          <span className="text-xs text-gray-500">({kb.documentsCount} docs)</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -703,6 +874,209 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
           </Button>
         )}
       </div>
+
+      {/* Modal para crear nueva Knowledge Base */}
+      {showCreateKB && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Crear Nueva Knowledge Base
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCreateKB(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newKbName">Nombre</Label>
+                <Input
+                  id="newKbName"
+                  value={newKBData.name}
+                  onChange={(e) => setNewKBData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ej: Conocimientos de Producto"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newKbDescription">Descripción</Label>
+                <Textarea
+                  id="newKbDescription"
+                  value={newKBData.description}
+                  onChange={(e) => setNewKBData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe el contenido y propósito de esta base de conocimiento..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Modelo de Embeddings</Label>
+                  <Select
+                    value={newKBData.embeddingModel}
+                    onValueChange={(value) => setNewKBData(prev => ({ ...prev, embeddingModel: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text-embedding-ada-002">Ada-002 (OpenAI)</SelectItem>
+                      <SelectItem value="text-embedding-3-small">Embedding-3-Small</SelectItem>
+                      <SelectItem value="text-embedding-3-large">Embedding-3-Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Tipo de Índice</Label>
+                  <Select
+                    value={newKBData.indexType}
+                    onValueChange={(value: 'semantic' | 'keyword' | 'hybrid') => setNewKBData(prev => ({ ...prev, indexType: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="semantic">Semántico</SelectItem>
+                      <SelectItem value="keyword">Palabras Clave</SelectItem>
+                      <SelectItem value="hybrid">Híbrido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowCreateKB(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleCreateKB} 
+                  disabled={!newKBData.name}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Crear Knowledge Base
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Modal para subir documentos */}
+      {showUploadDocs && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <Card className="w-full max-w-xl">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="h-5 w-5" />
+                  Subir Documentos
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowUploadDocs(false);
+                    setSelectedKBForUpload(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              {selectedKBForUpload ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-sm font-medium text-blue-900">
+                    Subir a: {knowledgeBases.find(kb => kb.id === selectedKBForUpload)?.name}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Seleccionar Knowledge Base</Label>
+                  <Select
+                    value={selectedKBForUpload || ''}
+                    onValueChange={setSelectedKBForUpload}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una knowledge base" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agentData.knowledgeBases.map(kbId => {
+                        const kb = knowledgeBases.find(k => k.id === kbId);
+                        if (!kb) return null;
+                        return (
+                          <SelectItem key={kbId} value={kbId}>
+                            {kb.name} ({kb.documentsCount} documentos)
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Documentos</Label>
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <File className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm text-gray-600 mb-1">
+                    Haz clic para seleccionar archivos
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Soporta PDF, DOCX, TXT, HTML
+                  </p>
+                </div>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.docx,.txt,.html"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </div>
+
+              {isUploading && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Subiendo documentos...</span>
+                    <span className="text-sm text-gray-500">{Math.round(uploadProgress)}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="w-full" />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowUploadDocs(false);
+                    setSelectedKBForUpload(null);
+                  }}
+                  disabled={isUploading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
