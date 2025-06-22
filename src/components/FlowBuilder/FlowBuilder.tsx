@@ -81,6 +81,7 @@ import { HttpRequestNode } from './nodes/HttpRequestNode';
 import { RecognitionNode } from './nodes/RecognitionNode';
 import { MetaConversionsNode } from './nodes/MetaConversionsNode';
 import { WhatsAppFlowNode } from './nodes/WhatsAppFlowNode';
+import { AIAgentNode } from './nodes/AIAgentNode';
 
 // Nodos básicos (mantener compatibilidad)
 import { ConditionNode } from './nodes/ConditionNode';
@@ -100,6 +101,7 @@ const nodeTypes = {
   
   // IA y Automatización
   aiResponse: AIResponseNode,
+  aiAgent: AIAgentNode,
   smarton: SmartonNode,
   formatter: FormatterNode,
   
@@ -235,6 +237,40 @@ const nodeCategories = {
     icon: Brain,
     color: 'bg-blue-50 border-blue-200',
     nodes: [
+      {
+        type: 'aiAgent',
+        title: 'Agente IA',
+        description: 'Agente IA completo con herramientas',
+        icon: Brain,
+        color: 'text-purple-600',
+        defaultData: {
+          label: 'Agente IA',
+          agentType: 'conversational',
+          model: 'gpt-4',
+          temperature: 0.7,
+          maxTokens: 2000,
+          systemPrompt: 'Eres un asistente virtual útil y amigable.',
+          tools: [],
+          useMemory: true,
+          memoryType: 'conversation',
+          memorySize: 1000,
+          useLangGraph: false,
+          graphNodes: [],
+          graphEdges: [],
+          useMultiAgent: false,
+          agents: [],
+          timeout: 30000,
+          maxIterations: 10,
+          fallbackBehavior: 'human_handoff',
+          saveConversation: true,
+          outputFormat: 'text',
+          extractEntities: false,
+          contentFilter: true,
+          allowedDomains: [],
+          rateLimiting: true,
+          maxRequestsPerMinute: 60
+        }
+      },
       {
         type: 'aiResponse',
         title: 'Respuesta IA',

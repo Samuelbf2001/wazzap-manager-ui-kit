@@ -17,9 +17,10 @@ import { MessageManager } from "@/components/MessageManager";
 import { FlowBuilder } from "@/components/FlowBuilder/FlowBuilder";
 import { FlowExecutionDemo } from "@/components/FlowExecutionDemo";
 import { LiveInbox } from "@/components/LiveInbox";
+import { AIAgentManager } from "@/components/AIAgentManager";
 import { Menu, Plus } from "lucide-react";
 
-type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia' | 'agentes' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
 
 // Componente interno que usa el contexto del sidebar
 function IndexContent() {
@@ -57,6 +58,8 @@ function IndexContent() {
         return <SubscriptionPanel />;
       case 'whatsia':
         return <WhatsIAStatsPanel />;
+      case 'agentes':
+        return <AIAgentManager />;
       case 'hubspot':
         return <HubSpotIntegration />;
       case 'mensajes':
@@ -73,7 +76,7 @@ function IndexContent() {
   };
 
   // Verificar si la pestaña actual necesita altura completa
-  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo' || activeTab === 'bandeja';
+  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo' || activeTab === 'bandeja' || activeTab === 'agentes';
 
   const handleConnectionSuccess = () => {
     console.log('Conexión exitosa - actualizar tabla');
