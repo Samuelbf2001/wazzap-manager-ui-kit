@@ -24,7 +24,12 @@ import {
   BarChart3,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
+  MoreHorizontal,
+  Activity,
+  Clock,
+  TrendingUp,
+  Users
 } from 'lucide-react';
 import { KnowledgeBaseManager } from './KnowledgeBaseManager';
 import { AIAgentCreator } from './AIAgentCreator';
@@ -106,6 +111,19 @@ export function AIAgentManager() {
         totalConversations: 45,
         avgResponseTime: 4.2,
         successRate: 87.8
+      },
+      {
+        id: '4',
+        name: 'Coordinador de Flujos',
+        type: 'workflow',
+        status: 'inactive',
+        model: 'GPT-4',
+        knowledgeBases: ['kb2'],
+        created: new Date('2024-01-12'),
+        lastUsed: new Date('2024-01-17'),
+        totalConversations: 320,
+        avgResponseTime: 1.8,
+        successRate: 96.1
       }
     ]);
 
@@ -167,12 +185,23 @@ export function AIAgentManager() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-gray-100 text-gray-800';
-      case 'training': return 'bg-yellow-100 text-yellow-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active': return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
+      case 'inactive': return { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' };
+      case 'training': return { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' };
+      case 'error': return { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' };
+      case 'processing': return { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+      default: return { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' };
+    }
+  };
+
+  const getAgentTypeColor = (type: string) => {
+    switch (type) {
+      case 'conversational': return { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' };
+      case 'tool_using': return { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200' };
+      case 'reasoning': return { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' };
+      case 'workflow': return { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' };
+      case 'multi_agent': return { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200' };
+      default: return { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' };
     }
   };
 
@@ -206,308 +235,421 @@ export function AIAgentManager() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Agentes IA</h1>
-          <p className="text-gray-600 mt-1">Crea, gestiona y monitorea tus agentes de inteligencia artificial</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => setShowKnowledgeBase(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Database className="h-4 w-4" />
-            Knowledge Base
-          </Button>
-          <Button 
-            onClick={() => setShowCreateAgent(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Crear Agente
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Bot className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Agentes</p>
-                <p className="text-2xl font-bold">{agents.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Play className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Agentes Activos</p>
-                <p className="text-2xl font-bold">{agents.filter(a => a.status === 'active').length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Database className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Knowledge Bases</p>
-                <p className="text-2xl font-bold">{knowledgeBases.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Conversaciones</p>
-                <p className="text-2xl font-bold">
-                  {agents.reduce((sum, agent) => sum + agent.totalConversations, 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="agents" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" />
-            Agentes IA
-          </TabsTrigger>
-          <TabsTrigger value="knowledge" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            Knowledge Base
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="agents" className="space-y-4">
-          {/* Search and Filters */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Buscar agentes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <select 
-              value={filterType} 
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="all">Todos los tipos</option>
-              <option value="conversational">Conversacional</option>
-              <option value="tool_using">Con Herramientas</option>
-              <option value="reasoning">Razonamiento</option>
-              <option value="workflow">Flujo de Trabajo</option>
-              <option value="multi_agent">Multi-Agente</option>
-            </select>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Agents Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAgents.map((agent) => {
-              const AgentIcon = getAgentTypeIcon(agent.type);
-              return (
-                <Card key={agent.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <AgentIcon className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-sm font-medium">{agent.name}</CardTitle>
-                          <p className="text-xs text-gray-500">{getAgentTypeLabel(agent.type)}</p>
-                        </div>
-                      </div>
-                      <Badge className={getStatusColor(agent.status)}>
-                        {agent.status === 'active' && 'Activo'}
-                        {agent.status === 'inactive' && 'Inactivo'}
-                        {agent.status === 'training' && 'Entrenando'}
-                        {agent.status === 'error' && 'Error'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-4 text-xs">
-                        <div>
-                          <p className="text-gray-500">Modelo</p>
-                          <p className="font-medium">{agent.model}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Knowledge Bases</p>
-                          <p className="font-medium">{agent.knowledgeBases.length}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 text-xs">
-                        <div>
-                          <p className="text-gray-500">Conversaciones</p>
-                          <p className="font-medium">{agent.totalConversations.toLocaleString()}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">Éxito</p>
-                          <p className="font-medium">{agent.successRate}%</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Settings className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {agent.status === 'active' ? (
-                            <Button variant="ghost" size="sm">
-                              <Pause className="h-3 w-3" />
-                            </Button>
-                          ) : (
-                            <Button variant="ghost" size="sm">
-                              <Play className="h-3 w-3" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm" className="text-red-600">
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="knowledge" className="space-y-4">
+    <div className="min-h-screen bg-gray-50/30 p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Bases de Conocimiento</h2>
-            <Button onClick={() => setShowKnowledgeBase(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nueva Knowledge Base
-            </Button>
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
+                Centro de Agentes IA
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl">
+                Gestiona, entrena y despliega agentes de inteligencia artificial para automatizar 
+                conversaciones y procesos de negocio
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={() => setShowKnowledgeBase(true)}
+                variant="outline"
+                size="lg"
+                className="flex items-center gap-3 px-6 py-3 h-auto"
+              >
+                <Database className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-medium">Knowledge Base</div>
+                  <div className="text-xs text-gray-500">Gestionar contenido</div>
+                </div>
+              </Button>
+              <Button 
+                onClick={() => setShowCreateAgent(true)}
+                size="lg"
+                className="flex items-center gap-3 px-6 py-3 h-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              >
+                <Plus className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-medium">Crear Agente</div>
+                  <div className="text-xs opacity-90">Nuevo agente IA</div>
+                </div>
+              </Button>
+            </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {knowledgeBases.map((kb) => (
-              <Card key={kb.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <Database className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-sm font-medium">{kb.name}</CardTitle>
-                        <p className="text-xs text-gray-500">{kb.description}</p>
-                      </div>
-                    </div>
-                    <Badge className={getStatusColor(kb.status)}>
-                      {kb.status === 'ready' && 'Listo'}
-                      {kb.status === 'processing' && 'Procesando'}
-                      {kb.status === 'error' && 'Error'}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <p className="text-gray-500">Documentos</p>
-                        <p className="font-medium">{kb.documentsCount}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Tamaño</p>
-                        <p className="font-medium">{kb.size}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="text-xs">
-                      <p className="text-gray-500">Última actualización</p>
-                      <p className="font-medium">{kb.lastUpdated.toLocaleDateString()}</p>
-                    </div>
+        {/* Stats Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-blue-600">Total Agentes</p>
+                  <p className="text-3xl font-bold text-blue-900">{agents.length}</p>
+                  <p className="text-xs text-blue-600/70">+2 este mes</p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <Bot className="h-6 w-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Upload className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <RefreshCw className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-600">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+          <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-emerald-600">Agentes Activos</p>
+                  <p className="text-3xl font-bold text-emerald-900">
+                    {agents.filter(a => a.status === 'active').length}
+                  </p>
+                  <p className="text-xs text-emerald-600/70">85% del total</p>
+                </div>
+                <div className="p-3 bg-emerald-100 rounded-xl">
+                  <Activity className="h-6 w-6 text-emerald-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <AgentAnalytics agents={agents} />
-        </TabsContent>
-      </Tabs>
+          <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-100 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-purple-600">Knowledge Bases</p>
+                  <p className="text-3xl font-bold text-purple-900">{knowledgeBases.length}</p>
+                  <p className="text-xs text-purple-600/70">
+                    {knowledgeBases.reduce((sum, kb) => sum + kb.documentsCount, 0)} documentos
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-xl">
+                  <Database className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-100 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-orange-600">Conversaciones</p>
+                  <p className="text-3xl font-bold text-orange-900">
+                    {(agents.reduce((sum, agent) => sum + agent.totalConversations, 0) / 1000).toFixed(1)}K
+                  </p>
+                  <p className="text-xs text-orange-600/70">+12% esta semana</p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-xl">
+                  <TrendingUp className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="border-b border-gray-100 px-8 pt-8">
+              <TabsList className="grid w-full max-w-md grid-cols-3 bg-gray-50 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="agents" 
+                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  <Bot className="h-4 w-4" />
+                  Agentes IA
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="knowledge"
+                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  <Database className="h-4 w-4" />
+                  Knowledge Base
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="analytics"
+                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Analytics
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="agents" className="p-8 space-y-6">
+              {/* Search and Filters */}
+              <div className="flex items-center gap-6">
+                <div className="flex-1 relative max-w-md">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    placeholder="Buscar agentes por nombre..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-12 text-base border-gray-200 focus:border-blue-300 rounded-xl"
+                  />
+                </div>
+                <select 
+                  value={filterType} 
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium bg-white focus:border-blue-300 focus:outline-none"
+                >
+                  <option value="all">Todos los tipos</option>
+                  <option value="conversational">Conversacional</option>
+                  <option value="tool_using">Con Herramientas</option>
+                  <option value="reasoning">Razonamiento</option>
+                  <option value="workflow">Flujo de Trabajo</option>
+                  <option value="multi_agent">Multi-Agente</option>
+                </select>
+                <Button variant="outline" className="h-12 px-4 rounded-xl border-gray-200">
+                  <Filter className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Agents Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredAgents.map((agent) => {
+                  const AgentIcon = getAgentTypeIcon(agent.type);
+                  const statusColors = getStatusColor(agent.status);
+                  const typeColors = getAgentTypeColor(agent.type);
+                  
+                  return (
+                    <Card key={agent.id} className="group hover:shadow-lg transition-all duration-300 border-gray-100 hover:border-gray-200 bg-white">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-4">
+                            <div className={`p-3 rounded-xl ${typeColors.bg} ${typeColors.border} border`}>
+                              <AgentIcon className={`h-6 w-6 ${typeColors.text}`} />
+                            </div>
+                            <div className="space-y-1">
+                              <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                {agent.name}
+                              </CardTitle>
+                              <p className="text-sm text-gray-600 font-medium">
+                                {getAgentTypeLabel(agent.type)}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Modelo: {agent.model}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors.bg} ${statusColors.text} ${statusColors.border} border`}>
+                              {agent.status === 'active' && 'Activo'}
+                              {agent.status === 'inactive' && 'Inactivo'}
+                              {agent.status === 'training' && 'Entrenando'}
+                              {agent.status === 'error' && 'Error'}
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0 space-y-6">
+                        {/* Metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-gray-900">
+                              {agent.totalConversations.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1 flex items-center justify-center gap-1">
+                              <MessageCircle className="h-3 w-3" />
+                              Conversaciones
+                            </div>
+                          </div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-emerald-600">
+                              {agent.successRate}%
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1 flex items-center justify-center gap-1">
+                              <TrendingUp className="h-3 w-3" />
+                              Tasa de éxito
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Additional Info */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600 flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              Tiempo respuesta
+                            </span>
+                            <span className="font-medium text-gray-900">{agent.avgResponseTime}s</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600 flex items-center gap-2">
+                              <Database className="h-4 w-4" />
+                              Knowledge Bases
+                            </span>
+                            <span className="font-medium text-gray-900">{agent.knowledgeBases.length}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600 flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              Último uso
+                            </span>
+                            <span className="font-medium text-gray-900">
+                              {agent.lastUsed.toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-blue-50">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-blue-50">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-blue-50">
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {agent.status === 'active' ? (
+                              <Button variant="outline" size="sm" className="h-8 px-3 text-orange-600 border-orange-200 hover:bg-orange-50">
+                                <Pause className="h-3 w-3 mr-1" />
+                                Pausar
+                              </Button>
+                            ) : (
+                              <Button variant="outline" size="sm" className="h-8 px-3 text-green-600 border-green-200 hover:bg-green-50">
+                                <Play className="h-3 w-3 mr-1" />
+                                Activar
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {filteredAgents.length === 0 && (
+                <div className="text-center py-12">
+                  <Bot className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron agentes</h3>
+                  <p className="text-gray-600 mb-6">
+                    {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Crea tu primer agente IA para comenzar'}
+                  </p>
+                  <Button onClick={() => setShowCreateAgent(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear Primer Agente
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="knowledge" className="p-8 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Bases de Conocimiento</h2>
+                  <p className="text-gray-600 mt-1">Gestiona el contenido que alimenta a tus agentes IA</p>
+                </div>
+                <Button onClick={() => setShowKnowledgeBase(true)} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Nueva Knowledge Base
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {knowledgeBases.map((kb) => {
+                  const statusColors = getStatusColor(kb.status);
+                  
+                  return (
+                    <Card key={kb.id} className="group hover:shadow-lg transition-all duration-300 border-gray-100 hover:border-gray-200">
+                      <CardHeader className="pb-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-purple-50 rounded-xl border border-purple-100">
+                              <Database className="h-6 w-6 text-purple-600" />
+                            </div>
+                            <div className="space-y-1">
+                              <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                                {kb.name}
+                              </CardTitle>
+                              <p className="text-sm text-gray-600">
+                                {kb.description}
+                              </p>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors.bg} ${statusColors.text} ${statusColors.border} border`}>
+                            {kb.status === 'ready' && 'Listo'}
+                            {kb.status === 'processing' && 'Procesando'}
+                            {kb.status === 'error' && 'Error'}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0 space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-gray-900">{kb.documentsCount}</div>
+                            <div className="text-xs text-gray-600 mt-1 flex items-center justify-center gap-1">
+                              <FileText className="h-3 w-3" />
+                              Documentos
+                            </div>
+                          </div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-purple-600">{kb.size}</div>
+                            <div className="text-xs text-gray-600 mt-1 flex items-center justify-center gap-1">
+                              <Database className="h-3 w-3" />
+                              Tamaño
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Creado</span>
+                            <span className="font-medium text-gray-900">{kb.created.toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Última actualización</span>
+                            <span className="font-medium text-gray-900">{kb.lastUpdated.toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-purple-50">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-purple-50">
+                              <Upload className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-purple-50">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-blue-50">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-green-50">
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:bg-red-50">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
+                         <TabsContent value="analytics" className="p-8">
+               <AgentAnalytics agents={agents} />
+             </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
