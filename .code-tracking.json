@@ -1,0 +1,2356 @@
+{
+  "timestamp": "2025-06-22T21:15:03.787Z",
+  "files": {
+    "src/App.tsx": {
+      "hash": "8accbd17004806184aa6f6bc7b63cfd6",
+      "lines": 36,
+      "size": 1385,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/api/logs.ts": {
+      "hash": "6f33ba0ccf2ef28f0992f2e5c8f237a9",
+      "lines": 74,
+      "size": 2346,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/CampaignsPanel.tsx": {
+      "hash": "6dd0c0254b10336dd7e4197fa3231ea5",
+      "lines": 340,
+      "size": 13551,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/ConfigurationPanel.tsx": {
+      "hash": "4670e11258147d360528aeb7ee868dae",
+      "lines": 99,
+      "size": 2988,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/ConnectionsTable.tsx": {
+      "hash": "b56196d525ae142d9ebd52341c2aeed0",
+      "lines": 164,
+      "size": 5604,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/DashboardHeader.tsx": {
+      "hash": "89b0fb42f65be210c9981cc87d7964ce",
+      "lines": 27,
+      "size": 749,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/FlowBuilder/FlowBuilder.tsx": {
+      "hash": "504d1f9fe27f17a1d7fc469db4db88da",
+      "lines": 828,
+      "size": 25133,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/FlowBuilder/NodeProperties.tsx": {
+      "hash": "fa8a35b422be472090343cb60031e3e3",
+      "lines": 395,
+      "size": 13609,
+      "lastModified": "2025-06-22T16:01:32.129Z"
+    },
+    "src/components/FlowBuilder/nodes/AIAgentNode.tsx": {
+      "hash": "3668486a32a3015d1f4a1bdd72a0d1ac",
+      "lines": 1018,
+      "size": 45268,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/AIResponseNode.tsx": {
+      "hash": "d1dff41275baf08dada8d296f6652c0d",
+      "lines": 82,
+      "size": 3281,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx": {
+      "hash": "c35e614731d9a8eeae6d5d41103e07e3",
+      "lines": 816,
+      "size": 36711,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/AssignmentNode.tsx": {
+      "hash": "129893b1c26f05eac183750b16bb6552",
+      "lines": 970,
+      "size": 45395,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/ConditionNode.tsx": {
+      "hash": "20b7eb870b9e37150ecfafa3b5ce4711",
+      "lines": 36,
+      "size": 965,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/ContactNode.tsx": {
+      "hash": "5d1efa4ed5ed5b2a6104cd3202c82811",
+      "lines": 32,
+      "size": 943,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/CustomerStageNode.tsx": {
+      "hash": "08653e3d0a71876a7d446de33a58f867",
+      "lines": 69,
+      "size": 2511,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/DatabaseNode.tsx": {
+      "hash": "952c8b6fbc6533fc7e44ab641f43de1d",
+      "lines": 750,
+      "size": 32997,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/DelayNode.tsx": {
+      "hash": "2c94cfac8085bc8a3d8839e701dd0fc4",
+      "lines": 25,
+      "size": 778,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/EnhancedMessageNode.tsx": {
+      "hash": "f835360fadb43f143c53fbb684585206",
+      "lines": 60,
+      "size": 2099,
+      "lastModified": "2025-06-22T16:01:32.130Z"
+    },
+    "src/components/FlowBuilder/nodes/FlowNode.tsx": {
+      "hash": "3eea9574660b39a73bd5235825ad7e9a",
+      "lines": 12,
+      "size": 378,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/FormatterNode.tsx": {
+      "hash": "4c3be918b6b2d05e3bc6faaffa28ae3e",
+      "lines": 664,
+      "size": 28378,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/HttpRequestNode.tsx": {
+      "hash": "7e78835682239f60eb0b4f5ff7fc9f9f",
+      "lines": 1002,
+      "size": 40990,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/InteractiveNode.tsx": {
+      "hash": "dea2058e602c528d7da933b5bf0c6541",
+      "lines": 36,
+      "size": 1174,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/ListNode.tsx": {
+      "hash": "8f2fa8bfca4cb4366d41c4d70f976016",
+      "lines": 47,
+      "size": 1811,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/LocationNode.tsx": {
+      "hash": "9116a2b7eb121173812cabadccc89ed2",
+      "lines": 169,
+      "size": 6154,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/MediaNode.tsx": {
+      "hash": "f7b28cc0b0b6d2f12f3dd64346e3ca11",
+      "lines": 34,
+      "size": 1028,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/MessageNode.tsx": {
+      "hash": "257a60dc2859e4fe8504e342c1c8e8e9",
+      "lines": 1352,
+      "size": 58217,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/MetaConversionsNode.tsx": {
+      "hash": "d216885851509931f339d0409873a9fd",
+      "lines": 1087,
+      "size": 45300,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/RecognitionNode.tsx": {
+      "hash": "7a5c4dce855b28da90a7c5788816c6a8",
+      "lines": 879,
+      "size": 36653,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/SmartConditionNode.tsx": {
+      "hash": "d0018e2364da2b13ff9c38973ff4e437",
+      "lines": 97,
+      "size": 3386,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/SmartonNode.tsx": {
+      "hash": "d65f8a34812b0897c527b185dac01ba8",
+      "lines": 785,
+      "size": 33590,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/SurveyNode.tsx": {
+      "hash": "e600fbcc542e655823d4f20d26d9dc76",
+      "lines": 148,
+      "size": 5641,
+      "lastModified": "2025-06-22T16:01:32.131Z"
+    },
+    "src/components/FlowBuilder/nodes/TagNode.tsx": {
+      "hash": "4b41fa1c64a15ac5e2e2f0ffeb9569f4",
+      "lines": 116,
+      "size": 4404,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/FlowBuilder/nodes/TemplateNode.tsx": {
+      "hash": "5811990862cdf7c89a45ea9b207e5814",
+      "lines": 40,
+      "size": 1570,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/FlowBuilder/nodes/TimeoutNode.tsx": {
+      "hash": "125e7217e1707d301a6d71c1a6bb7e7b",
+      "lines": 633,
+      "size": 28666,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/FlowBuilder/nodes/TypingNode.tsx": {
+      "hash": "0dc702e9fe2102b566065a800d983c39",
+      "lines": 693,
+      "size": 31035,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/FlowBuilder/nodes/WebhookNode.tsx": {
+      "hash": "04c54da23e369dc072b1a7dc6e84bfba",
+      "lines": 639,
+      "size": 26123,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/FlowBuilder/nodes/WhatsAppFlowNode.tsx": {
+      "hash": "450db3da002d64eb311e0f5fa89d8a20",
+      "lines": 639,
+      "size": 28000,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/FlowExecutionDemo.tsx": {
+      "hash": "6734a0184b335d90fc2c33cced840de5",
+      "lines": 462,
+      "size": 15180,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/HubSpotCompanies.tsx": {
+      "hash": "4767b3f644996830bcaab2c4321b245b",
+      "lines": 205,
+      "size": 6459,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/HubSpotContacts.tsx": {
+      "hash": "3429db6a9204bbaf1d83956aae334a62",
+      "lines": 202,
+      "size": 6363,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/HubSpotDeals.tsx": {
+      "hash": "abfc2d2ff054887c200babcfa95ff428",
+      "lines": 265,
+      "size": 9178,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/HubSpotInboxWidget.tsx": {
+      "hash": "11b3324877b3ea1158edcc5516fd021d",
+      "lines": 192,
+      "size": 6061,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/HubSpotIntegration.tsx": {
+      "hash": "3b6cf7879ac9784abd32e45b6f2c5b5a",
+      "lines": 113,
+      "size": 3830,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/HubSpotProperties.tsx": {
+      "hash": "f75aede6905595308cacd172f75f2129",
+      "lines": 204,
+      "size": 7142,
+      "lastModified": "2025-06-22T16:01:32.132Z"
+    },
+    "src/components/LiveInbox.tsx": {
+      "hash": "285998989c3426aeb08f054366e1b300",
+      "lines": 405,
+      "size": 12709,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/LogsPanel.tsx": {
+      "hash": "8413da85bd78788ac3961c7bf593d101",
+      "lines": 195,
+      "size": 6516,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/MessageManager.tsx": {
+      "hash": "13826379a3449b9544a6384281397cb5",
+      "lines": 197,
+      "size": 6659,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/MetricsCards.tsx": {
+      "hash": "9069a3cd677433f9fd8d7419d5b7c2ee",
+      "lines": 48,
+      "size": 1881,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/PropertiesPage.tsx": {
+      "hash": "7044032ad448531dfc0e6b411ca72e1b",
+      "lines": 167,
+      "size": 6043,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/Sidebar.tsx": {
+      "hash": "6edafcc3907fbf6fa2ca36afd8305534",
+      "lines": 265,
+      "size": 7198,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/SidebarContext.tsx": {
+      "hash": "b66c221516226143623952abea234e4a",
+      "lines": 97,
+      "size": 2296,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/SubscriptionPanel.tsx": {
+      "hash": "f7c459d465506a9c406308516e5845b1",
+      "lines": 150,
+      "size": 5801,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/WhatsAppConnectionModal.tsx": {
+      "hash": "44e03110efd5964710ff5f4cbb30d44d",
+      "lines": 351,
+      "size": 12173,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/WhatsAppConnectionMonitor.tsx": {
+      "hash": "d6ea310ba16bcd25f7e0fb5a8931a7cd",
+      "lines": 158,
+      "size": 4989,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/WhatsIAStatsPanel.tsx": {
+      "hash": "21c7f284004fe47ae402c3dbfff79fe3",
+      "lines": 129,
+      "size": 4967,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/inbox/AgentPanel.tsx": {
+      "hash": "e4c74c0652445061b071d13dacc026d4",
+      "lines": 298,
+      "size": 12023,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/inbox/ChatWindow.tsx": {
+      "hash": "9e38fec86cf71989708ae833604df020",
+      "lines": 423,
+      "size": 14148,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/inbox/ConversationList.tsx": {
+      "hash": "46b2b44e40d9924d320ac716163124eb",
+      "lines": 307,
+      "size": 11746,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/inbox/InboxHeader.tsx": {
+      "hash": "afa78dda04a0e8ec3bdb3e37c82fe579",
+      "lines": 237,
+      "size": 9256,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/inbox/InboxSidebar.tsx": {
+      "hash": "6871489b976db12c613d0a9aaca589e5",
+      "lines": 306,
+      "size": 12161,
+      "lastModified": "2025-06-22T16:01:32.133Z"
+    },
+    "src/components/ui/accordion.tsx": {
+      "hash": "1543fc386d0aba4654f3199bf017eaab",
+      "lines": 57,
+      "size": 1977,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/alert-dialog.tsx": {
+      "hash": "aca8996e4020285a789d58348abce552",
+      "lines": 140,
+      "size": 4420,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/alert.tsx": {
+      "hash": "48dac79c18e0c3ff687c320c6fcf1590",
+      "lines": 60,
+      "size": 1584,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/aspect-ratio.tsx": {
+      "hash": "ea9c6ff6c2931b5089972bfba3fa5c1f",
+      "lines": 6,
+      "size": 140,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/avatar.tsx": {
+      "hash": "ce4fe60f4c48c01a5a601d9835648b40",
+      "lines": 49,
+      "size": 1405,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/badge.tsx": {
+      "hash": "f9c097d427c421f83eb92772a4b8ec06",
+      "lines": 37,
+      "size": 1128,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/breadcrumb.tsx": {
+      "hash": "377763c80b5d08aa7748a2d532bb290e",
+      "lines": 116,
+      "size": 2701,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/button.tsx": {
+      "hash": "33f8ef5c351115f8904b2a2f3decef54",
+      "lines": 57,
+      "size": 1901,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/calendar.tsx": {
+      "hash": "577b2299d7782fffe974b558233dba3a",
+      "lines": 65,
+      "size": 2620,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/card.tsx": {
+      "hash": "a8c37b8b2cb24a44f46cbae530c075af",
+      "lines": 80,
+      "size": 1877,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/carousel.tsx": {
+      "hash": "005a47594c5c8f09e27f0ed1f02197cd",
+      "lines": 261,
+      "size": 6210,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/chart.tsx": {
+      "hash": "8d4b13c80ec8ade9908712155bf0d117",
+      "lines": 364,
+      "size": 10466,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/checkbox.tsx": {
+      "hash": "215d78af591c09a0f87305e3fc54060d",
+      "lines": 30,
+      "size": 1057,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/collapsible.tsx": {
+      "hash": "8bcc61ee503a05663fb77ad9b7ec064a",
+      "lines": 10,
+      "size": 315,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/command.tsx": {
+      "hash": "f7bf707fa618dc27429ec5f1c19028c6",
+      "lines": 154,
+      "size": 4879,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/context-menu.tsx": {
+      "hash": "d4964b3b39ddf550f9b30c104e0080d8",
+      "lines": 199,
+      "size": 7246,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/dialog.tsx": {
+      "hash": "3ca438e8db79dc5fa9fb4662372afadd",
+      "lines": 121,
+      "size": 3835,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/drawer.tsx": {
+      "hash": "1caf6dac62a50b2558dd36d6d7644891",
+      "lines": 117,
+      "size": 3007,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/dropdown-menu.tsx": {
+      "hash": "cf7fe61c5c91eae0bdb3b3864508d48d",
+      "lines": 199,
+      "size": 7295,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/form.tsx": {
+      "hash": "0ed732617aace88aa93d42fe438dd281",
+      "lines": 177,
+      "size": 4085,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/hover-card.tsx": {
+      "hash": "004259115672f57e95da0b72ea2c613e",
+      "lines": 28,
+      "size": 1184,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/input-otp.tsx": {
+      "hash": "084089343296a7ebcb40fff14c62cb30",
+      "lines": 70,
+      "size": 2154,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/input.tsx": {
+      "hash": "c7cbc8cd45d01649277bd7107581cb36",
+      "lines": 23,
+      "size": 791,
+      "lastModified": "2025-06-22T16:01:32.134Z"
+    },
+    "src/components/ui/label.tsx": {
+      "hash": "909d81b5b963b6689637ad068ab9b671",
+      "lines": 26,
+      "size": 711,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/menubar.tsx": {
+      "hash": "a3a53eadb4e2d52cb841ebd2a910d33d",
+      "lines": 235,
+      "size": 7974,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/navigation-menu.tsx": {
+      "hash": "630417e56e3f5f9a5f323565ed86d430",
+      "lines": 129,
+      "size": 5046,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/pagination.tsx": {
+      "hash": "de159ac89490951ee82b4991f604e394",
+      "lines": 118,
+      "size": 2751,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/popover.tsx": {
+      "hash": "b177b8aa44e03c0a5d2a9f00b11d55be",
+      "lines": 30,
+      "size": 1230,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/progress.tsx": {
+      "hash": "9202867eacff0cb1b253a05d5d65bfc0",
+      "lines": 27,
+      "size": 777,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/radio-group.tsx": {
+      "hash": "3ace644678cd101153deee82d72048d9",
+      "lines": 43,
+      "size": 1467,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/resizable.tsx": {
+      "hash": "cf5896bc9f1524c3f3fb2d4f24eb54bf",
+      "lines": 44,
+      "size": 1709,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/scroll-area.tsx": {
+      "hash": "c4d63c56a99feb600ed0e9bbcfd70829",
+      "lines": 47,
+      "size": 1642,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/select.tsx": {
+      "hash": "ec2eec6c9b4692f74ca813ed8cba7e87",
+      "lines": 160,
+      "size": 5616,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/separator.tsx": {
+      "hash": "e970901b62fe8b73d2b9254fad77f583",
+      "lines": 30,
+      "size": 756,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/sheet.tsx": {
+      "hash": "daa150998b6073011abdfc39df425359",
+      "lines": 132,
+      "size": 4250,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/sidebar.tsx": {
+      "hash": "27c8db4816b123901768861c586f1cdb",
+      "lines": 762,
+      "size": 23367,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/skeleton.tsx": {
+      "hash": "a5a4d6d5551d4c7feb8176a23e7eb07c",
+      "lines": 16,
+      "size": 261,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/slider.tsx": {
+      "hash": "ccbb4f4470af296eafa94f9972e8a4f9",
+      "lines": 27,
+      "size": 1077,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/sonner.tsx": {
+      "hash": "5fbe438560a1cd5cadedfcb920527567",
+      "lines": 27,
+      "size": 788,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/switch.tsx": {
+      "hash": "1210b13831d433e8a9488bab91432dd4",
+      "lines": 28,
+      "size": 1139,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/table.tsx": {
+      "hash": "efdbaeb9710b2f60de7c0e18bd4e3528",
+      "lines": 118,
+      "size": 2765,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/tabs.tsx": {
+      "hash": "edad06f905be7a7e3634fdbe1b6ad61a",
+      "lines": 54,
+      "size": 1883,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/textarea.tsx": {
+      "hash": "fb19dce4f1d33ed093b75db5cefed562",
+      "lines": 25,
+      "size": 772,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/toast.tsx": {
+      "hash": "6b9ed7f669208f6631d1c44bbd556877",
+      "lines": 128,
+      "size": 4845,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/toaster.tsx": {
+      "hash": "d0e062810c47a46b9bb4e8ea19875a02",
+      "lines": 34,
+      "size": 772,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/toggle-group.tsx": {
+      "hash": "6338f2936a2474998e1e546c6a1664a6",
+      "lines": 60,
+      "size": 1739,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/toggle.tsx": {
+      "hash": "5840a6d0f51ab73d9f40592fd0db4899",
+      "lines": 44,
+      "size": 1435,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/tooltip.tsx": {
+      "hash": "336ca01a98037c9a1dfe936bde3ee549",
+      "lines": 29,
+      "size": 1145,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/components/ui/use-toast.ts": {
+      "hash": "4f094014a1315ca1081cbdc7f78d55cc",
+      "lines": 4,
+      "size": 82,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/config/evolution-api.ts": {
+      "hash": "a474f21deaaf14033a66c87e20821f31",
+      "lines": 26,
+      "size": 739,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/config/messages.ts": {
+      "hash": "7e7952533b27acb5a344a3f3f9ee06bc",
+      "lines": 26,
+      "size": 1309,
+      "lastModified": "2025-06-22T16:01:32.135Z"
+    },
+    "src/hooks/use-mobile.tsx": {
+      "hash": "209b5193af16624cdd89d3591480dd48",
+      "lines": 20,
+      "size": 565,
+      "lastModified": "2025-06-22T16:01:32.136Z"
+    },
+    "src/hooks/use-toast.ts": {
+      "hash": "bc4be55df07bc8727d5df9ed7799ad64",
+      "lines": 192,
+      "size": 3895,
+      "lastModified": "2025-06-22T16:01:32.136Z"
+    },
+    "src/hubspot-extension/WhatsAppInboxExtension.tsx": {
+      "hash": "85479fb62f92d1330b6bc414d3572a62",
+      "lines": 242,
+      "size": 8472,
+      "lastModified": "2025-06-22T16:01:32.136Z"
+    },
+    "src/hubspot-extension/config.ts": {
+      "hash": "2b46c15f6bb56295331c298311620eea",
+      "lines": 15,
+      "size": 491,
+      "lastModified": "2025-06-22T16:01:32.136Z"
+    },
+    "src/hubspot-extension/index.ts": {
+      "hash": "b1dc160997cdfdfaf77f1f2ab9a5ea8c",
+      "lines": 179,
+      "size": 5384,
+      "lastModified": "2025-06-22T16:01:32.136Z"
+    },
+    "src/hubspot-extension/ui-extensions/WhatsAppIntegration.tsx": {
+      "hash": "7974f9127ba55e8d487fbc1eae21d6c0",
+      "lines": 89,
+      "size": 1962,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/hubspot-extension/ui-extensions/register.ts": {
+      "hash": "fd52ea823925540acd7971fe2ec77539",
+      "lines": 4,
+      "size": 198,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/lib/utils.ts": {
+      "hash": "5a6fd53fdcf2be529e9cc0b718fde352",
+      "lines": 7,
+      "size": 166,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/main.tsx": {
+      "hash": "15da54e39d48ef50de2df869b054c181",
+      "lines": 6,
+      "size": 158,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/pages/FlowBuilderPage.tsx": {
+      "hash": "ac5fb910faa2475be506204a16a442ac",
+      "lines": 9,
+      "size": 218,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/pages/Index.tsx": {
+      "hash": "e382f3abe5dd4a1ae2c523768137ca78",
+      "lines": 193,
+      "size": 6813,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/pages/LiveInboxPage.tsx": {
+      "hash": "4a77ef97a55ed48ea673fd220fda7fee",
+      "lines": 10,
+      "size": 194,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/pages/NotFound.tsx": {
+      "hash": "7f6f4e93331684fdf5a149fdf712cb80",
+      "lines": 28,
+      "size": 739,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/services/executor-registry.ts": {
+      "hash": "6303eec3c5203c5b448c9d433bf7c964",
+      "lines": 386,
+      "size": 11711,
+      "lastModified": "2025-06-22T16:01:32.137Z"
+    },
+    "src/services/flow-engine.service.ts": {
+      "hash": "f2306d4997e1779876e36cefe2729aab",
+      "lines": 376,
+      "size": 11239,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/services/hubspot.service.ts": {
+      "hash": "7d295a232ea34fca08a94e9b2dcf516f",
+      "lines": 137,
+      "size": 3293,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/services/node-executors/condition-executor.ts": {
+      "hash": "7d5b9281fedd10340fa4c30d916cd4e1",
+      "lines": 400,
+      "size": 11956,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/services/node-executors/database-executor.ts": {
+      "hash": "454a3b1afd02071c3970ab415a2b23cb",
+      "lines": 376,
+      "size": 12381,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/services/node-executors/message-executor.ts": {
+      "hash": "8ae27bae2bf3df7f74c2c83f48223262",
+      "lines": 243,
+      "size": 7681,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/services/node-executors/webhook-executor.ts": {
+      "hash": "f9b09527284ba6b31a6c40aa1c2348a4",
+      "lines": 211,
+      "size": 5970,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/types/conversation.ts": {
+      "hash": "4baa51d14ef7e4c3e96c302a3992f0a2",
+      "lines": 334,
+      "size": 8144,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    },
+    "src/vite-env.d.ts": {
+      "hash": "0352474ba2918efe13895edbc3780d94",
+      "lines": 2,
+      "size": 38,
+      "lastModified": "2025-06-22T16:01:32.138Z"
+    }
+  },
+  "metrics": {
+    "totalFiles": 133,
+    "totalLines": 28577,
+    "totalSize": 1055582,
+    "componentsCount": 107,
+    "servicesCount": 7,
+    "typesCount": 1,
+    "avgLinesPerFile": 215
+  },
+  "issues": {
+    "critical": [],
+    "warnings": [],
+    "improvements": [],
+    "todos": [
+      {
+        "file": "src/api/logs.ts",
+        "line": 72,
+        "content": "return res.status(405).json({ error: 'Método no permitido' });",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/NodeProperties.tsx",
+        "line": 145,
+        "content": "<Label>Método</Label>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/NodeProperties.tsx",
+        "line": 151,
+        "content": "<SelectValue placeholder=\"Método HTTP\" />",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 630,
+        "content": "placeholder='{\"url\": \"https://api.example.com\", \"apiKey\": \"xxx\"}'",
+        "type": "OTHER"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 958,
+        "content": "<p className=\"text-xs text-gray-500\">Un dominio por línea. Deja vacío para permitir todos.</p>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx",
+        "line": 109,
+        "content": "debugMode: boolean;             // Modo debug",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx",
+        "line": 176,
+        "content": "* - Modo debug para desarrollo",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx",
+        "line": 201,
+        "content": "debugMode: false,",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx",
+        "line": 414,
+        "content": "{config.advanced.debugMode && (",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx",
+        "line": 417,
+        "content": "<span className=\"text-yellow-700\">Modo Debug Activo</span>",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/DatabaseNode.tsx",
+        "line": 463,
+        "content": "<p className=\"text-sm text-gray-600\">Aplicar configuración de IA a todos los campos</p>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/DatabaseNode.tsx",
+        "line": 630,
+        "content": "<p className=\"text-sm text-gray-600\">Guarda información aunque no complete todos los campos</p>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/HttpRequestNode.tsx",
+        "line": 366,
+        "content": "<Label htmlFor=\"method\">Método</Label>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MessageNode.tsx",
+        "line": 1145,
+        "content": "{/* Selector de método de media */}",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MessageNode.tsx",
+        "line": 1147,
+        "content": "<Label>Método de Media</Label>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/RecognitionNode.tsx",
+        "line": 678,
+        "content": "<Label htmlFor=\"saveResults\">Guardar todos los resultados</Label>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TagNode.tsx",
+        "line": 88,
+        "content": "{data.applyTo === 'all' ? 'Todos los contactos' : 'Contacto actual'}",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TimeoutNode.tsx",
+        "line": 508,
+        "content": "Mensaje cuando se agotan todos los reintentos",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/WebhookNode.tsx",
+        "line": 224,
+        "content": "<Label className=\"text-sm font-medium\">Método HTTP</Label>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/WhatsAppFlowNode.tsx",
+        "line": 103,
+        "content": "{ id: 'payment_method', type: 'radio', label: 'Método de Pago Preferido', required: true, options: ['Transferencia Bancaria', 'Tarjeta de Débito', 'Efectivo'] }",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/WhatsAppFlowNode.tsx",
+        "line": 493,
+        "content": "<p className=\"text-sm text-gray-600\">Guarda el progreso aunque no complete todo</p>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 36,
+        "content": "* - Panel de debugging responsivo",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 260,
+        "content": "// Panel de métricas y debugging",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 261,
+        "content": "const DebugPanel = () => (",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 366,
+        "content": "<TabsTrigger value=\"debug\" className=\"flex items-center\">",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 368,
+        "content": "Debug",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 378,
+        "content": "<TabsContent value=\"debug\" className=\"flex-1 m-2 overflow-auto min-h-0\">",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 379,
+        "content": "<DebugPanel />",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 421,
+        "content": "{/* Panel de debugging */}",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 423,
+        "content": "<DebugPanel />",
+        "type": "BUG"
+      },
+      {
+        "file": "src/components/HubSpotDeals.tsx",
+        "line": 119,
+        "content": "<SelectItem value=\"all\">Todos los pipelines</SelectItem>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/HubSpotInboxWidget.tsx",
+        "line": 53,
+        "content": "setIsReady(true); // Continuar de todos modos",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/HubSpotProperties.tsx",
+        "line": 105,
+        "content": "<SelectItem value=\"all\">Todos los grupos</SelectItem>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 175,
+        "content": "// TODO: Conectar con API real",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 191,
+        "content": "// TODO: Conectar con API real",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 204,
+        "content": "// TODO: Conectar con API real",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 228,
+        "content": "// TODO: Conectar con API real",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 281,
+        "content": "// TODO: Enviar a API real",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 311,
+        "content": "// TODO: Aplicar filtros y recargar conversaciones",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/SubscriptionPanel.tsx",
+        "line": 108,
+        "content": "\"✅ Todo incluido + soporte dedicado\"",
+        "type": "TODO"
+      },
+      {
+        "file": "src/components/inbox/ConversationList.tsx",
+        "line": 234,
+        "content": "<SelectItem value=\"all\">Todos</SelectItem>",
+        "type": "TODO"
+      },
+      {
+        "file": "src/pages/Index.tsx",
+        "line": 89,
+        "content": "return \"w-full\"; // En móvil, ocupar todo el ancho",
+        "type": "TODO"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 3,
+        "content": "// Importar todos los ejecutores",
+        "type": "TODO"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 10,
+        "content": "* Registro de ejecutores para todos los tipos de nodos",
+        "type": "TODO"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 15,
+        "content": "* Registra todos los ejecutores disponibles",
+        "type": "TODO"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 55,
+        "content": "console.log('✅ Todos los ejecutores registrados correctamente');",
+        "type": "TODO"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 295,
+        "content": "* Obtiene todos los threads activos de un usuario",
+        "type": "TODO"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 392,
+        "content": "// Sobrescribir métodos padre para acceso protegido",
+        "type": "TODO"
+      }
+    ],
+    "anyTypes": [
+      {
+        "file": "src/components/FlowBuilder/FlowBuilder.tsx",
+        "line": 494,
+        "content": "const onDragStart = (event: React.DragEvent, nodeType: string, defaultData: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/FlowBuilder.tsx",
+        "line": 570,
+        "content": "const filtered = {} as any;"
+      },
+      {
+        "file": "src/components/FlowBuilder/FlowBuilder.tsx",
+        "line": 572,
+        "content": "const filteredNodes = category.nodes.filter((node: any) =>"
+      },
+      {
+        "file": "src/components/FlowBuilder/FlowBuilder.tsx",
+        "line": 628,
+        "content": "{category.nodes.map((node: any) => ("
+      },
+      {
+        "file": "src/components/FlowBuilder/NodeProperties.tsx",
+        "line": 11,
+        "content": "onUpdate: (nodeId: string, data: any) => void;"
+      },
+      {
+        "file": "src/components/FlowBuilder/NodeProperties.tsx",
+        "line": 15,
+        "content": "const handleChange = (field: string, value: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 375,
+        "content": "onValueChange={(value: any) => updateData({ agentType: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 421,
+        "content": "onValueChange={(value: any) => updateData({ model: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 503,
+        "content": "onValueChange={(value: any) => updateData({ fallbackBehavior: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 578,
+        "content": "onValueChange={(value: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 667,
+        "content": "onValueChange={(value: any) => updateData({ memoryType: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 754,
+        "content": "onValueChange={(value: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIAgentNode.tsx",
+        "line": 985,
+        "content": "onValueChange={(value: any) => updateData({ outputFormat: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/AIResponseNode.tsx",
+        "line": 6,
+        "content": "export function AIResponseNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/ConditionNode.tsx",
+        "line": 5,
+        "content": "export function ConditionNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/ContactNode.tsx",
+        "line": 5,
+        "content": "export function ContactNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/CustomerStageNode.tsx",
+        "line": 6,
+        "content": "export function CustomerStageNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/DatabaseNode.tsx",
+        "line": 50,
+        "content": "defaultValue?: any;"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/DelayNode.tsx",
+        "line": 5,
+        "content": "export function DelayNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/EnhancedMessageNode.tsx",
+        "line": 6,
+        "content": "export function EnhancedMessageNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/FlowNode.tsx",
+        "line": 4,
+        "content": "export function FlowNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/InteractiveNode.tsx",
+        "line": 5,
+        "content": "export function InteractiveNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/InteractiveNode.tsx",
+        "line": 21,
+        "content": "{data.buttons.map((button: any, index: number) => ("
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/ListNode.tsx",
+        "line": 6,
+        "content": "export function ListNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/LocationNode.tsx",
+        "line": 6,
+        "content": "export function LocationNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MediaNode.tsx",
+        "line": 5,
+        "content": "export function MediaNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MessageNode.tsx",
+        "line": 706,
+        "content": "<Select value={localData.messageType} onValueChange={(value: any) => updateData({ messageType: value })}>"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MessageNode.tsx",
+        "line": 752,
+        "content": "onValueChange={(value: any) => updateData({"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MessageNode.tsx",
+        "line": 856,
+        "content": "onValueChange={(value: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MetaConversionsNode.tsx",
+        "line": 381,
+        "content": "onValueChange={(value: any) => updateData({ actionSource: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/MetaConversionsNode.tsx",
+        "line": 402,
+        "content": "onValueChange={(value: any) => updateData({ eventName: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/RecognitionNode.tsx",
+        "line": 479,
+        "content": "onValueChange={(value: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/RecognitionNode.tsx",
+        "line": 745,
+        "content": "onValueChange={(value: any) => {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/SmartConditionNode.tsx",
+        "line": 6,
+        "content": "export function SmartConditionNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/SmartConditionNode.tsx",
+        "line": 40,
+        "content": "{data.conditions?.map((condition: any, index: number) => ("
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/SurveyNode.tsx",
+        "line": 6,
+        "content": "export function SurveyNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/SurveyNode.tsx",
+        "line": 65,
+        "content": "{data.questions?.map((question: any, index: number) => ("
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TagNode.tsx",
+        "line": 6,
+        "content": "export function TagNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TagNode.tsx",
+        "line": 73,
+        "content": "{data.conditions.map((condition: any, index: number) => ("
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TemplateNode.tsx",
+        "line": 6,
+        "content": "export function TemplateNode({ data }: { data: any }) {"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TypingNode.tsx",
+        "line": 283,
+        "content": "onValueChange={(value: any) => updateData({ classificationType: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TypingNode.tsx",
+        "line": 335,
+        "content": "onValueChange={(value: any) => updateData({ inputSource: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/TypingNode.tsx",
+        "line": 546,
+        "content": "onValueChange={(value: any) => updateData({ aiModel: value })}"
+      },
+      {
+        "file": "src/components/FlowBuilder/nodes/WhatsAppFlowNode.tsx",
+        "line": 63,
+        "content": "value: any;"
+      },
+      {
+        "file": "src/components/HubSpotInboxWidget.tsx",
+        "line": 83,
+        "content": "const notifyHubSpot = (event: string, data: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotInboxWidget.tsx",
+        "line": 101,
+        "content": "onConversationStart: (conversation: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotInboxWidget.tsx",
+        "line": 104,
+        "content": "onMessageSent: (message: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotInboxWidget.tsx",
+        "line": 107,
+        "content": "onConversationResolved: (conversation: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 32,
+        "content": "const handlePropertySelect = (property: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 36,
+        "content": "const handleContactSelect = (contact: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 40,
+        "content": "const handleCompanySelect = (company: any) => {"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 44,
+        "content": "const handleDealSelect = (deal: any) => {"
+      },
+      {
+        "file": "src/components/Sidebar.tsx",
+        "line": 23,
+        "content": "onTabChange: (tab: any) => void;"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionModal.tsx",
+        "line": 50,
+        "content": "const sendToN8n = async (action: string, data: any) => {"
+      },
+      {
+        "file": "src/components/inbox/InboxSidebar.tsx",
+        "line": 59,
+        "content": "const updateFilter = (key: keyof ConversationFilters, value: any) => {"
+      },
+      {
+        "file": "src/hubspot-extension/WhatsAppInboxExtension.tsx",
+        "line": 10,
+        "content": "properties?: any;"
+      },
+      {
+        "file": "src/hubspot-extension/WhatsAppInboxExtension.tsx",
+        "line": 18,
+        "content": "properties?: any;"
+      },
+      {
+        "file": "src/hubspot-extension/WhatsAppInboxExtension.tsx",
+        "line": 25,
+        "content": "properties?: any;"
+      },
+      {
+        "file": "src/hubspot-extension/WhatsAppInboxExtension.tsx",
+        "line": 108,
+        "content": "const notifyHubSpot = (eventType: string, data: any) => {"
+      },
+      {
+        "file": "src/hubspot-extension/index.ts",
+        "line": 16,
+        "content": "const authenticateRequest = (req: any, res: any, next: any) => {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 61,
+        "content": "static registerCustomExecutor(nodeType: string, executor: any): void {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 72,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 96,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 102,
+        "content": "console.log('Opciones:', buttons.map((b: any) => b.text).join(', '));"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 119,
+        "content": "private async sendWhatsAppButtons(phoneNumber: string, message: string, buttons: any[]) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 123,
+        "content": "buttons.forEach((button: any, index: number) => {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 133,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 182,
+        "content": "private async sendSurveyQuestion(phoneNumber: string, question: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 194,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 223,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 248,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 278,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 322,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 328,
+        "content": "data.assignments.forEach((assignment: any) => {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 338,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 354,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 361,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 368,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 375,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 382,
+        "content": "async execute(context: any) {"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 100,
+        "content": "userInput?: any"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 127,
+        "content": "userInput?: any"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 241,
+        "content": "return async (nodeId: string, output?: any) => {"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 251,
+        "content": "return (key: string, value: any) => {"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 282,
+        "content": "return (output: any, nextNodeId?: string) => {"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 39,
+        "content": "async createProperty(objectType: string, property: any) {"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 55,
+        "content": "async updateProperty(objectType: string, propertyName: string, property: any) {"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 104,
+        "content": "async createContact(contact: any) {"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 120,
+        "content": "async updateContact(contactId: string, contact: any) {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 13,
+        "content": "let evaluationDetails: any = {};"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 71,
+        "content": "private evaluateSimpleRules(context: NodeExecutionContext, data: ConditionNodeData): { result: boolean; details: any } {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 72,
+        "content": "const results: any[] = [];"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 115,
+        "content": "private evaluateAdvancedRules(context: NodeExecutionContext, data: ConditionNodeData): { result: boolean; details: any } {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 132,
+        "content": "private async evaluateWithAI(context: NodeExecutionContext, data: ConditionNodeData): Promise<{ result: boolean; details: any }> {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 181,
+        "content": "private async simulateAIEvaluation(aiContext: any): Promise<{ result: boolean; confidence: number; reasoning: string }> {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 213,
+        "content": "protected evaluateRule(fieldValue: any, rule: ConditionRule): boolean {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 249,
+        "content": "protected getFieldValue(field: string, context: NodeExecutionContext): any {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 326,
+        "content": "private async evaluateRuleGroups(context: NodeExecutionContext, data: any): Promise<any[]> {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 347,
+        "content": "private async evaluateGroup(context: NodeExecutionContext, group: any): Promise<boolean> {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 369,
+        "content": "private combineGroupResults(groupResults: any[], groupsLogic: string): boolean {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 384,
+        "content": "private determineNextNode(result: boolean, data: any): string | undefined {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 393,
+        "content": "protected getFieldValue(field: string, context: NodeExecutionContext): any {"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 397,
+        "content": "protected evaluateRule(fieldValue: any, rule: any): boolean {"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 12,
+        "content": "let result: any;"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 172,
+        "content": "private async simulateDatabase(table: string, operation: string, data: any): Promise<any> {"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 197,
+        "content": "private getMockData(table: string, conditions: any): any[] {"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 244,
+        "content": "let result: any;"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 291,
+        "content": "private async createHubSpotContact(data: any, context: NodeExecutionContext): Promise<any> {"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 316,
+        "content": "private async updateHubSpotContact(data: any, context: NodeExecutionContext): Promise<any> {"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 334,
+        "content": "private async createHubSpotDeal(data: any, context: NodeExecutionContext): Promise<any> {"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 358,
+        "content": "private async getHubSpotContact(data: any, context: NodeExecutionContext): Promise<any> {"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 227,
+        "content": "private async sendMediaMessage(context: NodeExecutionContext, data: any): Promise<NodeExecutionResult> {"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 106,
+        "content": "private processBody(body: any, variables: Record<string, any>): any {"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 118,
+        "content": "private processObjectVariables(obj: any, variables: Record<string, any>): any {"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 122,
+        "content": "const processed: any = {};"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 140,
+        "content": "body?: any;"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 147,
+        "content": "data: any;"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 185,
+        "content": "private async simulateHttpCall(config: any): Promise<{"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 188,
+        "content": "data: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 21,
+        "content": "input: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 22,
+        "content": "output: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 43,
+        "content": "input: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 44,
+        "content": "output: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 54,
+        "content": "userInput?: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 56,
+        "content": "flowData: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 57,
+        "content": "executeNext: (nodeId: string, output?: any) => Promise<void>;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 58,
+        "content": "setVariable: (key: string, value: any) => void;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 59,
+        "content": "getVariable: (key: string) => any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 61,
+        "content": "logStep: (output: any, nextNodeId?: string) => void;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 70,
+        "content": "output?: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 117,
+        "content": "body?: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 153,
+        "content": "data: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 170,
+        "content": "defaultValue?: any;"
+      },
+      {
+        "file": "src/types/conversation.ts",
+        "line": 318,
+        "content": "payload: any;"
+      }
+    ],
+    "consoleLogs": [
+      {
+        "file": "src/api/logs.ts",
+        "line": 33,
+        "content": "console.log('Nuevo log:', logEntry);"
+      },
+      {
+        "file": "src/api/logs.ts",
+        "line": 37,
+        "content": "console.error('Error al guardar log:', error);"
+      },
+      {
+        "file": "src/api/logs.ts",
+        "line": 68,
+        "content": "console.error('Error al obtener logs:', error);"
+      },
+      {
+        "file": "src/components/ConfigurationPanel.tsx",
+        "line": 15,
+        "content": "console.log(\"Saving configuration...\");"
+      },
+      {
+        "file": "src/components/ConfigurationPanel.tsx",
+        "line": 21,
+        "content": "console.log(\"Regenerating API key...\");"
+      },
+      {
+        "file": "src/components/ConnectionsTable.tsx",
+        "line": 62,
+        "content": "console.log('Reconectando:', connectionId);"
+      },
+      {
+        "file": "src/components/FlowBuilder/FlowBuilder.tsx",
+        "line": 545,
+        "content": "console.log('Guardando flujo:', flowData);"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 116,
+        "content": "console.error('Error iniciando flujo:', error);"
+      },
+      {
+        "file": "src/components/FlowExecutionDemo.tsx",
+        "line": 172,
+        "content": "console.error('Error procesando mensaje:', error);"
+      },
+      {
+        "file": "src/components/HubSpotInboxWidget.tsx",
+        "line": 52,
+        "content": "console.error('Error detecting HubSpot context:', error);"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 33,
+        "content": "console.log('Propiedad seleccionada:', property);"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 37,
+        "content": "console.log('Contacto seleccionado:', contact);"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 41,
+        "content": "console.log('Empresa seleccionada:', company);"
+      },
+      {
+        "file": "src/components/HubSpotIntegration.tsx",
+        "line": 45,
+        "content": "console.log('Negocio seleccionado:', deal);"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 222,
+        "content": "console.error('Error loading agents:', error);"
+      },
+      {
+        "file": "src/components/LiveInbox.tsx",
+        "line": 231,
+        "content": "console.error('Error loading stats:', error);"
+      },
+      {
+        "file": "src/components/LogsPanel.tsx",
+        "line": 24,
+        "content": "console.log('Cargando logs...');"
+      },
+      {
+        "file": "src/components/LogsPanel.tsx",
+        "line": 64,
+        "content": "console.error('Error fetching logs:', err);"
+      },
+      {
+        "file": "src/components/MessageManager.tsx",
+        "line": 35,
+        "content": "console.log(`Mensaje guardado: ${storageKey} = ${customMessage}`);"
+      },
+      {
+        "file": "src/components/MessageManager.tsx",
+        "line": 42,
+        "content": "console.error('Error saving message:', error);"
+      },
+      {
+        "file": "src/components/MessageManager.tsx",
+        "line": 63,
+        "content": "console.error('Error resetting message:', error);"
+      },
+      {
+        "file": "src/components/MessageManager.tsx",
+        "line": 78,
+        "content": "console.error('Error getting current message:', error);"
+      },
+      {
+        "file": "src/components/MessageManager.tsx",
+        "line": 99,
+        "content": "console.error('Error generating preview:', error);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionModal.tsx",
+        "line": 52,
+        "content": "console.log(`Enviando ${action} a n8n:`, formData.webhook_url);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionModal.tsx",
+        "line": 68,
+        "content": "console.log(`Respuesta de n8n para ${action}:`, responseData);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionModal.tsx",
+        "line": 74,
+        "content": "console.error(`Error enviando ${action} a n8n:`, error);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionModal.tsx",
+        "line": 147,
+        "content": "console.error('Error:', error);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionModal.tsx",
+        "line": 189,
+        "content": "console.error('Error notificando éxito:', error);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionMonitor.tsx",
+        "line": 24,
+        "content": "console.log(`Verificando conexión para ${sessionName}`);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionMonitor.tsx",
+        "line": 59,
+        "content": "console.error('Error checking connection:', error);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionMonitor.tsx",
+        "line": 71,
+        "content": "console.log(`Enviando mensaje de reconexión para ${sessionName}`);"
+      },
+      {
+        "file": "src/components/WhatsAppConnectionMonitor.tsx",
+        "line": 111,
+        "content": "console.error('Error sending reconnection message:', error);"
+      },
+      {
+        "file": "src/hubspot-extension/WhatsAppInboxExtension.tsx",
+        "line": 82,
+        "content": "console.error('Error inicializando contexto de HubSpot:', err);"
+      },
+      {
+        "file": "src/hubspot-extension/index.ts",
+        "line": 61,
+        "content": "console.error('Error al enviar mensaje:', error);"
+      },
+      {
+        "file": "src/hubspot-extension/index.ts",
+        "line": 103,
+        "content": "console.error('Error al sincronizar contacto:', error);"
+      },
+      {
+        "file": "src/hubspot-extension/index.ts",
+        "line": 170,
+        "content": "console.error('Error al procesar webhook:', error);"
+      },
+      {
+        "file": "src/hubspot-extension/index.ts",
+        "line": 178,
+        "content": "console.log(`Servidor de extensión HubSpot ejecutándose en el puerto ${PORT}`);"
+      },
+      {
+        "file": "src/pages/Index.tsx",
+        "line": 79,
+        "content": "console.log('Conexión exitosa - actualizar tabla');"
+      },
+      {
+        "file": "src/pages/NotFound.tsx",
+        "line": 8,
+        "content": "console.error("
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 18,
+        "content": "console.log('🔧 Registrando ejecutores de nodos...');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 55,
+        "content": "console.log('✅ Todos los ejecutores registrados correctamente');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 76,
+        "content": "console.log(`⌨️ Simulando tipificación por ${duration}ms...`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 101,
+        "content": "console.log(`🔘 Enviando botones interactivos: ${message}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 102,
+        "content": "console.log('Opciones:', buttons.map((b: any) => b.text).join(', '));"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 121,
+        "content": "console.log(`📱 Enviando a ${phoneNumber}:`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 122,
+        "content": "console.log(`💬 ${message}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 124,
+        "content": "console.log(`  ${index + 1}. ${button.text}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 138,
+        "content": "console.log(`📊 Iniciando encuesta tipo: ${surveyType}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 183,
+        "content": "console.log(`📋 Pregunta: ${question.text}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 185,
+        "content": "console.log('Opciones:', question.options.join(', '));"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 198,
+        "content": "console.log(`📍 Solicitando ubicación: ${requestMessage}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 215,
+        "content": "console.log(`📱 Solicitando ubicación a ${phoneNumber}: ${message}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 228,
+        "content": "console.log(`⏰ Ejecutando timeout de ${delay}ms...`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 252,
+        "content": "console.log(`👤 Actualizando etapa del cliente a: ${newStage}`);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 283,
+        "content": "console.log(`🏷️ Ejecutando acción de etiquetas: ${action}`, tags);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 324,
+        "content": "console.log('📝 Ejecutando asignación de variables:', data);"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 339,
+        "content": "console.log('🤖 Ejecutando respuesta con IA...');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 355,
+        "content": "console.log('🎯 Ejecutando reconocimiento de patrones...');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 362,
+        "content": "console.log('🔧 Ejecutando formateo de datos...');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 369,
+        "content": "console.log('📊 Ejecutando conversiones Meta...');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 376,
+        "content": "console.log('📱 Ejecutando WhatsApp Flow...');"
+      },
+      {
+        "file": "src/services/executor-registry.ts",
+        "line": 383,
+        "content": "console.log('⚡ Ejecutando Smarton...');"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 27,
+        "content": "console.log(`✅ Ejecutor registrado para nodo tipo: ${nodeType}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 35,
+        "content": "console.log(`✅ Flujo registrado: ${flow.name} (${flow.id})`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 86,
+        "content": "console.log(`🚀 Nueva conversación iniciada: ${threadId} (${phoneNumber})`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 166,
+        "content": "console.log(`🔄 Ejecutando nodo ${currentNode.type}: ${thread.currentNodeId}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 198,
+        "content": "console.error(`❌ Error en nodo ${thread.currentNodeId}: ${result.error}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 201,
+        "content": "console.log(`⏳ Nodo ${thread.currentNodeId} esperando input del usuario`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 205,
+        "content": "console.log(`➡️ Avanzando al nodo: ${result.nextNodeId}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 215,
+        "content": "console.log(`✅ Flujo completado para thread: ${threadId}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 219,
+        "content": "console.error(`❌ Error ejecutando nodo ${thread.currentNodeId}:`, error);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 255,
+        "content": "console.log(`📝 Variable actualizada: ${key} = ${JSON.stringify(value)}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 272,
+        "content": "console.log(`⏳ Thread ${threadId} esperando input${prompt ? `: ${prompt}` : ''}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 283,
+        "content": "console.log(`📊 Log del thread ${threadId}:`, { output, nextNodeId });"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 309,
+        "content": "console.log(`⏸️ Thread pausado: ${threadId}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 320,
+        "content": "console.log(`▶️ Thread reanudado: ${threadId}`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 357,
+        "content": "console.log(`💾 Thread guardado: ${thread.id} (${thread.status})`);"
+      },
+      {
+        "file": "src/services/flow-engine.service.ts",
+        "line": 369,
+        "content": "console.log(`🗑️ Thread limpiado: ${threadId}`);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 34,
+        "content": "console.error('Error fetching HubSpot properties:', error);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 50,
+        "content": "console.error('Error creating HubSpot property:', error);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 66,
+        "content": "console.error('Error updating HubSpot property:', error);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 81,
+        "content": "console.error('Error deleting HubSpot property:', error);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 99,
+        "content": "console.error('Error fetching HubSpot contacts:', error);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 115,
+        "content": "console.error('Error creating HubSpot contact:', error);"
+      },
+      {
+        "file": "src/services/hubspot.service.ts",
+        "line": 131,
+        "content": "console.error('Error updating HubSpot contact:', error);"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 59,
+        "content": "console.error('Error en ConditionExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 146,
+        "content": "console.log('🤖 Evaluando con IA:', aiContext);"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 161,
+        "content": "console.error('Error en evaluación IA:', error);"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 164,
+        "content": "console.log('🔄 Fallback a reglas simples...');"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 241,
+        "content": "console.warn(`Operador no reconocido: ${rule.operator}`);"
+      },
+      {
+        "file": "src/services/node-executors/condition-executor.ts",
+        "line": 314,
+        "content": "console.error('Error en AdvancedConditionExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 57,
+        "content": "console.error('Error en DatabaseExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 70,
+        "content": "console.log(`📊 Ejecutando SELECT en tabla: ${data.table}`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 78,
+        "content": "console.log(`✅ SELECT completado: ${mockData.length} registros encontrados`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 86,
+        "content": "console.log(`📝 Ejecutando INSERT en tabla: ${data.table}`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 94,
+        "content": "console.log(`✅ INSERT completado: registro insertado con ID ${result.id}`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 102,
+        "content": "console.log(`✏️ Ejecutando UPDATE en tabla: ${data.table}`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 110,
+        "content": "console.log(`✅ UPDATE completado: ${result.rowsAffected} registros actualizados`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 118,
+        "content": "console.log(`🗑️ Ejecutando DELETE en tabla: ${data.table}`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 125,
+        "content": "console.log(`✅ DELETE completado: ${result.rowsAffected} registros eliminados`);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 242,
+        "content": "console.log('🔗 Ejecutando operación HubSpot:', data.operation);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 279,
+        "content": "console.error('Error en HubSpotDatabaseExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 301,
+        "content": "console.log('👤 Creando contacto HubSpot:', contactData);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 320,
+        "content": "console.log(`✏️ Actualizando contacto HubSpot ${contactId}:`, updateData);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 344,
+        "content": "console.log('💼 Creando deal HubSpot:', dealData);"
+      },
+      {
+        "file": "src/services/node-executors/database-executor.ts",
+        "line": 361,
+        "content": "console.log(`🔍 Buscando contacto HubSpot por email: ${email}`);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 17,
+        "content": "console.log(`⌨️ Simulando tipificación por ${data.delay}ms...`);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 49,
+        "content": "console.error('Error en MessageExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 115,
+        "content": "console.log(`📱 Enviando mensaje a ${phoneNumber}:`);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 116,
+        "content": "console.log(`💬 ${message}`);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 175,
+        "content": "console.error('Error en EnhancedMessageExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 210,
+        "content": "console.log(`📋 Enviando template a ${context.variables.phoneNumber}: ${message}`);"
+      },
+      {
+        "file": "src/services/node-executors/message-executor.ts",
+        "line": 228,
+        "content": "console.log(`🖼️ Enviando media a ${context.variables.phoneNumber}:`, data.mediaUrl);"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 61,
+        "content": "console.error('Error en WebhookExecutor:', error);"
+      },
+      {
+        "file": "src/services/node-executors/webhook-executor.ts",
+        "line": 154,
+        "content": "console.log(`🌐 Ejecutando ${config.method} ${config.url}`);"
+      }
+    ]
+  }
+}

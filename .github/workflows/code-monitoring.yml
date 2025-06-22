@@ -1,0 +1,280 @@
+name: 🔍 Monitoreo Automático de Código
+
+on:
+  # Ejecutar cada 12 horas
+  schedule:
+    - cron: '0 */12 * * *'
+  
+  # Permitir ejecución manual
+  workflow_dispatch:
+  
+  # Ejecutar en push a main para detectar cambios inmediatamente
+  push:
+    branches: [ main, master ]
+    paths: 
+      - 'src/**'
+      - 'package.json'
+      - 'tsconfig.json'
+
+jobs:
+  monitor-changes:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 🔧 Instalar dependencias
+      run: npm ci
+    
+    - name: 🔍 Ejecutar monitoreo de cambios
+      run: |
+        chmod +x scripts/monitor-changes.js
+        node scripts/monitor-changes.js
+    
+    - name: 📊 Verificar cambios generados
+      id: verify-changes
+      run: |
+        if [[ `git status --porcelain` ]]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "✨ Cambios detectados en el monitoreo"
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "✅ No hay cambios para commitear"
+        fi
+    
+    - name: 📝 Configurar Git
+      if: steps.verify-changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action - Code Monitor"
+    
+    - name: 💾 Commit cambios automatizados
+      if: steps.verify-changes.outputs.changes == 'true'
+      run: |
+        git add REVISION_COMPLETA_APLICACION.md
+        git add ALERTAS_CODIGO.md
+        git add .code-tracking.json
+        
+        # Crear mensaje de commit con resumen
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+        
+        # Contar archivos modificados
+        MODIFIED_FILES=$(git diff --cached --name-only | wc -l)
+        
+        # Crear mensaje descriptivo
+        COMMIT_MSG="🤖 Monitoreo automático: $TIMESTAMP
+
+📊 Resumen de cambios:
+- Archivos analizados: $MODIFIED_FILES
+- Revisión actualizada automáticamente
+- Alertas de código generadas
+
+🔍 Este commit fue generado automáticamente por el sistema de monitoreo.
+Para más detalles ver REVISION_COMPLETA_APLICACION.md y ALERTAS_CODIGO.md"
+
+        git commit -m "$COMMIT_MSG"
+    
+    - name: 🚀 Push cambios
+      if: steps.verify-changes.outputs.changes == 'true'
+      run: |
+        git push origin ${{ github.ref_name }}
+    
+    - name: 🚨 Crear issue para alertas críticas
+      if: steps.verify-changes.outputs.changes == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Leer archivo de alertas si existe
+          if (fs.existsSync('ALERTAS_CODIGO.md')) {
+            const alertsContent = fs.readFileSync('ALERTAS_CODIGO.md', 'utf8');
+            
+            // Verificar si hay alertas críticas
+            if (alertsContent.includes('🔴 ALERTAS CRÍTICAS')) {
+              
+              // Buscar issues existentes de monitoreo
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['🤖 monitoreo-automático', '🔴 crítico'],
+                state: 'open'
+              });
+              
+              // Solo crear nuevo issue si no hay uno abierto
+              if (issues.data.length === 0) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: '🚨 Alertas Críticas Detectadas por Monitoreo Automático',
+                  body: `## 🔴 Alertas Críticas Detectadas
+
+El sistema de monitoreo automático ha detectado problemas críticos que requieren atención inmediata.
+
+### 📄 Archivos Afectados
+Ver detalles completos en: [ALERTAS_CODIGO.md](./ALERTAS_CODIGO.md)
+
+### 📊 Informe Completo
+Revisión detallada disponible en: [REVISION_COMPLETA_APLICACION.md](./REVISION_COMPLETA_APLICACION.md)
+
+### ⚡ Acción Requerida
+1. Revisar alertas críticas inmediatamente
+2. Corregir vulnerabilidades de seguridad
+3. Resolver problemas de type safety
+4. Actualizar documentación si es necesario
+
+### 🤖 Información del Monitoreo
+- **Timestamp**: ${new Date().toISOString()}
+- **Trigger**: Monitoreo automático cada 12 horas
+- **Branch**: ${context.ref}
+- **Commit**: ${context.sha}
+
+Este issue se cierra automáticamente cuando se resuelven las alertas críticas.`,
+                  labels: ['🤖 monitoreo-automático', '🔴 crítico', 'bug']
+                });
+                
+                console.log('✅ Issue creado para alertas críticas');
+              } else {
+                console.log('ℹ️ Issue de alertas críticas ya existe');
+              }
+            }
+          }
+    
+    - name: 💬 Comentar en PR si aplica
+      if: github.event_name == 'push' && steps.verify-changes.outputs.changes == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Buscar PR asociado al push
+          const prs = await github.rest.pulls.list({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`,
+            state: 'open'
+          });
+          
+          if (prs.data.length > 0) {
+            const pr = prs.data[0];
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `## 🤖 Monitoreo Automático Ejecutado
+
+El sistema de monitoreo ha analizado los cambios en este PR:
+
+### 📊 Análisis Completado
+- ✅ Código revisado automáticamente
+- 📄 Informe actualizado en \`REVISION_COMPLETA_APLICACION.md\`
+- 🚨 Alertas generadas en \`ALERTAS_CODIGO.md\`
+
+### 🔍 Próximos Pasos
+1. Revisar el informe de revisión actualizado
+2. Verificar alertas si las hay
+3. Corregir problemas críticos antes del merge
+
+*Este comentario fue generado automáticamente por el sistema de monitoreo.*`
+            });
+          }
+    
+    - name: 📈 Generar reporte de métricas
+      if: always()
+      run: |
+        echo "## 📊 Métricas del Monitoreo" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Cambios detectados**: ${{ steps.verify-changes.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "ALERTAS_CODIGO.md" ]; then
+          echo "### 🚨 Resumen de Alertas" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          head -20 ALERTAS_CODIGO.md >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📄 **Archivos generados**:" >> $GITHUB_STEP_SUMMARY
+        echo "- [Revisión Completa](./REVISION_COMPLETA_APLICACION.md)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Alertas de Código](./ALERTAS_CODIGO.md)" >> $GITHUB_STEP_SUMMARY
+
+  # Job para cerrar issues resueltos
+  cleanup-resolved-issues:
+    runs-on: ubuntu-latest
+    needs: monitor-changes
+    if: always()
+    
+    steps:
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
+    
+    - name: 🔍 Verificar y cerrar issues resueltos
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Verificar si aún hay alertas críticas
+          let hasCriticalAlerts = false;
+          if (fs.existsSync('ALERTAS_CODIGO.md')) {
+            const alertsContent = fs.readFileSync('ALERTAS_CODIGO.md', 'utf8');
+            hasCriticalAlerts = alertsContent.includes('🔴 ALERTAS CRÍTICAS');
+          }
+          
+          if (!hasCriticalAlerts) {
+            // Buscar issues abiertos de monitoreo crítico
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['🤖 monitoreo-automático', '🔴 crítico'],
+              state: 'open'
+            });
+            
+            // Cerrar issues resueltos
+            for (const issue of issues.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `## ✅ Alertas Críticas Resueltas
+
+El sistema de monitoreo automático confirma que las alertas críticas han sido resueltas.
+
+### 🎉 Estado Actual
+- ✅ No se detectan alertas críticas
+- ✅ Código en estado saludable
+- ✅ Issue cerrado automáticamente
+
+**Timestamp**: ${new Date().toISOString()}
+
+¡Excelente trabajo resolviendo los problemas críticos! 🎊`
+              });
+              
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'completed'
+              });
+              
+              console.log(`✅ Issue #${issue.number} cerrado - alertas críticas resueltas`);
+            }
+          }

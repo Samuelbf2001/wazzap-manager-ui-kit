@@ -735,3 +735,241 @@ La aplicación tiene potencial para ser un producto empresarial robusto, pero ne
 ---
 
 **👥 Para el equipo de desarrollo**: Este informe debe ser revisado semanalmente y actualizado conforme se implementen las mejoras. Cada nuevo feature debe incluir tests y documentación antes de merge.
+
+---
+
+## 🔄 HISTORIAL DE ACTUALIZACIONES
+
+### 📅 Actualización 6/22/2025, 9:15:03 PM
+
+**Resumen**: 133 archivos modificados, 297 nuevos problemas, 0 problemas resueltos
+
+#### 📝 Cambios en Código
+
+**Archivos Nuevos:**
+- ➕ `src/App.tsx`
+- ➕ `src/api/logs.ts`
+- ➕ `src/components/CampaignsPanel.tsx`
+- ➕ `src/components/ConfigurationPanel.tsx`
+- ➕ `src/components/ConnectionsTable.tsx`
+- ➕ `src/components/DashboardHeader.tsx`
+- ➕ `src/components/FlowBuilder/FlowBuilder.tsx`
+- ➕ `src/components/FlowBuilder/NodeProperties.tsx`
+- ➕ `src/components/FlowBuilder/nodes/AIAgentNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/AIResponseNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/AdvancedConditionNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/AssignmentNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/ConditionNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/ContactNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/CustomerStageNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/DatabaseNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/DelayNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/EnhancedMessageNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/FlowNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/FormatterNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/HttpRequestNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/InteractiveNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/ListNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/LocationNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/MediaNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/MessageNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/MetaConversionsNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/RecognitionNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/SmartConditionNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/SmartonNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/SurveyNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/TagNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/TemplateNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/TimeoutNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/TypingNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/WebhookNode.tsx`
+- ➕ `src/components/FlowBuilder/nodes/WhatsAppFlowNode.tsx`
+- ➕ `src/components/FlowExecutionDemo.tsx`
+- ➕ `src/components/HubSpotCompanies.tsx`
+- ➕ `src/components/HubSpotContacts.tsx`
+- ➕ `src/components/HubSpotDeals.tsx`
+- ➕ `src/components/HubSpotInboxWidget.tsx`
+- ➕ `src/components/HubSpotIntegration.tsx`
+- ➕ `src/components/HubSpotProperties.tsx`
+- ➕ `src/components/LiveInbox.tsx`
+- ➕ `src/components/LogsPanel.tsx`
+- ➕ `src/components/MessageManager.tsx`
+- ➕ `src/components/MetricsCards.tsx`
+- ➕ `src/components/PropertiesPage.tsx`
+- ➕ `src/components/Sidebar.tsx`
+- ➕ `src/components/SidebarContext.tsx`
+- ➕ `src/components/SubscriptionPanel.tsx`
+- ➕ `src/components/WhatsAppConnectionModal.tsx`
+- ➕ `src/components/WhatsAppConnectionMonitor.tsx`
+- ➕ `src/components/WhatsIAStatsPanel.tsx`
+- ➕ `src/components/inbox/AgentPanel.tsx`
+- ➕ `src/components/inbox/ChatWindow.tsx`
+- ➕ `src/components/inbox/ConversationList.tsx`
+- ➕ `src/components/inbox/InboxHeader.tsx`
+- ➕ `src/components/inbox/InboxSidebar.tsx`
+- ➕ `src/components/ui/accordion.tsx`
+- ➕ `src/components/ui/alert-dialog.tsx`
+- ➕ `src/components/ui/alert.tsx`
+- ➕ `src/components/ui/aspect-ratio.tsx`
+- ➕ `src/components/ui/avatar.tsx`
+- ➕ `src/components/ui/badge.tsx`
+- ➕ `src/components/ui/breadcrumb.tsx`
+- ➕ `src/components/ui/button.tsx`
+- ➕ `src/components/ui/calendar.tsx`
+- ➕ `src/components/ui/card.tsx`
+- ➕ `src/components/ui/carousel.tsx`
+- ➕ `src/components/ui/chart.tsx`
+- ➕ `src/components/ui/checkbox.tsx`
+- ➕ `src/components/ui/collapsible.tsx`
+- ➕ `src/components/ui/command.tsx`
+- ➕ `src/components/ui/context-menu.tsx`
+- ➕ `src/components/ui/dialog.tsx`
+- ➕ `src/components/ui/drawer.tsx`
+- ➕ `src/components/ui/dropdown-menu.tsx`
+- ➕ `src/components/ui/form.tsx`
+- ➕ `src/components/ui/hover-card.tsx`
+- ➕ `src/components/ui/input-otp.tsx`
+- ➕ `src/components/ui/input.tsx`
+- ➕ `src/components/ui/label.tsx`
+- ➕ `src/components/ui/menubar.tsx`
+- ➕ `src/components/ui/navigation-menu.tsx`
+- ➕ `src/components/ui/pagination.tsx`
+- ➕ `src/components/ui/popover.tsx`
+- ➕ `src/components/ui/progress.tsx`
+- ➕ `src/components/ui/radio-group.tsx`
+- ➕ `src/components/ui/resizable.tsx`
+- ➕ `src/components/ui/scroll-area.tsx`
+- ➕ `src/components/ui/select.tsx`
+- ➕ `src/components/ui/separator.tsx`
+- ➕ `src/components/ui/sheet.tsx`
+- ➕ `src/components/ui/sidebar.tsx`
+- ➕ `src/components/ui/skeleton.tsx`
+- ➕ `src/components/ui/slider.tsx`
+- ➕ `src/components/ui/sonner.tsx`
+- ➕ `src/components/ui/switch.tsx`
+- ➕ `src/components/ui/table.tsx`
+- ➕ `src/components/ui/tabs.tsx`
+- ➕ `src/components/ui/textarea.tsx`
+- ➕ `src/components/ui/toast.tsx`
+- ➕ `src/components/ui/toaster.tsx`
+- ➕ `src/components/ui/toggle-group.tsx`
+- ➕ `src/components/ui/toggle.tsx`
+- ➕ `src/components/ui/tooltip.tsx`
+- ➕ `src/components/ui/use-toast.ts`
+- ➕ `src/config/evolution-api.ts`
+- ➕ `src/config/messages.ts`
+- ➕ `src/hooks/use-mobile.tsx`
+- ➕ `src/hooks/use-toast.ts`
+- ➕ `src/hubspot-extension/WhatsAppInboxExtension.tsx`
+- ➕ `src/hubspot-extension/config.ts`
+- ➕ `src/hubspot-extension/index.ts`
+- ➕ `src/hubspot-extension/ui-extensions/WhatsAppIntegration.tsx`
+- ➕ `src/hubspot-extension/ui-extensions/register.ts`
+- ➕ `src/lib/utils.ts`
+- ➕ `src/main.tsx`
+- ➕ `src/pages/FlowBuilderPage.tsx`
+- ➕ `src/pages/Index.tsx`
+- ➕ `src/pages/LiveInboxPage.tsx`
+- ➕ `src/pages/NotFound.tsx`
+- ➕ `src/services/executor-registry.ts`
+- ➕ `src/services/flow-engine.service.ts`
+- ➕ `src/services/hubspot.service.ts`
+- ➕ `src/services/node-executors/condition-executor.ts`
+- ➕ `src/services/node-executors/database-executor.ts`
+- ➕ `src/services/node-executors/message-executor.ts`
+- ➕ `src/services/node-executors/webhook-executor.ts`
+- ➕ `src/types/conversation.ts`
+- ➕ `src/vite-env.d.ts`
+
+#### 🚨 Nuevos Problemas Detectados
+
+**TODOs** (48):
+- `src/api/logs.ts:72` - return res.status(405).json({ error: 'Método no permitido' });...
+- `src/components/FlowBuilder/NodeProperties.tsx:145` - <Label>Método</Label>...
+- `src/components/FlowBuilder/NodeProperties.tsx:151` - <SelectValue placeholder="Método HTTP" />...
+- `src/components/FlowBuilder/nodes/AIAgentNode.tsx:630` - placeholder='{"url": "https://api.example.com", "apiKey": "xxx"}'...
+- `src/components/FlowBuilder/nodes/AIAgentNode.tsx:958` - <p className="text-xs text-gray-500">Un dominio por línea. Deja vacío para permi...
+- ... y 43 más
+
+**Tipos Any** (134):
+- `src/components/FlowBuilder/FlowBuilder.tsx:494` - const onDragStart = (event: React.DragEvent, nodeType: string, defaultData: any)...
+- `src/components/FlowBuilder/FlowBuilder.tsx:570` - const filtered = {} as any;...
+- `src/components/FlowBuilder/FlowBuilder.tsx:572` - const filteredNodes = category.nodes.filter((node: any) =>...
+- `src/components/FlowBuilder/FlowBuilder.tsx:628` - {category.nodes.map((node: any) => (...
+- `src/components/FlowBuilder/NodeProperties.tsx:11` - onUpdate: (nodeId: string, data: any) => void;...
+- ... y 129 más
+
+**Console Logs** (115):
+- `src/api/logs.ts:33` - console.log('Nuevo log:', logEntry);...
+- `src/api/logs.ts:37` - console.error('Error al guardar log:', error);...
+- `src/api/logs.ts:68` - console.error('Error al obtener logs:', error);...
+- `src/components/ConfigurationPanel.tsx:15` - console.log("Saving configuration...");...
+- `src/components/ConfigurationPanel.tsx:21` - console.log("Regenerating API key...");...
+- ... y 110 más
+
+#### 📊 Métricas Actualizadas
+
+- **Líneas de código**: +28577
+- **Archivos**: +133
+- **Tamaño**: 1.01 MB
+
+---
+
+
+
+### 📅 Actualización Inicial - Sistema de Monitoreo Configurado
+
+**Resumen**: Sistema de monitoreo automatizado configurado exitosamente
+
+#### 🚀 Nuevo Sistema Implementado
+
+**Sistema de Monitoreo Automatizado:**
+- ✅ Script de análisis cada 12 horas: `scripts/monitor-changes.js`
+- ✅ Setup automatizado: `scripts/setup-monitoring.sh`
+- ✅ GitHub Actions workflow: `.github/workflows/code-monitoring.yml`
+- ✅ Documentación completa: `MONITOREO_README.md`
+
+#### 📝 Funcionalidades Activadas
+
+**Detección Automática:**
+- 🔍 Análisis de cambios en código cada 12 horas
+- 🚨 Alertas automáticas para problemas críticos
+- 📊 Tracking de métricas de calidad
+- 📈 Historial de evolución del código
+- 🤖 Issues automáticos en GitHub para alertas críticas
+
+**Archivos Generados:**
+- 📄 `REVISION_COMPLETA_APLICACION.md` - Informe principal (este archivo)
+- 🚨 `ALERTAS_CODIGO.md` - Alertas críticas
+- 📈 `.code-tracking.json` - Estado interno del sistema
+- 📋 `logs/monitoring_*.log` - Logs de ejecución
+
+#### 🎯 Estado Inicial Detectado
+
+**Métricas Base:**
+- **Líneas de código**: 28,444 líneas analizadas
+- **Archivos**: 100+ archivos TypeScript/React
+- **Problemas detectados**: Múltiples TODOs y tipos `any` identificados
+- **Prioridad**: LiveInbox APIs y TypeScript strict mode
+
+#### 📘 Comandos Disponibles
+
+```bash
+npm run monitor:run      # Ejecutar análisis una vez
+npm run monitor:start    # Ejecutar continuamente
+npm run monitor:logs     # Ver logs en tiempo real
+npm run monitor:setup    # Reconfigurar sistema
+```
+
+#### 🔮 Próximas Actualizaciones
+
+El sistema ahora **monitoreará automáticamente cada 12 horas** y actualizará este informe con:
+- 📊 Cambios detectados en el código
+- 🚨 Nuevos problemas identificados
+- ✅ Problemas resueltos
+- 📈 Tendencias de calidad
+- 🎯 Recomendaciones específicas
+
+---
+
+**🤖 Este sistema garantiza que la revisión se mantenga siempre actualizada sin intervención manual.**
