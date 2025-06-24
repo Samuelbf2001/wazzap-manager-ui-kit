@@ -10,7 +10,9 @@ import FlowBuilderPage from "./pages/FlowBuilderPage";
 import { LiveInboxPage } from "./pages/LiveInboxPage";
 import { InboxTestPage } from "./pages/InboxTestPage";
 import { HubSpotInboxMount } from "./components/HubSpotInboxWidget";
-import { AIAgentManager } from "./components/AIAgentManager";
+import { WhatsAppAIManager } from './components/WhatsAppAIManager';
+import { AIResponseReviewDashboard } from './components/AIResponseReviewDashboard';
+import { Layout } from './components/Layout';
 
 const queryClient = new QueryClient();
 
@@ -22,12 +24,13 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/propiedades" element={<PropertiesPage />} />
-          <Route path="/constructor" element={<FlowBuilderPage />} />
-          <Route path="/bandeja" element={<LiveInboxPage />} />
+          <Route path="/propiedades" element={<Layout><PropertiesPage /></Layout>} />
+          <Route path="/constructor" element={<Layout><FlowBuilderPage /></Layout>} />
+          <Route path="/bandeja" element={<Layout><LiveInboxPage /></Layout>} />
           <Route path="/bandeja/tests" element={<InboxTestPage />} />
           <Route path="/hubspot-inbox" element={<HubSpotInboxMount />} />
-          <Route path="/agentes-ia" element={<AIAgentManager />} />
+          <Route path="/whatsapp-ai" element={<Layout><WhatsAppAIManager /></Layout>} />
+          <Route path="/ai-review" element={<Layout><AIResponseReviewDashboard /></Layout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

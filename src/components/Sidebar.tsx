@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSidebar } from "./SidebarContext";
+import { useNavigate } from "react-router-dom";
 import {
   MessageSquare,
   Settings,
@@ -16,7 +17,8 @@ import {
   ChevronLeft,
   X,
   Play,
-  Bot
+  Bot,
+  ShieldCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -40,9 +42,16 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     toggleCollapse, 
     toggleOpen 
   } = useSidebar();
+  const navigate = useNavigate();
 
   // Configuración de los elementos del menú
-  const menuItems = [
+  const menuItems: Array<{
+    id: string;
+    icon: any;
+    label: string;
+    description: string;
+    href?: string;
+  }> = [
     {
       id: 'connections',
       icon: MessageSquare,
@@ -65,7 +74,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       id: 'properties',
       icon: Database,
       label: 'Propiedades',
-      description: 'Propiedades de contactos y datos'
+      description: 'Propiedades de contactos y datos',
+      href: '/propiedades'
     },
     {
       id: 'campañas',
@@ -77,7 +87,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       id: 'flujos',
       icon: GitBranch,
       label: 'Constructor de Flujos',
-      description: 'Diseña flujos de conversación'
+      description: 'Diseña flujos de conversación',
+      href: '/constructor'
     },
     {
       id: 'demo',
@@ -91,18 +102,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       label: 'Suscripción',
       description: 'Gestión de suscripción y facturación'
     },
-    {
-      id: 'whatsia',
-      icon: Brain,
-      label: 'WhatsIA',
-      description: 'Asistente de inteligencia artificial'
-    },
-    {
-      id: 'agentes',
-      icon: Bot,
-      label: 'Agentes IA',
-      description: 'Gestión de agentes de inteligencia artificial'
-    },
+
     {
       id: 'hubspot',
       icon: Building2,
@@ -119,12 +119,36 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       id: 'bandeja',
       icon: MessageSquare,
       label: 'Bandeja de Entrada',
-      description: 'Conversaciones en vivo y chat en tiempo real'
+      description: 'Conversaciones en vivo y chat en tiempo real',
+      href: '/bandeja'
+    },
+    {
+      id: 'whatsapp-ai',
+      icon: Bot,
+      label: 'WhatsApp AI Manager',
+      description: 'Centro unificado de agentes IA y automatización WhatsApp',
+      href: '/whatsapp-ai'
+    },
+    {
+      id: 'ai-review',
+      icon: ShieldCheck,
+      label: 'Revisión IA',
+      description: 'Dashboard para revisar y aprobar mejoras de respuestas IA',
+      href: '/ai-review'
     }
   ];
 
   const handleMenuItemClick = (itemId: string) => {
-    onTabChange(itemId);
+    // Buscar el item para ver si tiene href
+    const item = menuItems.find(i => i.id === itemId);
+    
+    if (item && item.href) {
+      // Si tiene href, navegar a esa ruta
+      navigate(item.href);
+    } else {
+      // Si no tiene href, cambiar tab local
+      onTabChange(itemId);
+    }
     
     // En móvil, cerrar el sidebar después de seleccionar
     if (isMobile) {

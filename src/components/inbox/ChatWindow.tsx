@@ -18,7 +18,8 @@ import {
   Check,
   Clock,
   AlertCircle,
-  MessageCircle
+  MessageCircle,
+  ThumbsDown
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AIResponseReporter } from '@/components/AIResponseReporter';
 
 interface ChatWindowProps {
   conversation: LiveConversation | null;
@@ -166,7 +168,7 @@ export function ChatWindow({
     }
 
     return (
-      <div className={`flex ${isAgent ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`group flex ${isAgent ? 'justify-end' : 'justify-start'} mb-4`}>
         <div className={`flex ${isAgent ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2 max-w-[70%]`}>
           {/* Avatar */}
           <Avatar className="w-6 h-6 flex-shrink-0">
@@ -176,35 +178,76 @@ export function ChatWindow({
             </AvatarFallback>
           </Avatar>
 
-          {/* Message bubble */}
-          <div
-            className={`px-3 py-2 rounded-lg ${
-              isAgent
-                ? 'bg-blue-500 text-white rounded-br-sm'
-                : 'bg-gray-100 text-gray-900 rounded-bl-sm'
-            }`}
-          >
-            {/* Sender name for group chats */}
-            {!isAgent && (
-              <p className="text-xs font-medium text-gray-600 mb-1">
-                {message.sender.name}
-              </p>
-            )}
-            
-            {/* Message content */}
-            <div className="text-sm">
-              {getMessageContent(message)}
+          {/* Message bubble container */}
+          <div className="flex flex-col space-y-1">
+            {/* Message bubble */}
+            <div
+              className={`px-3 py-2 rounded-lg ${
+                isAgent
+                  ? 'bg-blue-500 text-white rounded-br-sm'
+                  : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+              }`}
+            >
+              {/* Sender name for group chats */}
+              {!isAgent && (
+                <p className="text-xs font-medium text-gray-600 mb-1">
+                  {message.sender.name}
+                </p>
+              )}
+              
+              {/* Message content */}
+              <div className="text-sm">
+                {getMessageContent(message)}
+              </div>
+
+              {/* Time and status */}
+              <div className={`flex items-center justify-end space-x-1 mt-1 ${
+                isAgent ? 'text-blue-100' : 'text-gray-500'
+              }`}>
+                <span className="text-xs">
+                  {formatMessageTime(message.timestamp)}
+                </span>
+                {isAgent && getMessageStatusIcon(message.status)}
+              </div>
             </div>
 
-            {/* Time and status */}
-            <div className={`flex items-center justify-end space-x-1 mt-1 ${
-              isAgent ? 'text-blue-100' : 'text-gray-500'
-            }`}>
-              <span className="text-xs">
-                {formatMessageTime(message.timestamp)}
-              </span>
-              {isAgent && getMessageStatusIcon(message.status)}
-            </div>
+            {/* AI Response Reporter - Solo para mensajes de agente */}
+            {isAgent && currentAgent && (
+              <div className={`opacity-70 hover:opacity-100 transition-opacity duration-200 ${
+                isAgent ? 'flex justify-end' : 'flex justify-start'
+              }`}>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-gray-500">¿Respuesta incorrecta?</span>
+                  <AIResponseReporter
+                    messageId={message.id}
+                    conversationId={message.conversationId}
+                    agentId={currentAgent.id}
+                    agentName={currentAgent.name}
+                    originalResponse={message.content}
+                    trigger={
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0 text-gray-400 hover:text-orange-600 hover:bg-orange-50"
+                      >
+                        <ThumbsDown className="h-3 w-3" />
+                      </Button>
+                    }
+                    onReportSubmitted={(report) => {
+                      console.log('Reporte de IA enviado:', report);
+                      // Aquí se puede agregar lógica adicional
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {/* Debug info - remove in production */}
+            {isAgent && (
+              <div className="text-xs text-gray-400 opacity-50">
+                Debug: isAgent={isAgent.toString()}, currentAgent={currentAgent ? 'exists' : 'null'}
+              </div>
+            )}
           </div>
         </div>
       </div>

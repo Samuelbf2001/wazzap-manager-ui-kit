@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Bot, 
   ArrowLeft, 
@@ -33,22 +34,13 @@ import {
   X,
   File,
   Link,
-  Building2
+  Building2,
+  Sparkles,
+  Copy,
+  RefreshCw,
+  Lightbulb
 } from 'lucide-react';
-
-interface AIAgent {
-  id: string;
-  name: string;
-  type: 'conversational' | 'tool_using' | 'reasoning' | 'workflow' | 'multi_agent';
-  status: 'active' | 'inactive' | 'training' | 'error';
-  model: string;
-  knowledgeBases: string[];
-  created: Date;
-  lastUsed: Date;
-  totalConversations: number;
-  avgResponseTime: number;
-  successRate: number;
-}
+import { AIAgent } from './AIAgentManager';
 
 interface KnowledgeBase {
   id: string;
@@ -77,6 +69,7 @@ interface AIAgentCreatorProps {
 }
 
 export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAgentCreatorProps) {
+  console.log('🧙‍♂️ AIAgentCreator iniciado');
   const [currentStep, setCurrentStep] = useState(1);
   const [agentData, setAgentData] = useState({
     name: '',
@@ -106,6 +99,12 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
   // Estados para configuración de herramientas
   const [showToolConfig, setShowToolConfig] = useState(false);
   const [selectedToolType, setSelectedToolType] = useState<string | null>(null);
+
+  // Estados para el Asistente de Prompts IA
+  const [showPromptAssistant, setShowPromptAssistant] = useState(false);
+  const [promptRequirements, setPromptRequirements] = useState('');
+  const [generatingPrompt, setGeneratingPrompt] = useState(false);
+  const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([]);
 
   // Estado para nueva KB
   const [newKBData, setNewKBData] = useState({
@@ -239,6 +238,7 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
   };
 
   const createAgent = () => {
+    console.log('🤖 Creando agente con datos:', agentData);
     const newAgent: AIAgent = {
       id: Date.now().toString(),
       name: agentData.name,
@@ -250,7 +250,18 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
       lastUsed: new Date(),
       totalConversations: 0,
       avgResponseTime: 0,
-      successRate: 0
+      successRate: 0,
+      // Campos extendidos para FlowBuilder
+      systemPrompt: agentData.systemPrompt,
+      temperature: agentData.temperature,
+      maxTokens: agentData.maxTokens,
+      tools: agentData.tools,
+      useMemory: agentData.useMemory,
+      memoryType: agentData.memoryType as any,
+      memorySize: 1000,
+      timeout: 30000,
+      maxIterations: 10,
+      fallbackBehavior: 'human_handoff'
     };
 
     onAgentCreated(newAgent);
@@ -326,6 +337,150 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
       indexType: 'hybrid' as 'semantic' | 'keyword' | 'hybrid'
     });
     setShowCreateKB(false);
+  };
+
+  // Función para generar prompts con IA
+  const generateAIPrompt = async () => {
+    setGeneratingPrompt(true);
+    console.log('🧠 Generando prompt con IA:', { 
+      agentType: agentData.type, 
+      requirements: promptRequirements,
+      selectedTools: agentData.tools.map(t => t.name),
+      knowledgeBases: agentData.knowledgeBases.length
+    });
+
+    try {
+      // Simular procesamiento inteligente
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      
+      // Contexto para generar prompts más inteligentes
+      const context = {
+        agentType: agentData.type,
+        agentName: agentData.name,
+        description: agentData.description,
+        requirements: promptRequirements,
+        hasKnowledgeBase: agentData.knowledgeBases.length > 0,
+        tools: agentData.tools,
+        temperature: agentData.temperature,
+        useMemory: agentData.useMemory
+      };
+
+      const generateIntelligentPrompts = () => {
+        const basePromptTemplates = {
+          conversational: {
+            personality: 'empático, profesional y orientado a la ayuda',
+            approach: 'mantener conversaciones naturales y resolver dudas de manera clara',
+            structure: 'saludo, comprensión del problema, solución paso a paso, verificación de entendimiento'
+          },
+          tool_using: {
+            personality: 'analítico, eficiente y orientado a resultados',
+            approach: 'identificar qué herramientas usar para cada situación y explicar el proceso',
+            structure: 'análisis del problema, selección de herramientas, ejecución, validación de resultados'
+          },
+          reasoning: {
+            personality: 'metódico, reflexivo y basado en evidencia',
+            approach: 'desglosar problemas complejos y mostrar el razonamiento paso a paso',
+            structure: 'identificación del problema, análisis multi-perspectiva, evaluación de opciones, conclusión fundamentada'
+          },
+          workflow: {
+            personality: 'organizativo, sistemático y orientado a procesos',
+            approach: 'automatizar y optimizar flujos de trabajo complejos',
+            structure: 'planificación, secuenciación de tareas, ejecución coordinada, monitoreo y ajustes'
+          },
+          multi_agent: {
+            personality: 'colaborativo, coordinador y comunicativo',
+            approach: 'gestionar equipos de agentes especializados y sintetizar resultados',
+            structure: 'distribución de tareas, coordinación inter-agente, consolidación de resultados, presentación unificada'
+          }
+        };
+
+        const template = basePromptTemplates[agentData.type as keyof typeof basePromptTemplates];
+        
+        const prompts = [];
+
+        // Prompt 1: Profesional y detallado
+        prompts.push(`# ROL Y PERSONALIDAD
+Eres ${agentData.name || 'un asistente especializado'}, un agente IA ${template.personality}. ${promptRequirements ? `Tu especialidad es: ${promptRequirements}.` : ''}
+
+# OBJETIVO PRINCIPAL
+Tu misión es ${template.approach}. ${agentData.description ? `Específicamente: ${agentData.description}` : ''}
+
+# CAPACIDADES Y HERRAMIENTAS
+${agentData.tools.length > 0 ? `Tienes acceso a las siguientes herramientas: ${agentData.tools.map(t => t.name).join(', ')}. Úsalas estratégicamente para proporcionar las mejores respuestas.` : 'Basas tus respuestas en tu conocimiento entrenado y razonamiento.'}
+${context.hasKnowledgeBase ? 'Tienes acceso a bases de conocimiento especializadas que complementan tu información.' : ''}
+${agentData.useMemory ? 'Mantienes memoria de las conversaciones para proporcionar contexto continuo.' : ''}
+
+# METODOLOGÍA DE TRABAJO
+${template.structure}
+
+# INSTRUCCIONES ESPECÍFICAS
+${promptRequirements || 'Mantén siempre un enfoque profesional, claro y orientado a resolver las necesidades del usuario.'}
+
+# LIMITACIONES Y ÉTICA
+- Siempre sé honesto sobre lo que puedes y no puedes hacer
+- Si algo está fuera de tu expertise, dirígelo apropiadamente
+- Respeta la privacidad y confidencialidad
+- No generes contenido dañino o inapropiado`);
+
+        // Prompt 2: Conversacional y amigable
+        prompts.push(`Hola, soy ${agentData.name || 'tu asistente IA'}, ${template.personality}. ${promptRequirements ? `Me especializo en ${promptRequirements} y ` : ''}estoy aquí para ayudarte de la mejor manera posible.
+
+Mi enfoque es ${template.approach}. ${agentData.description ? agentData.description + ' ' : ''}
+
+${agentData.tools.length > 0 ? `Puedo usar herramientas como ${agentData.tools.map(t => t.name).join(', ')} para darte respuestas más precisas y completas. ` : ''}${context.hasKnowledgeBase ? 'También tengo acceso a información especializada actualizada. ' : ''}
+
+Cuando interactúes conmigo, seguiré esta metodología: ${template.structure}.
+
+${promptRequirements ? `Mis directrices específicas son: ${promptRequirements}` : 'Siempre buscaré entender exactamente lo que necesitas y te guiaré paso a paso hacia la solución.'}
+
+¿En qué puedo ayudarte hoy?`);
+
+        // Prompt 3: Técnico y estructurado
+        prompts.push(`CONFIGURACIÓN DEL AGENTE: ${agentData.name || 'Asistente Especializado'}
+
+TIPO: ${agentTypes.find(t => t.id === agentData.type)?.name}
+PERSONALIDAD: ${template.personality}
+ESPECIALIZACIÓN: ${promptRequirements || 'Asistencia general'}
+
+PROTOCOLO DE OPERACIÓN:
+1. ${template.structure.split(', ')[0] || 'Análisis inicial'}
+2. ${template.structure.split(', ')[1] || 'Procesamiento de información'}
+3. ${template.structure.split(', ')[2] || 'Generación de respuesta'}
+4. ${template.structure.split(', ')[3] || 'Verificación y seguimiento'}
+
+RECURSOS DISPONIBLES:
+${agentData.tools.length > 0 ? `- Herramientas: ${agentData.tools.map(t => `${t.name} (${t.description || t.type})`).join(', ')}` : '- Conocimiento base entrenado'}
+${context.hasKnowledgeBase ? '- Bases de conocimiento especializadas' : ''}
+${agentData.useMemory ? '- Sistema de memoria conversacional' : ''}
+
+DIRECTRICES DE EJECUCIÓN:
+${promptRequirements ? promptRequirements.split('.').map(req => `- ${req.trim()}`).join('\n') : '- Proporcionar respuestas precisas y útiles\n- Mantener un tono profesional\n- Verificar la comprensión del usuario'}
+
+PARÁMETROS TÉCNICOS:
+- Creatividad: ${agentData.temperature}/2.0
+- Memoria: ${agentData.useMemory ? 'Activada' : 'Desactivada'}
+- Modo de respuesta: ${template.approach}`);
+
+        return prompts;
+      };
+
+      const intelligentPrompts = generateIntelligentPrompts();
+      setSuggestedPrompts(intelligentPrompts);
+      
+    } catch (error) {
+      console.error('Error generando prompts:', error);
+      setSuggestedPrompts(['Error al generar prompts. Por favor, intenta nuevamente.']);
+    }
+    
+    setGeneratingPrompt(false);
+  };
+
+  // Función para aplicar prompt sugerido
+  const applyPrompt = (prompt: string) => {
+    updateAgentData({ systemPrompt: prompt });
+    setShowPromptAssistant(false);
+    setPromptRequirements('');
+    setSuggestedPrompts([]);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -549,13 +704,27 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
               </div>
 
               <div className="space-y-2">
-                <Label>Prompt del Sistema</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Prompt del Sistema</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPromptAssistant(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Asistente IA
+                  </Button>
+                </div>
                 <Textarea
                   value={agentData.systemPrompt}
                   onChange={(e) => updateAgentData({ systemPrompt: e.target.value })}
                   rows={6}
                   placeholder="Define el comportamiento, personalidad y objetivo del agente..."
                 />
+                <p className="text-xs text-gray-500">
+                  Tip: Usa el Asistente IA para generar prompts optimizados según tu tipo de agente
+                </p>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -926,6 +1095,152 @@ export function AIAgentCreator({ onBack, onAgentCreated, knowledgeBases }: AIAge
           </Button>
         )}
       </div>
+
+      {/* Modal Asistente de Prompts IA */}
+      {showPromptAssistant && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  Asistente IA para Generación de Prompts
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPromptAssistant(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Lightbulb className="h-5 w-5 text-yellow-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-purple-900">¿Cómo funciona?</h4>
+                    <p className="text-sm text-purple-700 mt-1">
+                      Describe qué quieres que haga tu agente y el asistente IA generará prompts optimizados 
+                      específicamente para el tipo de agente que estás creando ({agentTypes.find(t => t.id === agentData.type)?.name}).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="requirements">Describe los requisitos de tu agente:</Label>
+                  <Textarea
+                    id="requirements"
+                    value={promptRequirements}
+                    onChange={(e) => setPromptRequirements(e.target.value)}
+                    rows={4}
+                    placeholder="Ej: Quiero un agente que ayude a los usuarios con soporte técnico de software, que sea empático, que pueda derivar casos complejos a humanos, y que tenga conocimiento sobre productos de nuestra empresa..."
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={generateAIPrompt}
+                    disabled={generatingPrompt || !promptRequirements.trim()}
+                    className="flex items-center gap-2"
+                  >
+                    {generatingPrompt ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    {generatingPrompt ? 'Generando...' : 'Generar Prompts IA'}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setPromptRequirements('');
+                      setSuggestedPrompts([]);
+                    }}
+                    disabled={generatingPrompt}
+                  >
+                    Limpiar
+                  </Button>
+                </div>
+              </div>
+
+              {suggestedPrompts.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Prompts Sugeridos:</h3>
+                  <div className="space-y-3">
+                    {suggestedPrompts.map((prompt, index) => (
+                      <Card key={index} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline">Opción {index + 1}</Badge>
+                                <span className="text-sm text-gray-500">
+                                  {prompt.length} caracteres
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-4">
+                                {prompt}
+                              </p>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => applyPrompt(prompt)}
+                                className="flex items-center gap-1"
+                              >
+                                <Check className="h-3 w-3" />
+                                Usar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(prompt);
+                                }}
+                                className="flex items-center gap-1"
+                              >
+                                <Copy className="h-3 w-3" />
+                                Copiar
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">💡 Consejos para optimizar tu prompt:</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• Sé específico sobre el rol y personalidad del agente</li>
+                      <li>• Define claramente qué debe y no debe hacer</li>
+                      <li>• Incluye ejemplos de respuestas deseadas</li>
+                      <li>• Menciona el tono y estilo de comunicación</li>
+                      <li>• Especifica cómo manejar casos límite o errores</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPromptAssistant(false)}
+                >
+                  Cerrar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Modal para crear nueva Knowledge Base */}
       {showCreateKB && (

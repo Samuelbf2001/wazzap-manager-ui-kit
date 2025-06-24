@@ -9,7 +9,6 @@ import { LogsPanel } from "@/components/LogsPanel";
 import { WhatsAppConnectionModal } from "@/components/WhatsAppConnectionModal";
 import { Button } from "@/components/ui/button";
 import PropertiesPage from "../components/PropertiesPage";
-import { WhatsIAStatsPanel } from "@/components/WhatsIAStatsPanel";
 import { SubscriptionPanel } from "@/components/SubscriptionPanel";
 import { CampaignsPanel } from "@/components/CampaignsPanel";
 import { HubSpotIntegration } from "@/components/HubSpotIntegration";
@@ -17,10 +16,9 @@ import { MessageManager } from "@/components/MessageManager";
 import { FlowBuilder } from "@/components/FlowBuilder/FlowBuilder";
 import { FlowExecutionDemo } from "@/components/FlowExecutionDemo";
 import { LiveInbox } from "@/components/LiveInbox";
-import { AIAgentManager } from "@/components/AIAgentManager";
 import { Menu, Plus } from "lucide-react";
 
-type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'whatsia' | 'agentes' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
 
 // Componente interno que usa el contexto del sidebar
 function IndexContent() {
@@ -56,10 +54,7 @@ function IndexContent() {
         return <CampaignsPanel />;
       case 'suscripcion':
         return <SubscriptionPanel />;
-      case 'whatsia':
-        return <WhatsIAStatsPanel />;
-      case 'agentes':
-        return <AIAgentManager />;
+
       case 'hubspot':
         return <HubSpotIntegration />;
       case 'mensajes':
@@ -76,7 +71,7 @@ function IndexContent() {
   };
 
   // Verificar si la pestaña actual necesita altura completa
-  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo' || activeTab === 'bandeja' || activeTab === 'agentes';
+  const isFullHeightTab = activeTab === 'flujos' || activeTab === 'demo' || activeTab === 'bandeja';
 
   const handleConnectionSuccess = () => {
     console.log('Conexión exitosa - actualizar tabla');

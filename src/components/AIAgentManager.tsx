@@ -34,8 +34,10 @@ import {
 import { KnowledgeBaseManager } from './KnowledgeBaseManager';
 import { AIAgentCreator } from './AIAgentCreator';
 import { AgentAnalytics } from './AgentAnalytics';
+import { StorageStatus } from './StorageStatus';
+import { useAIAgents } from '@/hooks/use-ai-agents';
 
-interface AIAgent {
+export interface AIAgent {
   id: string;
   name: string;
   type: 'conversational' | 'tool_using' | 'reasoning' | 'workflow' | 'multi_agent';
@@ -47,6 +49,24 @@ interface AIAgent {
   totalConversations: number;
   avgResponseTime: number;
   successRate: number;
+  // Campos extendidos para FlowBuilder
+  systemPrompt?: string;
+  temperature?: number;
+  maxTokens?: number;
+  tools?: Array<{
+    id: string;
+    name: string;
+    type: 'search' | 'database' | 'api' | 'calculator' | 'file' | 'webhook' | 'mcp' | 'hubspot' | 'custom';
+    description: string;
+    config: Record<string, any>;
+    enabled: boolean;
+  }>;
+  useMemory?: boolean;
+  memoryType?: 'conversation' | 'vector' | 'graph' | 'session';
+  memorySize?: number;
+  timeout?: number;
+  maxIterations?: number;
+  fallbackBehavior?: 'human_handoff' | 'default_response' | 'error';
 }
 
 interface KnowledgeBase {
@@ -62,7 +82,6 @@ interface KnowledgeBase {
 
 export function AIAgentManager() {
   const [activeTab, setActiveTab] = useState('agents');
-  const [agents, setAgents] = useState<AIAgent[]>([]);
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -70,62 +89,11 @@ export function AIAgentManager() {
   const [showKnowledgeBase, setShowKnowledgeBase] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AIAgent | null>(null);
 
-  // Datos de ejemplo
+  // Usar el hook de agentes
+  const { agents, loading, saveAgent, deleteAgent } = useAIAgents();
+
+  // Cargar datos de example para knowledge bases
   useEffect(() => {
-    setAgents([
-      {
-        id: '1',
-        name: 'Asistente de Ventas',
-        type: 'conversational',
-        status: 'active',
-        model: 'GPT-4',
-        knowledgeBases: ['kb1', 'kb2'],
-        created: new Date('2024-01-15'),
-        lastUsed: new Date('2024-01-20'),
-        totalConversations: 1250,
-        avgResponseTime: 2.3,
-        successRate: 94.5
-      },
-      {
-        id: '2',
-        name: 'Soporte Técnico IA',
-        type: 'tool_using',
-        status: 'active',
-        model: 'Claude-3',
-        knowledgeBases: ['kb3'],
-        created: new Date('2024-01-10'),
-        lastUsed: new Date('2024-01-19'),
-        totalConversations: 850,
-        avgResponseTime: 3.1,
-        successRate: 91.2
-      },
-      {
-        id: '3',
-        name: 'Analizador de Consultas',
-        type: 'reasoning',
-        status: 'training',
-        model: 'GPT-4',
-        knowledgeBases: ['kb1'],
-        created: new Date('2024-01-18'),
-        lastUsed: new Date('2024-01-18'),
-        totalConversations: 45,
-        avgResponseTime: 4.2,
-        successRate: 87.8
-      },
-      {
-        id: '4',
-        name: 'Coordinador de Flujos',
-        type: 'workflow',
-        status: 'inactive',
-        model: 'GPT-4',
-        knowledgeBases: ['kb2'],
-        created: new Date('2024-01-12'),
-        lastUsed: new Date('2024-01-17'),
-        totalConversations: 320,
-        avgResponseTime: 1.8,
-        successRate: 96.1
-      }
-    ]);
 
     setKnowledgeBases([
       {
@@ -215,9 +183,14 @@ export function AIAgentManager() {
     return (
       <AIAgentCreator 
         onBack={() => setShowCreateAgent(false)}
-        onAgentCreated={(agent) => {
-          setAgents(prev => [...prev, agent]);
-          setShowCreateAgent(false);
+        onAgentCreated={async (agent) => {
+          try {
+            await saveAgent(agent);
+            setShowCreateAgent(false);
+            console.log('Agente guardado exitosamente');
+          } catch (error) {
+            console.error('Error al guardar el agente:', error);
+          }
         }}
         knowledgeBases={knowledgeBases}
       />
@@ -404,8 +377,19 @@ export function AIAgentManager() {
                 </Button>
               </div>
 
+              {/* Loading State */}
+              {loading && (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-center">
+                    <Bot className="h-12 w-12 text-gray-300 mx-auto mb-4 animate-pulse" />
+                    <p className="text-gray-600">Cargando agentes...</p>
+                  </div>
+                </div>
+              )}
+
               {/* Agents Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {!loading && (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredAgents.map((agent) => {
                   const AgentIcon = getAgentTypeIcon(agent.type);
                   const statusColors = getStatusColor(agent.status);
@@ -526,9 +510,10 @@ export function AIAgentManager() {
                     </Card>
                   );
                 })}
-              </div>
+                </div>
+              )}
 
-              {filteredAgents.length === 0 && (
+              {!loading && filteredAgents.length === 0 && (
                 <div className="text-center py-12">
                   <Bot className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron agentes</h3>
@@ -644,9 +629,18 @@ export function AIAgentManager() {
               </div>
             </TabsContent>
 
-                         <TabsContent value="analytics" className="p-8">
-               <AgentAnalytics agents={agents} />
-             </TabsContent>
+                                     <TabsContent value="analytics" className="p-8">
+              <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <div className="xl:col-span-3">
+                  <AgentAnalytics agents={agents} />
+                </div>
+                <div className="xl:col-span-1">
+                  <div className="space-y-4">
+                    <StorageStatus />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
