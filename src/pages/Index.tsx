@@ -17,8 +17,9 @@ import { FlowBuilder } from "@/components/FlowBuilder/FlowBuilder";
 import { FlowExecutionDemo } from "@/components/FlowExecutionDemo";
 import { LiveInbox } from "@/components/LiveInbox";
 import { Menu, Plus } from "lucide-react";
+import { ConnectionMonitorPanel } from "@/components/ConnectionMonitorPanel";
 
-type ActiveTab = 'connections' | 'configuration' | 'logs' | 'properties' | 'campañas' | 'suscripcion' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
+type ActiveTab = 'connections' | 'configuration' | 'logs' | 'monitor' | 'properties' | 'campañas' | 'suscripcion' | 'hubspot' | 'mensajes' | 'flujos' | 'demo' | 'bandeja';
 
 // Componente interno que usa el contexto del sidebar
 function IndexContent() {
@@ -48,6 +49,8 @@ function IndexContent() {
         return <ConfigurationPanel />;
       case 'logs':
         return <LogsPanel />;
+      case 'monitor':
+        return <ConnectionMonitorPanel />;
       case 'properties':
         return <PropertiesPage />;
       case 'campañas':
@@ -156,18 +159,6 @@ function IndexContent() {
           </div>
         </main>
       </div>
-      
-      {/* Botón flotante para nueva conexión - solo en connections */}
-      {activeTab === 'connections' && (
-        <div className="fixed bottom-8 right-8 z-30">
-          <Button 
-            onClick={handleConnectClick}
-            className="bg-green-600 hover:bg-green-700 text-white rounded-full w-14 h-14 shadow-lg"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        </div>
-      )}
 
       <WhatsAppConnectionModal
         open={showConnectionModal}
