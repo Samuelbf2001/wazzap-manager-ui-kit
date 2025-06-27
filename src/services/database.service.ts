@@ -33,12 +33,60 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
+interface WhatsAppConnection {
+  id: string;
+  name: string;
+  phone_number?: string;
+  status: 'active' | 'inactive' | 'pending' | 'connected';
+  instance_state: string | null;
+  instance_name: string | null;
+  created_at: string;
+  updated_at: string;
+  qr_code?: string;
+  webhook_url?: string;
+  agent_assigned?: string;
+  features: string[];
+}
+
+interface LogEntry {
+  id: string;
+  connection_id?: string;
+  type: 'webhook_request' | 'webhook_response' | 'webhook_error' | 'connection_lost' | 'connection_restored' | 'message_sent' | 'qr_generated' | 'qr_scanned' | 'form_submission' | 'system_error' | 'info' | 'warning' | 'success';
+  sessionName?: string;
+  phoneNumber?: string;
+  timestamp: string;
+  message: string;
+  data?: any;
+  error?: string;
+  status: 'success' | 'error' | 'warning' | 'info';
+  source: 'system' | 'webhook' | 'connection' | 'user';
+  level: 'debug' | 'info' | 'warn' | 'error';
+  metadata?: {
+    ip_address?: string;
+    user_agent?: string;
+    url?: string;
+    method?: string;
+    response_time?: number;
+    request_size?: number;
+    response_size?: number;
+  };
+}
+
+interface DatabaseSchema {
+  whatsapp_connections: WhatsAppConnection[];
+  logs: LogEntry[];
+}
+
 class DatabaseService {
   private config: DatabaseConfig;
   private isConnected: boolean = false;
+  private db: DatabaseSchema;
+  private readonly DB_KEY = 'wazzap_manager_database';
+  private subscribers: Map<string, Function[]> = new Map();
 
   constructor(config: DatabaseConfig) {
     this.config = config;
+    this.db = this.loadDatabase();
   }
 
   // === INICIALIZACIÓN ===
@@ -533,6 +581,795 @@ class DatabaseService {
       totalPages: 0
     };
   }
+
+  private loadDatabase(): DatabaseSchema {
+    try {
+      const stored = localStorage.getItem(this.DB_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (error) {
+      console.error('❌ Error cargando base de datos:', error);
+    }
+
+    // Base de datos inicial vacía
+    return {
+      whatsapp_connections: [],
+      logs: []
+    };
+  }
+
+  private saveDatabase(): void {
+    try {
+      localStorage.setItem(this.DB_KEY, JSON.stringify(this.db));
+      console.log('💾 Base de datos guardada exitosamente');
+    } catch (error) {
+      console.error('❌ Error guardando base de datos:', error);
+    }
+  }
+
+  private notifySubscribers(table: string, data: any): void {
+    const callbacks = this.subscribers.get(table) || [];
+    callbacks.forEach(callback => {
+      try {
+        callback(data);
+      } catch (error) {
+        console.error('❌ Error en callback de suscriptor:', error);
+      }
+    });
+  }
+
+  // 📡 SUSCRIPCIONES
+  public subscribe(table: string, callback: Function): void {
+    if (!this.subscribers.has(table)) {
+      this.subscribers.set(table, []);
+    }
+    this.subscribers.get(table)!.push(callback);
+    console.log(`📡 Nueva suscripción a tabla: ${table}`);
+  }
+
+  public unsubscribe(table: string, callback: Function): void {
+    const callbacks = this.subscribers.get(table) || [];
+    const index = callbacks.indexOf(callback);
+    if (index > -1) {
+      callbacks.splice(index, 1);
+      console.log(`📡 Cancelada suscripción a tabla: ${table}`);
+    }
+  }
+
+  // 🔄 OPERACIONES DE CONEXIONES WHATSAPP
+  public async createConnection(connectionData: Omit<WhatsAppConnection, 'id' | 'created_at' | 'updated_at'>): Promise<WhatsAppConnection> {
+    const now = new Date().toISOString();
+    const newConnection: WhatsAppConnection = {
+      id: `conn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
+      created_at: now,
+      updated_at: now,
+      features: ['Bot', 'Webhook', 'Variables', 'Logs'],
+      agent_assigned: 'Sin asignar',
+      ...connectionData
+    };
+
+    this.db.whatsapp_connections.push(newConnection);
+    this.saveDatabase();
+    
+    console.log('✅ Nueva conexión creada:', newConnection);
+    this.notifySubscribers('whatsapp_connections', this.db.whatsapp_connections);
+    
+    return newConnection;
+  }
+
+  public async updateConnection(id: string, updates: Partial<WhatsAppConnection>): Promise<WhatsAppConnection | null> {
+    const index = this.db.whatsapp_connections.findIndex(conn => conn.id === id);
+    if (index === -1) {
+      console.error(`❌ Conexión no encontrada: ${id}`);
+      return null;
+    }
+
+    const updatedConnection = {
+      ...this.db.whatsapp_connections[index],
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    this.db.whatsapp_connections[index] = updatedConnection;
+    this.saveDatabase();
+    
+    console.log('📝 Conexión actualizada:', updatedConnection);
+    this.notifySubscribers('whatsapp_connections', this.db.whatsapp_connections);
+    
+    return updatedConnection;
+  }
+
+  public async deleteConnection(id: string): Promise<boolean> {
+    const index = this.db.whatsapp_connections.findIndex(conn => conn.id === id);
+    if (index === -1) {
+      console.error(`❌ Conexión no encontrada para eliminar: ${id}`);
+      return false;
+    }
+
+    const deletedConnection = this.db.whatsapp_connections.splice(index, 1)[0];
+    this.saveDatabase();
+    
+    console.log('🗑️ Conexión eliminada:', deletedConnection);
+    this.notifySubscribers('whatsapp_connections', this.db.whatsapp_connections);
+    
+    return true;
+  }
+
+  public getConnection(id: string): WhatsAppConnection | null {
+    return this.db.whatsapp_connections.find(conn => conn.id === id) || null;
+  }
+
+  public getAllConnections(): WhatsAppConnection[] {
+    return [...this.db.whatsapp_connections];
+  }
+
+  public getConnectionByName(name: string): WhatsAppConnection | null {
+    return this.db.whatsapp_connections.find(conn => conn.name === name) || null;
+  }
+
+  // 📊 ESTADÍSTICAS
+  public getConnectionStats() {
+    const connections = this.db.whatsapp_connections;
+    return {
+      total: connections.length,
+      connected: connections.filter(c => c.status === 'connected' && c.instance_state === 'open').length,
+      active: connections.filter(c => c.status === 'active').length,
+      pending: connections.filter(c => c.status === 'pending').length,
+      inactive: connections.filter(c => c.status === 'inactive').length
+    };
+  }
+
+  // 📝 LOGS BÁSICOS (mantenemos compatibilidad)
+  public async addLog(connectionId: string, message: string, type: 'info' | 'error' | 'success' | 'warning' = 'info'): Promise<void> {
+    const log: LogEntry = {
+      id: `log_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
+      connection_id: connectionId,
+      message,
+      type: 'system_error', // Mapeo a un tipo válido del enum
+      timestamp: new Date().toISOString(),
+      status: type,
+      source: 'system',
+      level: type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'info'
+    };
+
+    this.db.logs.push(log);
+    
+    // Mantener solo los últimos 2000 logs
+    if (this.db.logs.length > 2000) {
+      this.db.logs = this.db.logs.slice(-2000);
+    }
+    
+    this.saveDatabase();
+    this.notifySubscribers('logs', this.db.logs);
+  }
+
+  // 📝 NUEVA FUNCIÓN PARA LOGS AVANZADOS
+  public async addAdvancedLog(logData: Omit<LogEntry, 'id' | 'timestamp'>): Promise<void> {
+    // Detectar automáticamente el status si no se proporcionó o es incorrecto
+    const detectedStatus = this.detectLogStatus(logData.message, logData.error, logData.type);
+    
+    const logEntry: LogEntry = {
+      id: this.generateId(),
+      timestamp: new Date().toISOString(),
+      status: detectedStatus, // Usar el status detectado automáticamente
+      ...logData
+    };
+
+    this.db.logs.push(logEntry);
+    
+    // Mantener solo los últimos 2000 logs para rendimiento
+    if (this.db.logs.length > 2000) {
+      this.db.logs = this.db.logs.slice(-2000);
+    }
+    
+    this.saveDatabase();
+    this.notifySubscribers('logs', this.db.logs);
+    
+    console.log(`📝 Log agregado: ${logData.type} - Status: ${detectedStatus} - ${logData.message}`);
+  }
+
+  public getLogsByConnection(connectionId: string): LogEntry[] {
+    return this.db.logs.filter(log => log.connection_id === connectionId);
+  }
+
+  public getAllLogs(): LogEntry[] {
+    return [...this.db.logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  public getLogsByType(type: LogEntry['type']): LogEntry[] {
+    return this.db.logs.filter(log => log.type === type).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  public getLogsByStatus(status: LogEntry['status']): LogEntry[] {
+    return this.db.logs.filter(log => log.status === status).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  public getLogsBySource(source: LogEntry['source']): LogEntry[] {
+    return this.db.logs.filter(log => log.source === source).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  public getLogsBySession(sessionName: string): LogEntry[] {
+    return this.db.logs.filter(log => log.sessionName === sessionName).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  public getLogsWithFilters(filters: {
+    type?: LogEntry['type'];
+    status?: LogEntry['status'];
+    source?: LogEntry['source'];
+    connectionId?: string;
+    sessionName?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): LogEntry[] {
+    let filteredLogs = [...this.db.logs];
+
+    if (filters.type) {
+      filteredLogs = filteredLogs.filter(log => log.type === filters.type);
+    }
+    if (filters.status) {
+      filteredLogs = filteredLogs.filter(log => log.status === filters.status);
+    }
+    if (filters.source) {
+      filteredLogs = filteredLogs.filter(log => log.source === filters.source);
+    }
+    if (filters.connectionId) {
+      filteredLogs = filteredLogs.filter(log => log.connection_id === filters.connectionId);
+    }
+    if (filters.sessionName) {
+      filteredLogs = filteredLogs.filter(log => log.sessionName === filters.sessionName);
+    }
+    if (filters.dateFrom) {
+      filteredLogs = filteredLogs.filter(log => log.timestamp >= filters.dateFrom!);
+    }
+    if (filters.dateTo) {
+      filteredLogs = filteredLogs.filter(log => log.timestamp <= filters.dateTo!);
+    }
+
+    return filteredLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  // 🔍 FUNCIÓN PARA DETECTAR STATUS AUTOMÁTICAMENTE
+  private detectLogStatus(message: string, error?: string, type?: string): LogEntry['status'] {
+    const text = `${message} ${error || ''} ${type || ''}`.toLowerCase();
+    
+    // Palabras clave para errores
+    const errorKeywords = [
+      'error', 'failed', 'fail', 'fallo', 'falló', 'timeout', 'exception', 
+      'crash', 'crashed', 'network error', 'connection lost', 'perdida', 
+      'perdió', 'malformed', 'malformado', 'invalid', 'inválido', 'not found',
+      'no encontrado', 'refused', 'rechazado', 'unauthorized', 'forbidden',
+      '404', '500', '502', '503', 'bad gateway', 'internal server error',
+      'syntax error', 'reference error', 'type error', 'range error',
+      'conexión perdida', 'sistema de monitoreo', 'error de sistema'
+    ];
+    
+    // Palabras clave para éxitos
+    const successKeywords = [
+      'success', 'successful', 'exitoso', 'exitosamente', 'éxito', 'ok', 
+      'completed', 'completado', 'generated', 'generado', 'created', 'creado',
+      'restored', 'restaurado', 'established', 'establecido', 'connected',
+      'conectado', 'sent', 'enviado', 'received', 'recibido', 'procesado',
+      'processed', 'qr generado', 'conexión restaurada', 'correctamente',
+      'con éxito', 'automática exitosa'
+    ];
+    
+    // Palabras clave para warnings
+    const warningKeywords = [
+      'warning', 'warn', 'advertencia', 'caution', 'cuidado', 'deprecated',
+      'obsoleto', 'retry', 'reintentar', 'timeout', 'slow', 'lento'
+    ];
+    
+    // Detectar errores
+    if (error || errorKeywords.some(keyword => text.includes(keyword))) {
+      return 'error';
+    }
+    
+    // Detectar éxitos
+    if (successKeywords.some(keyword => text.includes(keyword))) {
+      return 'success';
+    }
+    
+    // Detectar warnings
+    if (warningKeywords.some(keyword => text.includes(keyword))) {
+      return 'warning';
+    }
+    
+    // Por defecto, info
+    return 'info';
+  }
+
+  // 🔧 FUNCIÓN PARA RECALCULAR TODOS LOS LOGS EXISTENTES
+  public recalculateLogStatuses(): number {
+    let updatedCount = 0;
+    
+    this.db.logs.forEach(log => {
+      const detectedStatus = this.detectLogStatus(log.message, log.error, log.type);
+      
+      if (log.status !== detectedStatus) {
+        log.status = detectedStatus;
+        updatedCount++;
+      }
+    });
+    
+    if (updatedCount > 0) {
+      this.saveDatabase();
+      this.notifySubscribers('logs', this.db.logs);
+      console.log(`🔄 Se actualizaron ${updatedCount} logs con status detectado automáticamente`);
+    }
+    
+    return updatedCount;
+  }
+
+  public getLogStats() {
+    // Primero recalcular los status automáticamente
+    this.recalculateLogStatuses();
+    
+    const logs = this.db.logs;
+    const stats = {
+      total: logs.length,
+      byType: {} as Record<string, number>,
+      byStatus: {} as Record<string, number>,
+      bySource: {} as Record<string, number>,
+      recentErrors: logs.filter(l => l.status === 'error').slice(-5),
+      todayCount: logs.filter(l => {
+        const today = new Date().toDateString();
+        const logDate = new Date(l.timestamp).toDateString();
+        return today === logDate;
+      }).length,
+      // Nuevas estadísticas dinámicas
+      errorCount: logs.filter(l => l.status === 'error').length,
+      successCount: logs.filter(l => l.status === 'success').length,
+      warningCount: logs.filter(l => l.status === 'warning').length,
+      infoCount: logs.filter(l => l.status === 'info').length
+    };
+
+    logs.forEach(log => {
+      stats.byType[log.type] = (stats.byType[log.type] || 0) + 1;
+      stats.byStatus[log.status] = (stats.byStatus[log.status] || 0) + 1;
+      stats.bySource[log.source] = (stats.bySource[log.source] || 0) + 1;
+    });
+
+    return stats;
+  }
+
+  // 🎯 FUNCIÓN DE DEMOSTRACIÓN - Crear logs de ejemplo
+  public async addDemoLogs(): Promise<void> {
+    const now = new Date();
+    
+    // Función helper para crear fechas anteriores
+    const daysAgo = (days: number) => {
+      const date = new Date(now);
+      date.setDate(date.getDate() - days);
+      return date.toISOString();
+    };
+
+    const demoLogs: Omit<LogEntry, 'id' | 'timestamp'>[] = [
+      // === LOGS DE HACE 5 DÍAS ===
+      {
+        type: 'webhook_error',
+        message: 'Error de timeout en webhook personalizado',
+        status: 'error',
+        source: 'webhook',
+        level: 'error',
+        sessionName: 'ErrorConnection_Viejo',
+        phoneNumber: '+34600111222',
+        error: 'TimeoutError: El webhook no respondió en 30 segundos',
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST',
+          response_time: 30000
+        }
+      },
+      {
+        type: 'connection_lost',
+        message: 'Conexión perdida inesperadamente',
+        status: 'error',
+        source: 'connection',
+        level: 'error',
+        sessionName: 'ConexionFallida_01',
+        phoneNumber: '+34600222333',
+        error: 'Error de red: Connection reset by peer',
+        metadata: {
+          response_time: 0
+        }
+      },
+      {
+        type: 'system_error',
+        message: 'Fallo en el sistema de monitoreo',
+        status: 'error',
+        source: 'system',
+        level: 'error',
+        error: 'ReferenceError: monitor is not defined',
+        data: {
+          stack_trace: 'at ConnectionMonitor.check (monitor.js:45:12)'
+        }
+      },
+      
+      // === LOGS DE HACE 3 DÍAS ===
+      {
+        type: 'webhook_response',
+        message: 'QR generado exitosamente desde webhook',
+        status: 'success',
+        source: 'webhook',
+        level: 'info',
+        sessionName: 'ExitoAntiguo_01',
+        phoneNumber: '+34600333444',
+        data: { 
+          success: true, 
+          base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVwAAA...',
+          qr_generated: true
+        },
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST',
+          response_time: 245
+        }
+      },
+      {
+        type: 'connection_restored',
+        message: 'Conexión WhatsApp restaurada correctamente',
+        status: 'success',
+        source: 'connection',
+        level: 'info',
+        sessionName: 'ConexionExitosa_02',
+        phoneNumber: '+34600444555',
+        data: {
+          instance_name: 'ConexionExitosa_02',
+          state: 'open',
+          previous_status: 'closed'
+        },
+        metadata: {
+          response_time: 156
+        }
+      },
+      {
+        type: 'form_submission',
+        message: 'Formulario de conexión procesado con éxito',
+        status: 'success',
+        source: 'user',
+        level: 'info',
+        sessionName: 'FormularioOK_03',
+        phoneNumber: '+34600555666',
+        data: {
+          connection_name: 'FormularioOK_03',
+          phone_number: '+34600555666',
+          account_protection: true
+        }
+      },
+
+      // === LOGS DE HACE 2 DÍAS ===
+      {
+        type: 'webhook_error',
+        message: 'Respuesta malformada del webhook',
+        status: 'error',
+        source: 'webhook',
+        level: 'error',
+        sessionName: 'ErrorJSON_04',
+        phoneNumber: '+34600666777',
+        error: 'SyntaxError: Unexpected token in JSON at position 123',
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST',
+          response_time: 890
+        }
+      },
+      {
+        type: 'qr_generated',
+        message: 'Código QR generado exitosamente',
+        status: 'success',
+        source: 'system',
+        level: 'info',
+        sessionName: 'QRExitoso_05',
+        phoneNumber: '+34600777888',
+        data: {
+          qr_code: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVwAAA...',
+          format: 'png'
+        }
+      },
+
+      // === LOGS DE AYER ===
+      {
+        type: 'webhook_error',
+        message: 'Error 500 en el servidor del webhook',
+        status: 'error',
+        source: 'webhook',
+        level: 'error',
+        sessionName: 'Error500_06',
+        phoneNumber: '+34600888999',
+        error: 'HTTPError: 500 Internal Server Error',
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST',
+          response_time: 5000
+        }
+      },
+      {
+        type: 'message_sent',
+        message: 'Mensaje de bienvenida enviado correctamente',
+        status: 'success',
+        source: 'system',
+        level: 'info',
+        sessionName: 'MensajeOK_07',
+        phoneNumber: '+34600999000',
+        data: {
+          message_id: 'msg_123456789',
+          recipient: '+34600999000',
+          content: 'Bienvenido a WhatsApp Manager'
+        },
+        metadata: {
+          response_time: 230
+        }
+      },
+      {
+        type: 'connection_restored',
+        message: 'Reconexión automática exitosa',
+        status: 'success',
+        source: 'connection',
+        level: 'info',
+        sessionName: 'AutoReconect_08',
+        phoneNumber: '+34601000111',
+        data: {
+          instance_name: 'AutoReconect_08',
+          state: 'open',
+          reconnection_attempt: 3
+        }
+      },
+
+      // === LOGS DE HOY ===
+      {
+        type: 'webhook_request',
+        message: 'Solicitud enviada al webhook de verificación',
+        status: 'info',
+        source: 'webhook',
+        level: 'info',
+        sessionName: 'HoyRequest_01',
+        phoneNumber: '+34601111222',
+        data: { request_payload: { connection_name: 'HoyRequest_01' } },
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST',
+          response_time: 125
+        }
+      },
+      {
+        type: 'webhook_response',
+        message: 'Respuesta exitosa del webhook recibida',
+        status: 'success',
+        source: 'webhook',
+        level: 'info',
+        sessionName: 'HoySuccess_02',
+        phoneNumber: '+34601222333',
+        data: { 
+          success: true,
+          data: {
+            pairingCode: null,
+            code: "2@j4N6Y1l64+r42o2vpDzZe7Qpe8b+7SRFgZG3bKvMiN4zbhK0gI948kzPYkkrGOK6HC3zot5fwDNVxvsQXk6iKFjryfwO2HOcCNc=",
+            base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVwAAAFcCAYAAACEFgYs...",
+            count: 1
+          }
+        },
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST',
+          response_time: 189,
+          response_size: 1256
+        }
+      },
+      {
+        type: 'form_submission',
+        message: 'Nueva conexión creada desde formulario',
+        status: 'success',
+        source: 'user',
+        level: 'info',
+        sessionName: 'HoyForm_03',
+        phoneNumber: '+34601333444',
+        data: {
+          connection_name: 'HoyForm_03',
+          phone_number: '+34601333444',
+          account_protection: true,
+          message_logging: true
+        }
+      },
+      {
+        type: 'webhook_error',
+        message: 'Error de conexión en webhook actual',
+        status: 'error',
+        source: 'webhook',
+        level: 'error',
+        sessionName: 'HoyError_04',
+        phoneNumber: '+34601444555',
+        error: 'NetworkError: Failed to fetch - ERR_NETWORK_CHANGED',
+        metadata: {
+          url: 'https://n8n-n8n.5raxun.easypanel.host/webhook-test/f2666a61-db14-45e0-ab5b-4bb895adb3c2',
+          method: 'POST'
+        }
+      }
+    ];
+
+    console.log('🎯 Creando logs de demostración con fechas variadas...');
+    
+    for (let i = 0; i < demoLogs.length; i++) {
+      const logData = demoLogs[i];
+      
+      // Asignar timestamps basados en la posición del log
+      let timestamp: string;
+      if (i < 3) {
+        // Primeros 3 logs: hace 5 días
+        timestamp = daysAgo(5);
+      } else if (i < 6) {
+        // Siguiente 3 logs: hace 3 días
+        timestamp = daysAgo(3);
+      } else if (i < 8) {
+        // Siguiente 2 logs: hace 2 días
+        timestamp = daysAgo(2);
+      } else if (i < 11) {
+        // Siguiente 3 logs: ayer
+        timestamp = daysAgo(1);
+      } else {
+        // Últimos logs: hoy
+        timestamp = now.toISOString();
+      }
+      
+      // Crear el log con timestamp específico
+      const logEntry: LogEntry = {
+        id: this.generateId(),
+        timestamp,
+        ...logData
+      };
+      
+      this.db.logs.push(logEntry);
+      
+      // Pequeña pausa para evitar problemas de procesamiento
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
+    this.saveDatabase();
+    this.notifySubscribers('logs', this.db.logs);
+    
+    console.log(`✅ Se crearon ${demoLogs.length} logs de demostración con fechas variadas`);
+    console.log(`📊 Logs por estado: 
+    - Éxitos: ${demoLogs.filter(l => l.status === 'success').length}
+    - Errores: ${demoLogs.filter(l => l.status === 'error').length}
+    - Info: ${demoLogs.filter(l => l.status === 'info').length}`);
+  }
+
+  // 🧹 FUNCIÓN PARA LIMPIAR SOLO LOS LOGS
+  public clearAllLogs(): void {
+    console.log('🧹 Limpiando todos los logs de la base de datos...');
+    this.db.logs = [];
+    this.saveDatabase();
+    this.notifySubscribers('logs', this.db.logs);
+    console.log('✅ Todos los logs han sido eliminados de la base de datos');
+  }
+
+  // 🔧 UTILIDADES
+  public exportDatabase(): string {
+    return JSON.stringify(this.db, null, 2);
+  }
+
+  public importDatabase(jsonData: string): boolean {
+    try {
+      const importedData = JSON.parse(jsonData);
+      this.db = importedData;
+      this.saveDatabase();
+      
+      // Notificar a todos los suscriptores
+      this.notifySubscribers('whatsapp_connections', this.db.whatsapp_connections);
+      this.notifySubscribers('logs', this.db.logs);
+      
+      console.log('📂 Base de datos importada exitosamente');
+      return true;
+    } catch (error) {
+      console.error('❌ Error importando base de datos:', error);
+      return false;
+    }
+  }
+
+  public clearDatabase(): void {
+    this.db = {
+      whatsapp_connections: [],
+      logs: []
+    };
+    this.saveDatabase();
+    
+    // Notificar a todos los suscriptores
+    this.notifySubscribers('whatsapp_connections', this.db.whatsapp_connections);
+    this.notifySubscribers('logs', this.db.logs);
+    
+    console.log('🧹 Base de datos limpiada');
+  }
+
+  // 🆕 FUNCIÓN PARA CREAR LOGS ESPECÍFICOS DE HOY (para testing de filtros)
+  public async createTodayTestLogs(): Promise<void> {
+    console.log('🧪 Creando logs de prueba para HOY específicamente...');
+    
+    const today = new Date();
+    const todayTimestamps = [
+      new Date(today.getFullYear(), today.getMonth(), today.getDate(), 9, 30, 0).toISOString(),
+      new Date(today.getFullYear(), today.getMonth(), today.getDate(), 11, 45, 15).toISOString(),
+      new Date(today.getFullYear(), today.getMonth(), today.getDate(), 14, 20, 30).toISOString(),
+      new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 15, 45).toISOString(),
+      new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 0, 0).toISOString()
+    ];
+
+    const todayLogs: Array<Omit<LogEntry, 'id'>> = [
+      {
+        timestamp: todayTimestamps[0],
+        type: 'webhook_request',
+        message: 'Test: Solicitud webhook de esta mañana',
+        status: 'info',
+        source: 'webhook',
+        level: 'info',
+        sessionName: 'TestHoy_01',
+        phoneNumber: '+34700111222'
+      },
+      {
+        timestamp: todayTimestamps[1],
+        type: 'webhook_response',
+        message: 'Test: QR generado exitosamente hoy',
+        status: 'success',
+        source: 'webhook',
+        level: 'info',
+        sessionName: 'TestHoy_02',
+        phoneNumber: '+34700222333'
+      },
+      {
+        timestamp: todayTimestamps[2],
+        type: 'webhook_error',
+        message: 'Test: Error de timeout en webhook hoy',
+        status: 'error',
+        source: 'webhook',
+        level: 'error',
+        sessionName: 'TestHoy_03',
+        phoneNumber: '+34700333444',
+        error: 'TimeoutError: Webhook timeout'
+      },
+      {
+        timestamp: todayTimestamps[3],
+        type: 'form_submission',
+        message: 'Test: Formulario enviado con éxito hoy',
+        status: 'success',
+        source: 'user',
+        level: 'info',
+        sessionName: 'TestHoy_04',
+        phoneNumber: '+34700444555'
+      },
+      {
+        timestamp: todayTimestamps[4],
+        type: 'connection_restored',
+        message: 'Test: Conexión restaurada esta tarde',
+        status: 'success',
+        source: 'connection',
+        level: 'info',
+        sessionName: 'TestHoy_05',
+        phoneNumber: '+34700555666'
+      }
+    ];
+
+    // Agregar logs específicos de hoy
+    todayLogs.forEach(logData => {
+      this.db.logs.push({
+        id: this.generateId(),
+        ...logData
+      });
+    });
+
+    this.saveDatabase();
+    this.notifySubscribers('logs', this.db.logs);
+    
+    console.log(`✅ Se crearon ${todayLogs.length} logs específicos para HOY`);
+    console.log(`📅 Fecha de hoy: ${today.toISOString().split('T')[0]}`);
+  }
 }
 
-export default DatabaseService;
+// Instancia singleton con configuración por defecto
+const defaultConfig: DatabaseConfig = {
+  connectionString: 'local://wazzap_manager.db',
+  type: 'sqlite'
+};
+
+export const databaseService = new DatabaseService(defaultConfig);
+
+// Tipos exportados
+export type { WhatsAppConnection, DatabaseSchema, LogEntry };

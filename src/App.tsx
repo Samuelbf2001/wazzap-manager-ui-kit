@@ -13,6 +13,11 @@ import { HubSpotInboxMount } from "./components/HubSpotInboxWidget";
 import { WhatsAppAIManager } from './components/WhatsAppAIManager';
 import { AIResponseReviewDashboard } from './components/AIResponseReviewDashboard';
 import { Layout } from './components/Layout';
+import { connectionMonitorService } from './services/connection-monitor.service';
+
+// 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
+console.log('🚀 Inicializando servicios de la aplicación...');
+console.log('✅ ConnectionMonitorService inicializado:', !!connectionMonitorService);
 
 const queryClient = new QueryClient();
 

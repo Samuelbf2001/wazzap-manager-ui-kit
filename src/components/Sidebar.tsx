@@ -18,7 +18,8 @@ import {
   X,
   Play,
   Bot,
-  ShieldCheck
+  ShieldCheck,
+  MonitorSpeaker
 } from "lucide-react";
 
 interface SidebarProps {
@@ -69,6 +70,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       icon: Activity,
       label: 'Registros',
       description: 'Logs y actividad del sistema'
+    },
+    {
+      id: 'monitor',
+      icon: MonitorSpeaker,
+      label: 'Monitor Conexiones',
+      description: 'Monitor en tiempo real de conexiones activas'
     },
     {
       id: 'properties',
