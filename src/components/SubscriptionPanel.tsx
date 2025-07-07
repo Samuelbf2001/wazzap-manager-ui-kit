@@ -1,16 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useToast } from "@/hooks/use-toast";
 
 export function SubscriptionPanel() {
   const [currentPlan, setCurrentPlan] = useState("Pro");
-  const [whatsAppLimit, setWhatsAppLimit] = useState(3);
+  const [whatsAppLimit, setWhatsAppLimit] = useState(10);
   const [iaAgents, setIaAgents] = useState(2);
 
-  const [newWhatsAppLimit, setNewWhatsAppLimit] = useState("3");
+  const [newWhatsAppLimit, setNewWhatsAppLimit] = useState("10");
   const [newIaAgents, setNewIaAgents] = useState("2");
+
+  const { toast } = useToast();
+
+  // Cargar configuración guardada al inicializar
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('subscription_config');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        setWhatsAppLimit(config.whatsAppLimit || 10);
+        setCurrentPlan(config.currentPlan || 'Pro');
+        setNewWhatsAppLimit(String(config.whatsAppLimit || 10));
+        
+        // También cargar agentes IA si está guardado
+        if (config.iaAgents !== undefined) {
+          setIaAgents(config.iaAgents);
+          setNewIaAgents(String(config.iaAgents));
+        }
+      } catch (error) {
+        console.error('Error al cargar configuración:', error);
+      }
+    }
+  }, []);
+
+  // Función para guardar cambios
+  const handleSaveChanges = () => {
+    const newConfig = {
+      whatsAppLimit: parseInt(newWhatsAppLimit),
+      iaAgents: parseInt(newIaAgents),
+      currentPlan: currentPlan
+    };
+
+    // Guardar en localStorage
+    localStorage.setItem('subscription_config', JSON.stringify(newConfig));
+
+    // Actualizar estado local
+    setWhatsAppLimit(newConfig.whatsAppLimit);
+    setIaAgents(newConfig.iaAgents);
+
+    // Disparar evento personalizado para notificar cambios
+    window.dispatchEvent(new CustomEvent('subscription-config-updated', {
+      detail: newConfig
+    }));
+
+    // Mostrar notificación
+    toast({
+      title: "✅ Configuración actualizada",
+      description: `Límite de WhatsApp: ${newConfig.whatsAppLimit}, Agentes IA: ${newConfig.iaAgents}`,
+      duration: 3000,
+    });
+
+    console.log('🔄 Configuración actualizada:', newConfig);
+  };
 
   return (
     <div className="space-y-10">
@@ -25,7 +79,7 @@ export function SubscriptionPanel() {
       </section>
 
       {/* Modificar plan */}
-      <section className="bg-white p-6 border rounded shadow-sm space-y-4">
+      <section className="bg-white p-6 border rounded shadow-sm">
         <h2 className="text-xl font-semibold mb-2">Modificar tu plan</h2>
         <div className="space-y-4 max-w-md">
           <div>
@@ -35,7 +89,7 @@ export function SubscriptionPanel() {
                 <SelectValue placeholder="Selecciona" />
               </SelectTrigger>
               <SelectContent>
-                {[1, 2, 3, 5, 10].map((n) => (
+                {[1, 2, 3, 5, 10, 15, 20, 50].map((n) => (
                   <SelectItem key={n} value={n.toString()}>
                     {n} número{n > 1 ? "s" : ""}
                   </SelectItem>
@@ -51,7 +105,7 @@ export function SubscriptionPanel() {
                 <SelectValue placeholder="Selecciona" />
               </SelectTrigger>
               <SelectContent>
-                {[0, 1, 2, 3, 5].map((a) => (
+                {[0, 1, 2, 3, 5, 10].map((a) => (
                   <SelectItem key={a} value={a.toString()}>
                     {a} agente{a !== 1 ? "s" : ""}
                   </SelectItem>
@@ -60,7 +114,10 @@ export function SubscriptionPanel() {
             </Select>
           </div>
 
-          <Button className="mt-2 bg-green-600 hover:bg-green-700">
+          <Button 
+            className="mt-2 bg-green-600 hover:bg-green-700"
+            onClick={handleSaveChanges}
+          >
             Guardar cambios
           </Button>
         </div>
@@ -75,6 +132,8 @@ export function SubscriptionPanel() {
               name: "Inicial",
               limit: "1 número / 0 IA",
               price: "$19/mes",
+              whatsAppLimit: 1,
+              iaLimit: 0,
               features: [
                 "3 usuarios incluidos",
                 "2.000 contactos activos",
@@ -86,12 +145,14 @@ export function SubscriptionPanel() {
             },
             {
               name: "Pro",
-              limit: "3 números / 2 IA",
+              limit: "10 números / 2 IA",
               price: "$49/mes",
+              whatsAppLimit: 10,
+              iaLimit: 2,
               features: [
                 "6 usuarios incluidos",
                 "6.000 contactos activos",
-                "2 números WhatsApp",
+                "10 números WhatsApp",
                 "API & Webhooks incluidos",
                 "✅ Zapier, HubSpot, Apps móviles"
               ],
@@ -101,6 +162,8 @@ export function SubscriptionPanel() {
               name: "Enterprise",
               limit: "∞ números / ∞ IA",
               price: "A convenir",
+              whatsAppLimit: 999,
+              iaLimit: 999,
               features: [
                 "Usuarios y contactos personalizados",
                 "Números y agentes ilimitados",
@@ -109,42 +172,79 @@ export function SubscriptionPanel() {
               ],
               button: "Consultar"
             }
-          ].map((plan) => (
-            <div key={plan.name} className="border rounded p-6 bg-white shadow-sm flex flex-col justify-between">
-              <div>
-                <h3 className="text-lg font-semibold mb-1">{plan.name}</h3>
-                <p className="text-sm text-gray-500 mb-2">{plan.limit}</p>
-                <p className="text-green-600 font-bold text-lg mb-4">{plan.price}</p>
+          ].map((plan, index) => (
+            <div key={index} className="border rounded p-4 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold text-lg">{plan.name}</h3>
+              <p className="text-gray-600 text-sm">{plan.limit}</p>
+              <p className="text-2xl font-bold text-green-600 my-2">{plan.price}</p>
+              <ul className="text-sm text-gray-700 space-y-1 mb-4">
+                {plan.features.map((feature, i) => (
+                  <li key={i}>{feature}</li>
+                ))}
+              </ul>
+              <Button 
+                variant={plan.name === currentPlan ? "default" : "outline"} 
+                className="w-full"
+                onClick={() => {
+                  if (plan.name !== "Enterprise") {
+                    setCurrentPlan(plan.name);
+                    setNewWhatsAppLimit(String(plan.whatsAppLimit));
+                    setNewIaAgents(String(plan.iaLimit));
+                    
+                    // Auto-guardar cuando selecciona un plan
+                    const newConfig = {
+                      whatsAppLimit: plan.whatsAppLimit,
+                      iaAgents: plan.iaLimit,
+                      currentPlan: plan.name
+                    };
+                    localStorage.setItem('subscription_config', JSON.stringify(newConfig));
+                    setWhatsAppLimit(plan.whatsAppLimit);
+                    setIaAgents(plan.iaLimit);
+                    
+                    window.dispatchEvent(new CustomEvent('subscription-config-updated', {
+                      detail: newConfig
+                    }));
 
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="features">
-                    <AccordionTrigger className="text-sm text-gray-700 hover:underline">
-                      Ver funcionalidades
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <ul className="text-sm text-gray-600 space-y-1 mt-2">
-                        {plan.features.map((f, i) => (
-                          <li key={i}>✅ {f}</li>
-                        ))}
-                      </ul>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
-              <Button variant={plan.name === "Enterprise" ? "outline" : "default"} className="mt-4">
-                {plan.button}
+                    toast({
+                      title: `Plan ${plan.name} seleccionado`,
+                      description: `Límite actualizado a ${plan.whatsAppLimit} números de WhatsApp`,
+                      duration: 3000,
+                    });
+                  }
+                }}
+                disabled={plan.name === currentPlan}
+              >
+                {plan.name === currentPlan ? "Plan actual" : plan.button}
               </Button>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Botón de facturas anteriores */}
-      <section className="flex justify-start">
-        <Button variant="outline" className="border-gray-300">
-          Ver facturas anteriores
-        </Button>
-      </section>
+      {/* Información adicional */}
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="billing">
+          <AccordionTrigger>💳 Información de facturación</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2 text-sm text-gray-600">
+              <p><strong>Próxima facturación:</strong> 15 de diciembre de 2024</p>
+              <p><strong>Método de pago:</strong> **** **** **** 1234 (Visa)</p>
+              <p><strong>Email de facturación:</strong> usuario@empresa.com</p>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="usage">
+          <AccordionTrigger>📊 Uso actual</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2 text-sm text-gray-600">
+              <p><strong>Números conectados:</strong> {whatsAppLimit}/10 disponibles</p>
+              <p><strong>Mensajes enviados este mes:</strong> 1,245</p>
+              <p><strong>Agentes IA activos:</strong> {iaAgents}/2 disponibles</p>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }

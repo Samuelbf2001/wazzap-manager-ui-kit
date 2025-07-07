@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSidebar } from "./SidebarContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   MessageSquare,
   Settings,
@@ -21,10 +21,12 @@ import {
   ShieldCheck,
   MonitorSpeaker
 } from "lucide-react";
+import { useState } from "react";
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: any) => void;
+  onLogoClick?: () => void;
 }
 
 /**
@@ -35,7 +37,7 @@ interface SidebarProps {
  * - Tablet: Sidebar overlay, deslizable
  * - Mobile: Sidebar overlay, menú hamburguesa
  */
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
   const { 
     isCollapsed, 
     isMobile, 
@@ -44,6 +46,34 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
     toggleOpen 
   } = useSidebar();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  // Función para determinar qué elemento está activo basándose en la ruta actual
+  const getActiveItemId = (): string => {
+    const pathname = location.pathname;
+    
+    // Mapear rutas a IDs de elementos del menú
+    const routeToIdMap: { [key: string]: string } = {
+      '/': '', // Página de bienvenida - no hay elemento activo
+      '/conexiones': 'connections',
+      '/registros': 'logs', 
+      '/monitor-conexiones': 'monitor',
+      '/propiedades': 'properties',
+      '/campanas': 'campañas',
+      '/constructor': 'flujos',
+      '/demo-flujos': 'demo',
+      '/suscripcion': 'suscripcion',
+      '/hubspot': 'hubspot',
+      '/mensajes': 'mensajes',
+      '/bandeja': 'bandeja',
+      '/whatsapp-ai': 'whatsapp-ai',
+      '/ai-review': 'ai-review',
+      '/configuracion': 'configuration'
+    };
+
+    return routeToIdMap[pathname] || ''; // Retorna string vacío si no encuentra la ruta
+  };
 
   // Configuración de los elementos del menú
   const menuItems: Array<{
@@ -57,25 +87,22 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       id: 'connections',
       icon: MessageSquare,
       label: 'Conexiones',
-      description: 'Gestiona conexiones de WhatsApp'
-    },
-    {
-      id: 'configuration', 
-      icon: Settings,
-      label: 'Configuración',
-      description: 'Configuración general del sistema'
+      description: 'Gestiona conexiones de WhatsApp',
+      href: '/conexiones'
     },
     {
       id: 'logs',
       icon: Activity,
       label: 'Registros',
-      description: 'Logs y actividad del sistema'
+      description: 'Logs y actividad del sistema',
+      href: '/registros'
     },
     {
       id: 'monitor',
       icon: MonitorSpeaker,
       label: 'Monitor Conexiones',
-      description: 'Monitor en tiempo real de conexiones activas'
+      description: 'Monitor en tiempo real de conexiones activas',
+      href: '/monitor-conexiones'
     },
     {
       id: 'properties',
@@ -88,7 +115,8 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       id: 'campañas',
       icon: Megaphone,
       label: 'Campañas',
-      description: 'Campañas de marketing'
+      description: 'Campañas de marketing',
+      href: '/campanas'
     },
     {
       id: 'flujos',
@@ -101,26 +129,29 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       id: 'demo',
       icon: Play,
       label: 'Demo Flujos',
-      description: 'Demostración del sistema de flujos'
+      description: 'Demostración del sistema de flujos',
+      href: '/demo-flujos'
     },
     {
       id: 'suscripcion',
       icon: CreditCard,
       label: 'Suscripción',
-      description: 'Gestión de suscripción y facturación'
+      description: 'Gestión de suscripción y facturación',
+      href: '/suscripcion'
     },
-
     {
       id: 'hubspot',
       icon: Building2,
       label: 'HubSpot',
-      description: 'Integración con HubSpot CRM'
+      description: 'Integración con HubSpot CRM',
+      href: '/hubspot'
     },
     {
       id: 'mensajes',
       icon: Mail,
       label: 'Mensajes',
-      description: 'Gestión de mensajes y conversaciones'
+      description: 'Gestión de mensajes y conversaciones',
+      href: '/mensajes'
     },
     {
       id: 'bandeja',
@@ -142,42 +173,64 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       label: 'Revisión IA',
       description: 'Dashboard para revisar y aprobar mejoras de respuestas IA',
       href: '/ai-review'
+    },
+    {
+      id: 'configuration', 
+      icon: Settings,
+      label: 'Configuración',
+      description: 'Configuración general del sistema',
+      href: '/configuracion'
     }
   ];
 
-  const handleMenuItemClick = (itemId: string) => {
-    // Buscar el item para ver si tiene href
+  const handleMenuItemClick = (itemId: string, event?: React.MouseEvent) => {
+    // Prevenir comportamientos por defecto
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    console.log('🔧 Sidebar: Click en item:', itemId);
+
+    // Buscar el item para obtener su href
     const item = menuItems.find(i => i.id === itemId);
     
     if (item && item.href) {
-      // Si tiene href, navegar a esa ruta
+      // Navegar a la ruta específica
+      console.log('🔧 Sidebar: Navegando a:', item.href);
       navigate(item.href);
-    } else {
-      // Si no tiene href, cambiar tab local
-      onTabChange(itemId);
     }
     
     // En móvil, cerrar el sidebar después de seleccionar
-    if (isMobile) {
-      toggleOpen();
+    if (isMobile && isOpen) {
+      setTimeout(() => {
+        toggleOpen();
+      }, 100);
     }
   };
 
-  // Overlay para móvil
+
+
+  // Overlay para móvil - Mejorado para evitar problemas de z-index
   const renderOverlay = () => {
     if (!isMobile || !isOpen) return null;
     
     return (
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-        onClick={toggleOpen}
+        className="fixed inset-0 bg-black/50 z-[45] lg:hidden transition-opacity duration-300"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleOpen();
+        }}
+        style={{ pointerEvents: 'auto' }}
       />
     );
   };
 
-  // Obtener clases CSS responsivas
+  // Obtener clases CSS responsivas - Mejorado z-index
   const getSidebarClasses = () => {
-    let classes = "fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-50";
+    let classes = "fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-[60] shadow-lg";
     
     if (isMobile) {
       // Móvil: Sidebar overlay
@@ -196,8 +249,12 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={toggleOpen}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleOpen();
+          }}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors pointer-events-auto"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -208,9 +265,13 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <Button
         variant="ghost"
         size="sm"
-        onClick={toggleCollapse}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleCollapse();
+        }}
         className={`
-          p-2 hover:bg-gray-100 rounded-lg transition-colors
+          p-2 hover:bg-gray-100 rounded-lg transition-colors pointer-events-auto
           ${isCollapsed ? 'w-8 h-8' : ''}
         `}
       >
@@ -224,15 +285,21 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   };
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={500}>
       {renderOverlay()}
       
-      <aside className={getSidebarClasses()}>
+      <aside className={getSidebarClasses()} style={{ pointerEvents: 'auto' }}>
         {/* Header */}
         <div className={`p-6 flex items-center justify-between ${(isCollapsed && !isMobile) ? 'px-3' : ''}`}>
-          {(!isCollapsed || isMobile) && (
-            <h1 className="text-2xl font-bold text-gray-900">WhatsFull</h1>
-          )}
+          <h1 className={`
+            font-bold text-gray-900
+            ${(isCollapsed && !isMobile) 
+              ? 'text-lg' 
+              : 'text-2xl'
+            }
+          `}>
+            {(isCollapsed && !isMobile) ? 'W' : 'WhatsFull'}
+          </h1>
           
           {getToggleButton()}
         </div>
@@ -241,42 +308,64 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
         <nav className={`${(isCollapsed && !isMobile) ? 'px-1' : 'px-4'} space-y-1 max-h-[calc(100vh-200px)] overflow-y-auto`}>
           {menuItems.map((item) => {
             const IconComponent = item.icon;
+            const currentActiveId = getActiveItemId();
+            const isActive = currentActiveId === item.id;
             
             const buttonContent = (
               <Button
-                variant={activeTab === item.id ? 'secondary' : 'ghost'}
+                variant={isActive ? 'secondary' : 'ghost'}
                 className={`
-                  w-full transition-all duration-200
+                  w-full transition-all duration-200 cursor-pointer
                   ${(isCollapsed && !isMobile)
-                    ? 'justify-center px-2 py-2 mx-auto' 
-                    : 'justify-start'
+                    ? 'justify-center px-2 py-2 mx-auto h-10 w-10' 
+                    : 'justify-start h-10'
                   }
-                  ${activeTab === item.id 
-                    ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                    : 'hover:bg-gray-50'
+                  ${isActive 
+                    ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' 
+                    : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
                   }
+                  active:scale-95 active:bg-blue-100
                 `}
-                onClick={() => handleMenuItemClick(item.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('🔧 Button clicked for:', item.id);
+                  handleMenuItemClick(item.id, e);
+                }}
+                onMouseEnter={() => setHoveredItem(item.id)}
+                onMouseLeave={() => setHoveredItem(null)}
+                onTouchStart={() => setHoveredItem(item.id)}
+                onTouchEnd={() => setHoveredItem(null)}
+                style={{ 
+                  pointerEvents: 'auto',
+                  touchAction: 'manipulation'
+                }}
               >
-                <IconComponent className={`h-4 w-4 ${(!isCollapsed || isMobile) ? 'mr-2' : ''}`} />
+                <IconComponent className={`h-4 w-4 ${(!isCollapsed || isMobile) ? 'mr-2' : ''} flex-shrink-0`} />
                 {(!isCollapsed || isMobile) && (
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span className="text-sm font-medium truncate">{item.label}</span>
                 )}
               </Button>
             );
 
-            // Si está colapsado en desktop, mostrar tooltip
+            // Si está colapsado en desktop, mostrar tooltip mejorado
             if (isCollapsed && !isMobile) {
               return (
-                <Tooltip key={item.id} delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    {buttonContent}
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="ml-2">
-                    <div className="font-medium">{item.label}</div>
-                    <div className="text-xs text-gray-500">{item.description}</div>
-                  </TooltipContent>
-                </Tooltip>
+                <div key={item.id} className="relative">
+                  <Tooltip open={hoveredItem === item.id}>
+                    <TooltipTrigger asChild>
+                      {buttonContent}
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="right" 
+                      className="ml-2 z-[70] pointer-events-none"
+                      sideOffset={8}
+                    >
+                      <div className="font-medium">{item.label}</div>
+                      <div className="text-xs text-gray-500 max-w-48">{item.description}</div>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               );
             }
 

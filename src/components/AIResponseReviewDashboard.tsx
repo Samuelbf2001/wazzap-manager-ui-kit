@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PageHeader } from './PageHeader';
 import { 
   AlertTriangle, 
   CheckCircle, 
@@ -423,17 +424,22 @@ export function AIResponseReviewDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader 
+        title="Revisión IA"
+        subtitle="Supervisa, revisa y aprueba mejoras propuestas por IA"
+      />
+      
       <div className="max-w-7xl mx-auto p-8 space-y-6">
-        {/* Header */}
+        {/* Control Panel */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-                Dashboard de Revisión IA
-              </h1>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                Panel de Control
+              </h2>
               <p className="text-gray-600 mt-1">
-                Supervisa, revisa y aprueba mejoras propuestas por IA
+                Gestiona reportes y mejoras de respuestas IA
               </p>
             </div>
             <div className="flex items-center gap-2">

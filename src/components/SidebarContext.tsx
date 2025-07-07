@@ -29,37 +29,44 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024; // lg breakpoint
+      const wasMobile = isMobile;
       setIsMobile(mobile);
       
-      // En móvil, empezar con sidebar cerrado
-      if (mobile && isOpen) {
-        setIsOpen(false);
-      }
-      
-      // En desktop, si está cerrado en móvil, abrirlo
-      if (!mobile && !isOpen) {
-        setIsOpen(true);
+      // Solo cambiar el estado si realmente cambió el tipo de dispositivo
+      if (wasMobile !== mobile) {
+        if (mobile) {
+          // Cambió a móvil: cerrar sidebar
+          setIsOpen(false);
+        } else {
+          // Cambió a desktop: abrir sidebar si estaba cerrado
+          setIsOpen(true);
+        }
       }
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    
+    // Usar passive para mejor rendimiento
+    window.addEventListener('resize', checkMobile, { passive: true });
     
     return () => window.removeEventListener('resize', checkMobile);
-  }, [isOpen]);
+  }, [isMobile]); // Dependencia cambiada para evitar loops
 
   const toggleCollapse = () => {
     if (!isMobile) {
+      console.log('🔧 SidebarContext: Toggle collapse:', !isCollapsed);
       setIsCollapsed(!isCollapsed);
     }
   };
 
   const toggleOpen = () => {
+    console.log('🔧 SidebarContext: Toggle open:', !isOpen);
     setIsOpen(!isOpen);
   };
 
   const setCollapsed = (collapsed: boolean) => {
     if (!isMobile) {
+      console.log('🔧 SidebarContext: Set collapsed:', collapsed);
       setIsCollapsed(collapsed);
     }
   };

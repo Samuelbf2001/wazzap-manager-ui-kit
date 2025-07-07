@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { PageHeader } from './PageHeader';
 import { 
   Bot, 
   MessageSquare,
@@ -258,21 +259,26 @@ export function WhatsAppAIManager() {
   }
   
   return (
-    <div className="p-8 space-y-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                <MessageSquare className="h-10 w-10 text-green-600" />
-                WhatsApp AI Manager
-              </h1>
-              <p className="text-lg text-gray-600 max-w-2xl">
-                Centro unificado para gestionar agentes IA de WhatsApp, conversaciones automáticas 
-                y análisis de rendimiento en tiempo real
-              </p>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader 
+        title="WhatsApp AI Manager"
+        subtitle="Centro unificado para gestionar agentes IA de WhatsApp, conversaciones automáticas y análisis de rendimiento en tiempo real"
+      />
+      
+      <div className="p-8 space-y-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                  <MessageSquare className="h-8 w-8 text-green-600" />
+                  Panel de Control
+                </h1>
+                <p className="text-base text-gray-600 max-w-2xl">
+                  Gestiona agentes IA, conversaciones automáticas y métricas de rendimiento
+                </p>
+              </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-gray-500">Auto-Response</div>
@@ -700,6 +706,7 @@ export function WhatsAppAIManager() {
             </TabsContent>
           </Tabs>
         </div>
+      </div>
       </div>
     </div>
   );

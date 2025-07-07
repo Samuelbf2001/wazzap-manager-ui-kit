@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { PageHeader } from "./PageHeader";
 
 interface Property {
   id: string;
@@ -44,14 +45,16 @@ export default function PropertiesPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h1 className="text-2xl font-bold">Propiedades de HubSpot</h1>
-          <p className="text-sm text-gray-500">Consulta, asocia y explora propiedades personalizadas por objeto.</p>
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader 
+        title="Propiedades de HubSpot"
+        subtitle="Consulta, asocia y explora propiedades personalizadas por objeto."
+      />
+      
+      <div className="p-6">
+        <div className="flex justify-end mb-4">
+          <Button onClick={() => setShowAssociateModal(true)}>+ Asociar nueva propiedad</Button>
         </div>
-        <Button onClick={() => setShowAssociateModal(true)}>+ Asociar nueva propiedad</Button>
-      </div>
 
       <table className="w-full text-sm">
         <thead className="bg-gray-100">
@@ -161,6 +164,7 @@ export default function PropertiesPage() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
