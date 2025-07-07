@@ -383,44 +383,8 @@ export function LogsPanel() {
               <Trash2 className="w-4 h-4 mr-2" />
               Limpiar Todo
             </Button>
-            {logs.length === 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={async () => {
-                  await databaseService.addDemoLogs();
-                }}
-              >
-                <Database className="w-4 h-4 mr-2" />
-                Crear Ejemplos
-              </Button>
-            )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={async () => {
-                await databaseService.createTodayTestLogs();
-                console.log('🧪 Logs de hoy creados para testing');
-              }}
-              title="Crear logs específicos de hoy para probar el filtro de calendario"
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              Test Hoy
-            </Button>
-            {logs.length > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  const updated = databaseService.recalculateLogStatuses();
-                  console.log(`🔄 Recalculados ${updated} logs automáticamente`);
-                }}
-                title="Recalcular automáticamente el estado de todos los logs basándose en su contenido"
-              >
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                Recalcular Status
-              </Button>
-            )}
+
+
           </div>
         </div>
 
@@ -485,6 +449,12 @@ export function LogsPanel() {
               filters.status === 'error' ? 'ring-2 ring-red-500 bg-red-50' : ''
             }`}
             onClick={filterByErrors}
+            style={{ 
+              ...(filters.status === 'error' && { 
+                margin: '2px',
+                borderRadius: '0.375rem'
+              }) 
+            }}
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -505,6 +475,12 @@ export function LogsPanel() {
               filters.status === 'success' ? 'ring-2 ring-green-500 bg-green-50' : ''
             }`}
             onClick={filterBySuccess}
+            style={{ 
+              ...(filters.status === 'success' && { 
+                margin: '2px',
+                borderRadius: '0.375rem'
+              }) 
+            }}
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">

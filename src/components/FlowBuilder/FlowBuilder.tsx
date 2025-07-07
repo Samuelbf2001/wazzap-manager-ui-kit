@@ -415,7 +415,13 @@ const nodeCategories = {
  * - Tablet: Panel lateral colapsable + controles táctiles
  * - Mobile: Panel lateral como sheet + vista optimizada
  */
-export function FlowBuilder() {
+interface FlowBuilderProps {
+  flowId?: string | null;
+  initialFlow?: any;
+  mode?: 'edit' | 'readonly';
+}
+
+export function FlowBuilder({ flowId, initialFlow, mode = 'edit' }: FlowBuilderProps = {}) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -423,6 +429,15 @@ export function FlowBuilder() {
   const [isToolboxOpen, setIsToolboxOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Cargar flujo inicial si se proporciona
+  useEffect(() => {
+    if (initialFlow) {
+      setNodes(initialFlow.nodes || []);
+      setEdges(initialFlow.edges || []);
+      setFlowName(initialFlow.name || 'Flujo sin nombre');
+    }
+  }, [initialFlow, setNodes, setEdges]);
 
   // Detectar si es móvil
   useEffect(() => {
@@ -572,14 +587,33 @@ export function FlowBuilder() {
   }, []);
 
   const saveFlow = () => {
-    const flowData = {
-      name: flowName,
-      nodes,
-      edges,
-      timestamp: new Date().toISOString()
-    };
-    console.log('Guardando flujo:', flowData);
-    localStorage.setItem('flowBuilder_currentFlow', JSON.stringify(flowData));
+    if (mode === 'readonly') return;
+    
+    if (flowId) {
+      // Actualizar flujo existente
+      try {
+        const { FlowsService } = require('@/services/flows.service');
+        FlowsService.updateFlow({
+          id: flowId,
+          name: flowName,
+          nodes,
+          edges
+        });
+        console.log('Flujo actualizado:', flowId);
+      } catch (error) {
+        console.error('Error al actualizar flujo:', error);
+      }
+    } else {
+      // Guardar temporalmente para flujos nuevos
+      const flowData = {
+        name: flowName,
+        nodes,
+        edges,
+        timestamp: new Date().toISOString()
+      };
+      console.log('Guardando flujo temporal:', flowData);
+      localStorage.setItem('flowBuilder_currentFlow', JSON.stringify(flowData));
+    }
   };
 
   const exportFlow = () => {
@@ -594,6 +628,8 @@ export function FlowBuilder() {
   };
 
   const clearFlow = () => {
+    if (mode === 'readonly') return;
+    
     setNodes([]);
     setEdges([]);
     setSelectedNode(null);
@@ -694,9 +730,9 @@ export function FlowBuilder() {
       {/* Header responsivo */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 min-h-[60px]">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-4">
             {/* Botón de menú móvil */}
-            {isMobile && (
+            {isMobile && mode !== 'readonly' && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -709,28 +745,49 @@ export function FlowBuilder() {
             {/* Título del flujo */}
             <div className="flex items-center space-x-3">
               <GitBranch className="h-6 w-6 text-blue-600" />
-              <Input
-                value={flowName}
-                onChange={(e) => setFlowName(e.target.value)}
-                className="font-semibold border-none p-0 h-auto bg-transparent focus:bg-white focus:border-gray-300"
-              />
+              {mode === 'readonly' ? (
+                <h1 className="font-semibold text-lg text-gray-900">
+                  {flowName}
+                </h1>
+              ) : (
+                <Input
+                  value={flowName}
+                  onChange={(e) => setFlowName(e.target.value)}
+                  className="font-semibold border-none p-0 h-auto bg-transparent focus:bg-white focus:border-gray-300"
+                />
+              )}
             </div>
           </div>
 
           {/* Acciones del header */}
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={clearFlow}>
-              <Trash2 className="h-4 w-4 mr-1" />
-              {!isMobile && "Limpiar"}
-            </Button>
-            <Button variant="outline" size="sm" onClick={saveFlow}>
-              <Save className="h-4 w-4 mr-1" />
-              {!isMobile && "Guardar"}
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportFlow}>
-              <Download className="h-4 w-4 mr-1" />
-              {!isMobile && "Exportar"}
-            </Button>
+            {mode === 'readonly' ? (
+              <>
+                <Badge variant="secondary" className="mr-2">
+                  <Eye className="h-3 w-3 mr-1" />
+                  Solo lectura
+                </Badge>
+                <Button variant="outline" size="sm" onClick={exportFlow}>
+                  <Download className="h-4 w-4 mr-1" />
+                  {!isMobile && "Exportar"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={clearFlow}>
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  {!isMobile && "Limpiar"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={saveFlow}>
+                  <Save className="h-4 w-4 mr-1" />
+                  {!isMobile && "Guardar"}
+                </Button>
+                <Button variant="outline" size="sm" onClick={exportFlow}>
+                  <Download className="h-4 w-4 mr-1" />
+                  {!isMobile && "Exportar"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -738,7 +795,7 @@ export function FlowBuilder() {
       {/* Contenido principal */}
       <div className="flex-1 flex overflow-hidden min-h-0" style={{ height: 'calc(100vh - 60px)' }}>
         {/* Panel de herramientas - Desktop */}
-        {!isMobile && (
+        {!isMobile && mode !== 'readonly' && (
           <div className="w-80 bg-gray-50 border-r border-gray-200 overflow-hidden flex-shrink-0 h-full">
             {renderToolbox()}
           </div>
@@ -764,29 +821,29 @@ export function FlowBuilder() {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
+            onNodesChange={mode === 'readonly' ? undefined : onNodesChange}
+            onEdgesChange={mode === 'readonly' ? undefined : onEdgesChange}
+            onConnect={mode === 'readonly' ? undefined : onConnect}
+            onDrop={mode === 'readonly' ? undefined : onDrop}
+            onDragOver={mode === 'readonly' ? undefined : onDragOver}
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
             connectionLineType={ConnectionLineType.SmoothStep}
             connectionLineStyle={connectionLineStyle}
             defaultEdgeOptions={defaultEdgeOptions}
-            isValidConnection={isValidConnection}
-            onEdgeClick={onEdgeClick}
-            onEdgeMouseEnter={onEdgeMouseEnter}
-            onEdgeMouseLeave={onEdgeMouseLeave}
+            isValidConnection={mode === 'readonly' ? () => false : isValidConnection}
+            onEdgeClick={mode === 'readonly' ? undefined : onEdgeClick}
+            onEdgeMouseEnter={mode === 'readonly' ? undefined : onEdgeMouseEnter}
+            onEdgeMouseLeave={mode === 'readonly' ? undefined : onEdgeMouseLeave}
             snapToGrid={true}
             snapGrid={[15, 15]}
-            nodesDraggable={true}
-            nodesConnectable={true}
+            nodesDraggable={mode !== 'readonly'}
+            nodesConnectable={mode !== 'readonly'}
             elementsSelectable={true}
             selectNodesOnDrag={false}
             panOnDrag={true}
             zoomOnDoubleClick={false}
-            deleteKeyCode={['Backspace', 'Delete']}
+            deleteKeyCode={mode === 'readonly' ? [] : ['Backspace', 'Delete']}
             multiSelectionKeyCode={['Control', 'Meta']}
             fitView
             fitViewOptions={{

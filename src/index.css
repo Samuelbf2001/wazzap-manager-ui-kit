@@ -111,11 +111,27 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Asegurar que los elementos del sidebar sean clickeables */
+  .sidebar-clickable {
+    pointer-events: auto !important;
+    cursor: pointer;
+  }
+
+  /* Prevenir problemas de overlay */
+  .sidebar-overlay {
+    pointer-events: auto !important;
+  }
+
+  /* Mejorar z-index para tooltips */
+  [data-radix-popper-content-wrapper] {
+    z-index: 1000 !important;
   }
 }
 

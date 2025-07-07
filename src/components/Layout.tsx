@@ -3,7 +3,7 @@ import { Sidebar } from './Sidebar';
 import { SidebarProvider, useSidebar } from './SidebarContext';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +13,7 @@ interface LayoutProps {
 function LayoutContent({ children }: LayoutProps) {
   const { isCollapsed, isMobile, isOpen, toggleOpen } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Determinar el tab activo basado en la ruta actual
   const getActiveTabFromPath = (pathname: string) => {
@@ -32,6 +33,12 @@ function LayoutContent({ children }: LayoutProps) {
     // El sidebar se encarga de la navegación directamente
   };
 
+  // Función para manejar click en el logo
+  const handleLogoClick = () => {
+    console.log('🏠 Logo clickeado desde Layout, navegando al inicio');
+    navigate('/');
+  };
+
   // Calcular el margen izquierdo basado en el estado del sidebar
   const getMainContentClasses = () => {
     if (isMobile) {
@@ -42,7 +49,7 @@ function LayoutContent({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
+      <Sidebar activeTab={activeTab} onTabChange={handleTabChange} onLogoClick={handleLogoClick} />
       
       <div className={`transition-all duration-300 ${getMainContentClasses()}`}>
         {/* Header móvil con botón de menú */}
