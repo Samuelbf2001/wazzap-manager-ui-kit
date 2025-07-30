@@ -17,12 +17,12 @@ function LayoutContent({ children }: LayoutProps) {
   
   // Determinar el tab activo basado en la ruta actual
   const getActiveTabFromPath = (pathname: string) => {
-    if (pathname === '/whatsapp-ai') return 'whatsapp-ai';
-    if (pathname === '/ai-review') return 'ai-review';
-    if (pathname === '/bandeja') return 'bandeja';
-    if (pathname === '/constructor') return 'constructor';
-    if (pathname === '/propiedades') return 'properties';
-    if (pathname === '/hubspot-inbox') return 'hubspot';
+    if (pathname === '/dashboard/whatsapp-ai') return 'whatsapp-ai';
+    if (pathname === '/dashboard/ai-review') return 'ai-review';
+    if (pathname === '/dashboard/bandeja') return 'bandeja';
+    if (pathname === '/dashboard/constructor') return 'constructor';
+    if (pathname === '/dashboard/propiedades') return 'properties';
+    if (pathname === '/dashboard/hubspot-inbox') return 'hubspot';
     return 'connections'; // Default
   };
 

@@ -36,11 +36,11 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
       if (wasMobile !== mobile) {
         if (mobile) {
           // Cambió a móvil: cerrar sidebar
-          setIsOpen(false);
+        setIsOpen(false);
         } else {
           // Cambió a desktop: abrir sidebar si estaba cerrado
           setIsOpen(true);
-        }
+      }
       }
     };
 

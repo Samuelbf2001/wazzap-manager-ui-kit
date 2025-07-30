@@ -336,7 +336,7 @@ export function LiveInbox({
         </div>
       )}
       
-      <div className={`${isIframe ? 'h-full' : 'h-[calc(100vh-4rem)]'}`}>
+      <div className="h-full">
         <ResizablePanelGroup direction="horizontal">
           {!isIframe && showAgentPanel && (
             <>
@@ -353,43 +353,49 @@ export function LiveInbox({
           )}
 
           <ResizablePanel defaultSize={isIframe ? 40 : 30} minSize={25} maxSize={50}>
-            <Card className="h-full rounded-none border-r">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="all">Todas ({conversations.length})</TabsTrigger>
-                  <TabsTrigger value="active">
-                    Activas ({conversations.filter(c => c.status === 'active').length})
-                  </TabsTrigger>
-                  <TabsTrigger value="waiting">
-                    Esperando ({conversations.filter(c => c.status === 'waiting').length})
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value={activeTab} className="h-[calc(100%-3rem)] mt-0">
-                  <ConversationList
-                    conversations={filteredConversations}
-                    selectedConversation={selectedConversation}
-                    onConversationSelect={handleConversationSelect}
-                    isLoading={isLoading}
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                  />
-                </TabsContent>
-              </Tabs>
-            </Card>
+            <div className="h-full pt-[0px]">
+              <Card className="h-[calc(100%-300px)] rounded-none border-r">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="all">Todas ({conversations.length})</TabsTrigger>
+                    <TabsTrigger value="active">
+                      Activas ({conversations.filter(c => c.status === 'active').length})
+                    </TabsTrigger>
+                    <TabsTrigger value="waiting">
+                      Esperando ({conversations.filter(c => c.status === 'waiting').length})
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value={activeTab} className="h-[calc(100%-3rem)] mt-0">
+                    <ConversationList
+                      conversations={filteredConversations}
+                      selectedConversation={selectedConversation}
+                      onConversationSelect={handleConversationSelect}
+                      isLoading={isLoading}
+                      filters={filters}
+                      onFilterChange={handleFilterChange}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </Card>
+            </div>
           </ResizablePanel>
 
           <ResizableHandle />
 
           <ResizablePanel defaultSize={isIframe ? 60 : 50}>
-            <ChatWindow
-              conversation={selectedConversation}
-              messages={messages}
-              currentAgent={currentAgent}
-              onSendMessage={handleSendMessage}
-              isConnected={isConnected}
-              isIframe={isIframe}
-            />
+            <div className="h-full pt-[0px]">
+              <div className="h-[calc(100%-300px)]">
+                <ChatWindow
+                  conversation={selectedConversation}
+                  messages={messages}
+                  currentAgent={currentAgent}
+                  onSendMessage={handleSendMessage}
+                  isConnected={isConnected}
+                  isIframe={isIframe}
+                />
+              </div>
+            </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

@@ -605,14 +605,14 @@ export function FlowBuilder({ flowId, initialFlow, mode = 'edit' }: FlowBuilderP
       }
     } else {
       // Guardar temporalmente para flujos nuevos
-      const flowData = {
-        name: flowName,
-        nodes,
-        edges,
-        timestamp: new Date().toISOString()
-      };
+    const flowData = {
+      name: flowName,
+      nodes,
+      edges,
+      timestamp: new Date().toISOString()
+    };
       console.log('Guardando flujo temporal:', flowData);
-      localStorage.setItem('flowBuilder_currentFlow', JSON.stringify(flowData));
+    localStorage.setItem('flowBuilder_currentFlow', JSON.stringify(flowData));
     }
   };
 
@@ -730,7 +730,7 @@ export function FlowBuilder({ flowId, initialFlow, mode = 'edit' }: FlowBuilderP
       {/* Header responsivo */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0 min-h-[60px]">
         <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             {/* Botón de menú móvil */}
             {isMobile && mode !== 'readonly' && (
               <Button
@@ -750,11 +750,11 @@ export function FlowBuilder({ flowId, initialFlow, mode = 'edit' }: FlowBuilderP
                   {flowName}
                 </h1>
               ) : (
-                <Input
-                  value={flowName}
-                  onChange={(e) => setFlowName(e.target.value)}
-                  className="font-semibold border-none p-0 h-auto bg-transparent focus:bg-white focus:border-gray-300"
-                />
+              <Input
+                value={flowName}
+                onChange={(e) => setFlowName(e.target.value)}
+                className="font-semibold border-none p-0 h-auto bg-transparent focus:bg-white focus:border-gray-300"
+              />
               )}
             </div>
           </div>
@@ -774,18 +774,18 @@ export function FlowBuilder({ flowId, initialFlow, mode = 'edit' }: FlowBuilderP
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={clearFlow}>
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  {!isMobile && "Limpiar"}
-                </Button>
-                <Button variant="outline" size="sm" onClick={saveFlow}>
-                  <Save className="h-4 w-4 mr-1" />
-                  {!isMobile && "Guardar"}
-                </Button>
-                <Button variant="outline" size="sm" onClick={exportFlow}>
-                  <Download className="h-4 w-4 mr-1" />
-                  {!isMobile && "Exportar"}
-                </Button>
+            <Button variant="outline" size="sm" onClick={clearFlow}>
+              <Trash2 className="h-4 w-4 mr-1" />
+              {!isMobile && "Limpiar"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={saveFlow}>
+              <Save className="h-4 w-4 mr-1" />
+              {!isMobile && "Guardar"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportFlow}>
+              <Download className="h-4 w-4 mr-1" />
+              {!isMobile && "Exportar"}
+            </Button>
               </>
             )}
           </div>

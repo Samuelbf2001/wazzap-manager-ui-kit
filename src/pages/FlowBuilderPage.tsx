@@ -34,7 +34,7 @@ export default function FlowBuilderPage() {
         setCurrentFlow(flow);
       } else {
         // Flujo no encontrado, volver a lista
-        navigate('/constructor', { replace: true });
+        navigate('/dashboard/constructor', { replace: true });
       }
     } else if (action === 'view' && flowId) {
       const flow = FlowsService.getFlowById(flowId);
@@ -44,7 +44,7 @@ export default function FlowBuilderPage() {
         setCurrentFlow(flow);
       } else {
         // Flujo no encontrado, volver a lista
-        navigate('/constructor', { replace: true });
+        navigate('/dashboard/constructor', { replace: true });
       }
     } else {
       // Vista por defecto: lista

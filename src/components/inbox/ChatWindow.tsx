@@ -298,7 +298,7 @@ export function ChatWindow({
                   {conversation.status === 'transferred' && 'Transferida'}
                 </Badge>
                 {conversation.metadata.hubspotContactId && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="secondary" className="text-xs">
                     HubSpot
                   </Badge>
                 )}
@@ -306,8 +306,7 @@ export function ChatWindow({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             {!isIframe && (
               <>
                 <TooltipProvider>
@@ -377,17 +376,17 @@ export function ChatWindow({
       </CardHeader>
 
       {/* Messages */}
-      <CardContent className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4" style={{ maxHeight: 'calc(100% - 280px)' }}>
         <div className="space-y-1">
           {messages.map(message => (
             <MessageBubble key={message.id} message={message} />
           ))}
           <div ref={messagesEndRef} />
         </div>
-      </CardContent>
+      </div>
 
       {/* Input */}
-      <div className="border-t p-4">
+      <div className="border-t p-4 mt-auto">
         <div className="flex items-end space-x-2">
           <div className="flex space-x-1">
             <TooltipProvider>

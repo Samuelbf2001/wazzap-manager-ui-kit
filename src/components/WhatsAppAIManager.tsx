@@ -265,20 +265,20 @@ export function WhatsAppAIManager() {
         subtitle="Centro unificado para gestionar agentes IA de WhatsApp, conversaciones automáticas y análisis de rendimiento en tiempo real"
       />
       
-      <div className="p-8 space-y-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
+    <div className="p-8 space-y-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
                 <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
                   <MessageSquare className="h-8 w-8 text-green-600" />
                   Panel de Control
-                </h1>
+              </h1>
                 <p className="text-base text-gray-600 max-w-2xl">
                   Gestiona agentes IA, conversaciones automáticas y métricas de rendimiento
-                </p>
-              </div>
+              </p>
+            </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-gray-500">Auto-Response</div>
@@ -706,7 +706,7 @@ export function WhatsAppAIManager() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
+        </div>
       </div>
     </div>
   );

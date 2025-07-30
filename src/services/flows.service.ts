@@ -1,13 +1,40 @@
 import { FlowData, FlowListItem, CreateFlowRequest, UpdateFlowRequest } from '@/types/flow';
 
-const FLOWS_STORAGE_KEY = 'wazzap_flows';
+// Función auxiliar para obtener la empresa autenticada
+function getCurrentCompany(): { id: string; name: string; email: string } | null {
+  try {
+    const stored = localStorage.getItem('authenticated_company');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error obteniendo empresa actual:', error);
+    return null;
+  }
+}
+
+// Función auxiliar para generar la clave de storage específica por empresa
+function getCompanyFlowsKey(): string {
+  const company = getCurrentCompany();
+  if (!company) {
+    throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+  }
+  return `wazzap_flows_${company.id}`;
+}
 
 export class FlowsService {
   
   // Obtener todos los flujos (lista)
   static getFlows(): FlowListItem[] {
     try {
-      const flows = localStorage.getItem(FLOWS_STORAGE_KEY);
+      const company = getCurrentCompany();
+      if (!company) {
+        console.warn('No hay empresa autenticada, retornando lista vacía');
+        return [];
+      }
+
+      const flows = localStorage.getItem(getCompanyFlowsKey());
       if (!flows) return [];
       
       const parsedFlows: FlowData[] = JSON.parse(flows);
@@ -34,7 +61,13 @@ export class FlowsService {
   // Obtener un flujo específico por ID
   static getFlowById(id: string): FlowData | null {
     try {
-      const flows = localStorage.getItem(FLOWS_STORAGE_KEY);
+      const company = getCurrentCompany();
+      if (!company) {
+        console.warn('No hay empresa autenticada');
+        return null;
+      }
+
+      const flows = localStorage.getItem(getCompanyFlowsKey());
       if (!flows) return null;
       
       const parsedFlows: FlowData[] = JSON.parse(flows);
@@ -57,6 +90,11 @@ export class FlowsService {
   // Crear nuevo flujo
   static createFlow(request: CreateFlowRequest): FlowData {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const flows = this.getFlows();
       const allFlows = this.getAllFlowsData();
       
@@ -79,7 +117,7 @@ export class FlowsService {
       };
 
       allFlows.push(newFlow);
-      localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(allFlows));
+      localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(allFlows));
       
       return newFlow;
     } catch (error) {
@@ -91,6 +129,11 @@ export class FlowsService {
   // Actualizar flujo existente
   static updateFlow(request: UpdateFlowRequest): FlowData | null {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const allFlows = this.getAllFlowsData();
       const flowIndex = allFlows.findIndex(f => f.id === request.id);
       
@@ -106,7 +149,7 @@ export class FlowsService {
       };
 
       allFlows[flowIndex] = updatedFlow;
-      localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(allFlows));
+      localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(allFlows));
       
       return updatedFlow;
     } catch (error) {
@@ -118,6 +161,11 @@ export class FlowsService {
   // Eliminar flujo
   static deleteFlow(id: string): boolean {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const allFlows = this.getAllFlowsData();
       const filteredFlows = allFlows.filter(f => f.id !== id);
       
@@ -125,7 +173,7 @@ export class FlowsService {
         return false; // No se encontró el flujo
       }
 
-      localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(filteredFlows));
+      localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(filteredFlows));
       return true;
     } catch (error) {
       console.error('Error al eliminar flujo:', error);
@@ -136,6 +184,11 @@ export class FlowsService {
   // Duplicar flujo
   static duplicateFlow(id: string, newName?: string): FlowData | null {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const originalFlow = this.getFlowById(id);
       if (!originalFlow) return null;
 
@@ -155,7 +208,7 @@ export class FlowsService {
 
       const allFlows = this.getAllFlowsData();
       allFlows.push(duplicatedFlow);
-      localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(allFlows));
+      localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(allFlows));
 
       return duplicatedFlow;
     } catch (error) {
@@ -178,6 +231,11 @@ export class FlowsService {
   // Exportar flujo
   static exportFlow(id: string): string | null {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const flow = this.getFlowById(id);
       if (!flow) return null;
       
@@ -191,6 +249,11 @@ export class FlowsService {
   // Importar flujo
   static importFlow(flowData: string, newName?: string): FlowData | null {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const flow: FlowData = JSON.parse(flowData);
       
       // Validar estructura básica
@@ -210,7 +273,7 @@ export class FlowsService {
 
       const allFlows = this.getAllFlowsData();
       allFlows.push(importedFlow);
-      localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(allFlows));
+      localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(allFlows));
 
       return importedFlow;
     } catch (error) {
@@ -222,6 +285,11 @@ export class FlowsService {
   // Obtener estadísticas de flujos
   static getFlowStats() {
     try {
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
       const flows = this.getFlows();
       
       return {
@@ -250,7 +318,12 @@ export class FlowsService {
   // Métodos privados auxiliares
   private static getAllFlowsData(): FlowData[] {
     try {
-      const flows = localStorage.getItem(FLOWS_STORAGE_KEY);
+      const company = getCurrentCompany();
+      if (!company) {
+        throw new Error('No hay empresa autenticada. Por favor inicia sesión.');
+      }
+
+      const flows = localStorage.getItem(getCompanyFlowsKey());
       return flows ? JSON.parse(flows) : [];
     } catch (error) {
       console.error('Error al obtener datos de flujos:', error);
@@ -264,11 +337,20 @@ export class FlowsService {
 
   // Limpiar todos los flujos (para desarrollo/testing)
   static clearAllFlows(): void {
-    localStorage.removeItem(FLOWS_STORAGE_KEY);
+    const company = getCurrentCompany();
+    if (company) {
+      localStorage.removeItem(getCompanyFlowsKey());
+    }
   }
 
   // Crear flujos de ejemplo
   static createSampleFlows(): void {
+    const company = getCurrentCompany();
+    if (!company) {
+      console.warn('No hay empresa autenticada, no se pueden crear flujos de ejemplo.');
+      return;
+    }
+
     const sampleFlows: FlowData[] = [
       {
         id: 'flow_sample_1',
@@ -362,11 +444,17 @@ export class FlowsService {
       }
     ];
 
-    localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(sampleFlows));
+    localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(sampleFlows));
   }
 
   // Limpiar flujos de ejemplo si existen
   static initializeSampleData(): void {
+    const company = getCurrentCompany();
+    if (!company) {
+      console.warn('No hay empresa autenticada, no se pueden limpiar flujos de ejemplo.');
+      return;
+    }
+
     // Eliminar flujos de ejemplo si existen
     const allFlows = this.getAllFlowsData();
     const sampleFlowIds = ['flow_sample_1', 'flow_sample_2', 'flow_sample_3'];
@@ -375,7 +463,7 @@ export class FlowsService {
     
     if (filteredFlows.length !== allFlows.length) {
       // Si había flujos de ejemplo, guardar la lista sin ellos
-      localStorage.setItem(FLOWS_STORAGE_KEY, JSON.stringify(filteredFlows));
+      localStorage.setItem(getCompanyFlowsKey(), JSON.stringify(filteredFlows));
     }
   }
 } 

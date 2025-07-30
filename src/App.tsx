@@ -14,6 +14,7 @@ import { HubSpotInboxMount } from "./components/HubSpotInboxWidget";
 import { WhatsAppAIManager } from './components/WhatsAppAIManager';
 import { AIResponseReviewDashboard } from './components/AIResponseReviewDashboard';
 import { Layout } from './components/Layout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Nuevas páginas separadas
 import RegistrosPage from './pages/RegistrosPage';
@@ -24,6 +25,8 @@ import SuscripcionPage from './pages/SuscripcionPage';
 import HubSpotPage from './pages/HubSpotPage';
 import MensajesPage from './pages/MensajesPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
+import RegisterPage from './pages/oauth/RegisterPage';
+import LoginPage from './pages/oauth/LoginPage';
 import { connectionMonitorService } from './services/connection-monitor.service';
 
 // 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
@@ -40,26 +43,94 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/conexiones" element={<DashboardPage />} />
+          <Route path="/oauth/register" element={<RegisterPage />} />
+          <Route path="/oauth/login" element={<LoginPage />} />
+          
+          {/* Rutas protegidas del dashboard */}
+          <Route path="/dashboard/conexiones" element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } />
           
           {/* Páginas principales del sidebar */}
-          <Route path="/registros" element={<Layout><RegistrosPage /></Layout>} />
-          <Route path="/monitor-conexiones" element={<Layout><MonitorConexionesPage /></Layout>} />
-          <Route path="/campanas" element={<Layout><CampanasPage /></Layout>} />
-          <Route path="/demo-flujos" element={<Layout><DemoFlujosPage /></Layout>} />
-          <Route path="/suscripcion" element={<Layout><SuscripcionPage /></Layout>} />
-          <Route path="/hubspot" element={<Layout><HubSpotPage /></Layout>} />
-          <Route path="/mensajes" element={<Layout><MensajesPage /></Layout>} />
-          <Route path="/configuracion" element={<Layout><ConfiguracionPage /></Layout>} />
+          <Route path="/dashboard/registros" element={
+            <ProtectedRoute>
+              <Layout><RegistrosPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/monitor-conexiones" element={
+            <ProtectedRoute>
+              <Layout><MonitorConexionesPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/campanas" element={
+            <ProtectedRoute>
+              <Layout><CampanasPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/demo-flujos" element={
+            <ProtectedRoute>
+              <Layout><DemoFlujosPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/suscripcion" element={
+            <ProtectedRoute>
+              <Layout><SuscripcionPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/hubspot" element={
+            <ProtectedRoute>
+              <Layout><HubSpotPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/mensajes" element={
+            <ProtectedRoute>
+              <Layout><MensajesPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/configuracion" element={
+            <ProtectedRoute>
+              <Layout><ConfiguracionPage /></Layout>
+            </ProtectedRoute>
+          } />
           
           {/* Páginas especiales */}
-          <Route path="/propiedades" element={<Layout><PropertiesPage /></Layout>} />
-          <Route path="/constructor" element={<Layout><FlowBuilderPage /></Layout>} />
-          <Route path="/bandeja" element={<Layout><LiveInboxPage /></Layout>} />
-          <Route path="/bandeja/tests" element={<InboxTestPage />} />
-          <Route path="/hubspot-inbox" element={<HubSpotInboxMount />} />
-          <Route path="/whatsapp-ai" element={<Layout><WhatsAppAIManager /></Layout>} />
-          <Route path="/ai-review" element={<Layout><AIResponseReviewDashboard /></Layout>} />
+          <Route path="/dashboard/propiedades" element={
+            <ProtectedRoute>
+              <Layout><PropertiesPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/constructor" element={
+            <ProtectedRoute>
+              <Layout><FlowBuilderPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/bandeja" element={
+            <ProtectedRoute>
+              <Layout><LiveInboxPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/bandeja/tests" element={
+            <ProtectedRoute>
+              <InboxTestPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/hubspot-inbox" element={
+            <ProtectedRoute>
+              <HubSpotInboxMount />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/whatsapp-ai" element={
+            <ProtectedRoute>
+              <Layout><WhatsAppAIManager /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/ai-review" element={
+            <ProtectedRoute>
+              <Layout><AIResponseReviewDashboard /></Layout>
+            </ProtectedRoute>
+          } />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

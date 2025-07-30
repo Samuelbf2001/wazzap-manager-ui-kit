@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { databaseService } from '@/services/database.service';
 
 // Hook personalizado para obtener configuración del plan
@@ -43,7 +43,7 @@ const useSubscriptionConfig = () => {
   return config;
 };
 
-export function MetricsCards() {
+export const MetricsCards = memo(function MetricsCards() {
   const [connectionStats, setConnectionStats] = useState({
     total: 0,
     connected: 0,
@@ -179,4 +179,6 @@ export function MetricsCards() {
       </div>
     </div>
   );
-} 
+});
+
+MetricsCards.displayName = 'MetricsCards';

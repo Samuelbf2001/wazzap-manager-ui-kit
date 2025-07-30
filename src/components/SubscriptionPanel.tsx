@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 
-export function SubscriptionPanel() {
+export const SubscriptionPanel = memo(function SubscriptionPanel() {
   const [currentPlan, setCurrentPlan] = useState("Pro");
   const [whatsAppLimit, setWhatsAppLimit] = useState(10);
   const [iaAgents, setIaAgents] = useState(2);
@@ -247,4 +247,6 @@ export function SubscriptionPanel() {
       </Accordion>
     </div>
   );
-}
+});
+
+SubscriptionPanel.displayName = 'SubscriptionPanel';
