@@ -7,7 +7,10 @@ import {
   Agent, 
   Campaign, 
   SystemLog, 
-  WebhookLog 
+  WebhookLog,
+  Company,
+  CreateCompanyRequest,
+  LoginRequest
 } from '../types/database';
 
 export interface DatabaseConfig {
@@ -75,6 +78,7 @@ interface LogEntry {
 interface DatabaseSchema {
   whatsapp_connections: WhatsAppConnection[];
   logs: LogEntry[];
+  companies: Company[];
 }
 
 class DatabaseService {
@@ -592,10 +596,32 @@ class DatabaseService {
       console.error('❌ Error cargando base de datos:', error);
     }
 
-    // Base de datos inicial vacía
+    // Base de datos inicial con datos de prueba
     return {
       whatsapp_connections: [],
-      logs: []
+      logs: [],
+      companies: [
+        {
+          id: 'company_1',
+          name: 'Empresa Demo',
+          email: 'admin@demo.com',
+          phone: '+34600123456',
+          password: '123456', // En producción esto debería estar hasheado
+          status: 'active',
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01')
+        },
+        {
+          id: 'company_2',
+          name: 'WhatsFull Corp',
+          email: 'contacto@whatsfull.com',
+          phone: '+34600654321',
+          password: 'admin123', // En producción esto debería estar hasheado
+          status: 'active',
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01')
+        }
+      ]
     };
   }
 
@@ -1269,7 +1295,8 @@ class DatabaseService {
   public clearDatabase(): void {
     this.db = {
       whatsapp_connections: [],
-      logs: []
+      logs: [],
+      companies: [] // Limpiar también las empresas
     };
     this.saveDatabase();
     
@@ -1360,6 +1387,101 @@ class DatabaseService {
     
     console.log(`✅ Se crearon ${todayLogs.length} logs específicos para HOY`);
     console.log(`📅 Fecha de hoy: ${today.toISOString().split('T')[0]}`);
+  }
+
+  // === GESTIÓN DE EMPRESAS ===
+
+  async createCompany(companyData: CreateCompanyRequest): Promise<Company> {
+    // Verificar si ya existe una empresa con ese email
+    const existingCompany = this.db.companies.find(c => c.email === companyData.email);
+    if (existingCompany) {
+      throw new Error('Ya existe una empresa registrada con este correo electrónico');
+    }
+
+    const company: Company = {
+      id: this.generateId(),
+      name: companyData.name,
+      email: companyData.email,
+      phone: companyData.phone,
+      password: companyData.password, // En producción debería hashearse
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.db.companies.push(company);
+    this.saveDatabase();
+    
+    console.log('✅ Nueva empresa creada:', company.name);
+    return company;
+  }
+
+  async getCompany(companyId: string): Promise<Company | null> {
+    return this.db.companies.find(c => c.id === companyId) || null;
+  }
+
+  async getCompanyByEmail(email: string): Promise<Company | null> {
+    return this.db.companies.find(c => c.email === email) || null;
+  }
+
+  async updateCompany(companyId: string, updates: Partial<Company>): Promise<Company | null> {
+    const index = this.db.companies.findIndex(c => c.id === companyId);
+    if (index === -1) {
+      return null;
+    }
+
+    this.db.companies[index] = {
+      ...this.db.companies[index],
+      ...updates,
+      updatedAt: new Date()
+    };
+
+    this.saveDatabase();
+    console.log('📝 Empresa actualizada:', this.db.companies[index].name);
+    return this.db.companies[index];
+  }
+
+  async deleteCompany(companyId: string): Promise<boolean> {
+    const index = this.db.companies.findIndex(c => c.id === companyId);
+    if (index === -1) {
+      return false;
+    }
+
+    const deletedCompany = this.db.companies.splice(index, 1)[0];
+    this.saveDatabase();
+    
+    console.log('🗑️ Empresa eliminada:', deletedCompany.name);
+    return true;
+  }
+
+  async getAllCompanies(): Promise<Company[]> {
+    return [...this.db.companies];
+  }
+
+  // === AUTENTICACIÓN ===
+
+  async authenticateCompany(email: string, password: string): Promise<Company | null> {
+    console.log('🔐 Intentando autenticar empresa:', email);
+    
+    const company = await this.getCompanyByEmail(email);
+    if (!company) {
+      console.log('❌ Empresa no encontrada:', email);
+      return null;
+    }
+
+    if (company.status !== 'active') {
+      console.log('❌ Empresa no está activa:', email);
+      return null;
+    }
+
+    // En producción, aquí compararías con un hash
+    if (company.password !== password) {
+      console.log('❌ Contraseña incorrecta para:', email);
+      return null;
+    }
+
+    console.log('✅ Autenticación exitosa para:', company.name);
+    return company;
   }
 }
 

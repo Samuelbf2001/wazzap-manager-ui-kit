@@ -513,3 +513,34 @@ export interface WebhookLog {
   retryCount: number;
   timestamp: Date;
 }
+
+// Tipo para el registro de empresas
+export interface Company {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  password: string; // En producción esto debería estar hasheado
+  status: 'active' | 'pending' | 'suspended';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateCompanyRequest {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  company?: Company;
+  message: string;
+}

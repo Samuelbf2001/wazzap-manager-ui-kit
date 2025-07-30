@@ -56,20 +56,20 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
     // Mapear rutas a IDs de elementos del menú
     const routeToIdMap: { [key: string]: string } = {
       '/': '', // Página de bienvenida - no hay elemento activo
-      '/conexiones': 'connections',
-      '/registros': 'logs', 
-      '/monitor-conexiones': 'monitor',
-      '/propiedades': 'properties',
-      '/campanas': 'campañas',
-      '/constructor': 'flujos',
-      '/demo-flujos': 'demo',
-      '/suscripcion': 'suscripcion',
-      '/hubspot': 'hubspot',
-      '/mensajes': 'mensajes',
-      '/bandeja': 'bandeja',
-      '/whatsapp-ai': 'whatsapp-ai',
-      '/ai-review': 'ai-review',
-      '/configuracion': 'configuration'
+      '/dashboard/conexiones': 'connections',
+      '/dashboard/registros': 'logs', 
+      '/dashboard/monitor-conexiones': 'monitor',
+      '/dashboard/propiedades': 'properties',
+      '/dashboard/campanas': 'campañas',
+      '/dashboard/constructor': 'flujos',
+      '/dashboard/demo-flujos': 'demo',
+      '/dashboard/suscripcion': 'suscripcion',
+      '/dashboard/hubspot': 'hubspot',
+      '/dashboard/mensajes': 'mensajes',
+      '/dashboard/bandeja': 'bandeja',
+      '/dashboard/whatsapp-ai': 'whatsapp-ai',
+      '/dashboard/ai-review': 'ai-review',
+      '/dashboard/configuracion': 'configuration'
     };
 
     return routeToIdMap[pathname] || ''; // Retorna string vacío si no encuentra la ruta
@@ -88,98 +88,98 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       icon: MessageSquare,
       label: 'Conexiones',
       description: 'Gestiona conexiones de WhatsApp',
-      href: '/conexiones'
+      href: '/dashboard/conexiones'
     },
     {
       id: 'logs',
       icon: Activity,
       label: 'Registros',
       description: 'Logs y actividad del sistema',
-      href: '/registros'
+      href: '/dashboard/registros'
     },
     {
       id: 'monitor',
       icon: MonitorSpeaker,
       label: 'Monitor Conexiones',
       description: 'Monitor en tiempo real de conexiones activas',
-      href: '/monitor-conexiones'
+      href: '/dashboard/monitor-conexiones'
     },
     {
       id: 'properties',
       icon: Database,
       label: 'Propiedades',
       description: 'Propiedades de contactos y datos',
-      href: '/propiedades'
+      href: '/dashboard/propiedades'
     },
     {
       id: 'campañas',
       icon: Megaphone,
       label: 'Campañas',
       description: 'Campañas de marketing',
-      href: '/campanas'
+      href: '/dashboard/campanas'
     },
     {
       id: 'flujos',
       icon: GitBranch,
       label: 'Constructor de Flujos',
       description: 'Diseña flujos de conversación',
-      href: '/constructor'
+      href: '/dashboard/constructor'
     },
     {
       id: 'demo',
       icon: Play,
       label: 'Demo Flujos',
       description: 'Demostración del sistema de flujos',
-      href: '/demo-flujos'
+      href: '/dashboard/demo-flujos'
     },
     {
       id: 'suscripcion',
       icon: CreditCard,
       label: 'Suscripción',
       description: 'Gestión de suscripción y facturación',
-      href: '/suscripcion'
+      href: '/dashboard/suscripcion'
     },
     {
       id: 'hubspot',
       icon: Building2,
       label: 'HubSpot',
       description: 'Integración con HubSpot CRM',
-      href: '/hubspot'
+      href: '/dashboard/hubspot'
     },
     {
       id: 'mensajes',
       icon: Mail,
       label: 'Mensajes',
       description: 'Gestión de mensajes y conversaciones',
-      href: '/mensajes'
+      href: '/dashboard/mensajes'
     },
     {
       id: 'bandeja',
       icon: MessageSquare,
       label: 'Bandeja de Entrada',
       description: 'Conversaciones en vivo y chat en tiempo real',
-      href: '/bandeja'
+      href: '/dashboard/bandeja'
     },
     {
       id: 'whatsapp-ai',
       icon: Bot,
       label: 'WhatsApp AI Manager',
       description: 'Centro unificado de agentes IA y automatización WhatsApp',
-      href: '/whatsapp-ai'
+      href: '/dashboard/whatsapp-ai'
     },
     {
       id: 'ai-review',
       icon: ShieldCheck,
       label: 'Revisión IA',
       description: 'Dashboard para revisar y aprobar mejoras de respuestas IA',
-      href: '/ai-review'
+      href: '/dashboard/ai-review'
     },
     {
       id: 'configuration', 
       icon: Settings,
       label: 'Configuración',
       description: 'Configuración general del sistema',
-      href: '/configuracion'
+      href: '/dashboard/configuracion'
     }
   ];
 
@@ -204,7 +204,7 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
     // En móvil, cerrar el sidebar después de seleccionar
     if (isMobile && isOpen) {
       setTimeout(() => {
-        toggleOpen();
+      toggleOpen();
       }, 100);
     }
   };
@@ -353,18 +353,18 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
               return (
                 <div key={item.id} className="relative">
                   <Tooltip open={hoveredItem === item.id}>
-                    <TooltipTrigger asChild>
-                      {buttonContent}
-                    </TooltipTrigger>
+                  <TooltipTrigger asChild>
+                    {buttonContent}
+                  </TooltipTrigger>
                     <TooltipContent 
                       side="right" 
                       className="ml-2 z-[70] pointer-events-none"
                       sideOffset={8}
                     >
-                      <div className="font-medium">{item.label}</div>
+                    <div className="font-medium">{item.label}</div>
                       <div className="text-xs text-gray-500 max-w-48">{item.description}</div>
-                    </TooltipContent>
-                  </Tooltip>
+                  </TooltipContent>
+                </Tooltip>
                 </div>
               );
             }

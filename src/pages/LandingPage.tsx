@@ -1,12 +1,90 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Zap, Users, BarChart3 } from 'lucide-react';
+import { MessageSquare, Zap, Users, BarChart3, LogIn, UserPlus, ArrowRight, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { databaseService } from '@/services/database.service';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [hasActiveSession, setHasActiveSession] = useState(false);
 
-  const handleStart = () => {
-    navigate('/conexiones');
+  useEffect(() => {
+    // Verificar si hay una sesión activa
+    const checkSession = () => {
+      try {
+        const stored = localStorage.getItem('authenticated_company');
+        if (stored) {
+          const company = JSON.parse(stored);
+          setHasActiveSession(company.id && company.name && company.email);
+        }
+      } catch (error) {
+        setHasActiveSession(false);
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  const handleLogin = () => {
+    navigate('/oauth/login');
+  };
+
+  const handleRegister = () => {
+    navigate('/oauth/register');
+  };
+
+  const handleDirectAccess = () => {
+    if (hasActiveSession) {
+      navigate('/dashboard/conexiones');
+    } else {
+      navigate('/oauth/login');
+    }
+  };
+
+  const handleDemoAccess = async () => {
+    try {
+      // Intentar autenticación automática con usuario demo
+      const authenticatedCompany = await databaseService.authenticateCompany(
+        'admin@demo.com',
+        '123456'
+      );
+
+      if (authenticatedCompany) {
+        // Guardar sesión
+        localStorage.setItem('authenticated_company', JSON.stringify({
+          id: authenticatedCompany.id,
+          name: authenticatedCompany.name,
+          email: authenticatedCompany.email,
+          loginTime: new Date().toISOString()
+        }));
+
+        toast({
+          title: "¡Acceso demo activado!",
+          description: `Bienvenido ${authenticatedCompany.name}, accediendo al dashboard...`,
+          variant: "default"
+        });
+
+        // Redirigir al dashboard
+        setTimeout(() => {
+          navigate('/dashboard/conexiones');
+        }, 1500);
+      } else {
+        toast({
+          title: "Error en acceso demo",
+          description: "No se pudo acceder con las credenciales de demostración",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error en acceso demo:', error);
+      toast({
+        title: "Error del sistema",
+        description: "Ha ocurrido un error inesperado. Intenta nuevamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -63,18 +141,68 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className="space-y-4">
-            <Button 
-              onClick={handleStart}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-            >
-              Iniciar
-            </Button>
-            <p className="text-sm text-gray-500">
-              Accede al panel de administración
-            </p>
+          {/* CTA Buttons */}
+          <div className="space-y-6">
+            {/* Botón principal de acceso directo */}
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleDirectAccess}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-6 text-xl font-bold rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+              >
+                <ArrowRight className="w-6 h-6 mr-3" />
+                {hasActiveSession ? 'Ir al Dashboard' : 'Acceder a la Aplicación'}
+              </Button>
+            </div>
+            
+            {/* Botón demo */}
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleDemoAccess}
+                size="lg"
+                variant="outline"
+                className="border-2 border-green-500 text-green-600 hover:bg-green-500 hover:text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Acceso Demo Instantáneo
+              </Button>
+            </div>
+
+            {/* Separador */}
+            <div className="flex items-center justify-center space-x-4 my-6">
+              <div className="h-px bg-gray-300 flex-1"></div>
+              <span className="text-gray-500 text-sm">o accede con tu cuenta</span>
+              <div className="h-px bg-gray-300 flex-1"></div>
+            </div>
+
+            {/* Botones de login y registro */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                onClick={handleLogin}
+                size="lg"
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto"
+              >
+                <LogIn className="w-5 h-5 mr-2" />
+                Iniciar sesión
+              </Button>
+              <Button 
+                onClick={handleRegister}
+                size="lg"
+                variant="outline"
+                className="border-gray-400 text-gray-600 hover:bg-gray-600 hover:text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto"
+              >
+                <UserPlus className="w-5 h-5 mr-2" />
+                Registro
+              </Button>
+            </div>
+            
+            <div className="space-y-2 text-sm text-gray-500">
+              <p>Accede al panel de administración</p>
+              <p className="text-xs">
+                <strong>Demo:</strong> admin@demo.com | <strong>Contraseña:</strong> 123456
+              </p>
+            </div>
           </div>
         </div>
       </main>

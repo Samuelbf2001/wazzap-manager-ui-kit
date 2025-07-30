@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { User } from "lucide-react";
 
-export function WhatsIAStatsPanel() {
+export const WhatsIAStatsPanel = memo(function WhatsIAStatsPanel() {
   const [showDetail, setShowDetail] = useState(false);
   const [hourRate, setHourRate] = useState<{ [agent: string]: number }>({
     "Agente 1": 12,
@@ -125,4 +125,6 @@ export function WhatsIAStatsPanel() {
       </Dialog>
     </section>
   );
-}
+});
+
+WhatsIAStatsPanel.displayName = 'WhatsIAStatsPanel';
