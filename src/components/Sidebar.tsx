@@ -6,19 +6,11 @@ import {
   MessageSquare,
   Settings,
   Activity,
-  Database,
-  Megaphone,
-  CreditCard,
-  Brain,
-  Building2,
-  Mail,
-  GitBranch,
+
   Menu,
   ChevronLeft,
   X,
-  Play,
-  Bot,
-  ShieldCheck,
+
   MonitorSpeaker
 } from "lucide-react";
 import { useState } from "react";
@@ -59,16 +51,7 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       '/dashboard/conexiones': 'connections',
       '/dashboard/registros': 'logs', 
       '/dashboard/monitor-conexiones': 'monitor',
-      '/dashboard/propiedades': 'properties',
-      '/dashboard/campanas': 'campañas',
-      '/dashboard/constructor': 'flujos',
-      '/dashboard/demo-flujos': 'demo',
-      '/dashboard/suscripcion': 'suscripcion',
-      '/dashboard/hubspot': 'hubspot',
-      '/dashboard/mensajes': 'mensajes',
-      '/dashboard/bandeja': 'bandeja',
-      '/dashboard/whatsapp-ai': 'whatsapp-ai',
-      '/dashboard/ai-review': 'ai-review',
+
       '/dashboard/configuracion': 'configuration'
     };
 
@@ -104,76 +87,7 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       description: 'Monitor en tiempo real de conexiones activas',
       href: '/dashboard/monitor-conexiones'
     },
-    {
-      id: 'properties',
-      icon: Database,
-      label: 'Propiedades',
-      description: 'Propiedades de contactos y datos',
-      href: '/dashboard/propiedades'
-    },
-    {
-      id: 'campañas',
-      icon: Megaphone,
-      label: 'Campañas',
-      description: 'Campañas de marketing',
-      href: '/dashboard/campanas'
-    },
-    {
-      id: 'flujos',
-      icon: GitBranch,
-      label: 'Constructor de Flujos',
-      description: 'Diseña flujos de conversación',
-      href: '/dashboard/constructor'
-    },
-    {
-      id: 'demo',
-      icon: Play,
-      label: 'Demo Flujos',
-      description: 'Demostración del sistema de flujos',
-      href: '/dashboard/demo-flujos'
-    },
-    {
-      id: 'suscripcion',
-      icon: CreditCard,
-      label: 'Suscripción',
-      description: 'Gestión de suscripción y facturación',
-      href: '/dashboard/suscripcion'
-    },
-    {
-      id: 'hubspot',
-      icon: Building2,
-      label: 'HubSpot',
-      description: 'Integración con HubSpot CRM',
-      href: '/dashboard/hubspot'
-    },
-    {
-      id: 'mensajes',
-      icon: Mail,
-      label: 'Mensajes',
-      description: 'Gestión de mensajes y conversaciones',
-      href: '/dashboard/mensajes'
-    },
-    {
-      id: 'bandeja',
-      icon: MessageSquare,
-      label: 'Bandeja de Entrada',
-      description: 'Conversaciones en vivo y chat en tiempo real',
-      href: '/dashboard/bandeja'
-    },
-    {
-      id: 'whatsapp-ai',
-      icon: Bot,
-      label: 'WhatsApp AI Manager',
-      description: 'Centro unificado de agentes IA y automatización WhatsApp',
-      href: '/dashboard/whatsapp-ai'
-    },
-    {
-      id: 'ai-review',
-      icon: ShieldCheck,
-      label: 'Revisión IA',
-      description: 'Dashboard para revisar y aprobar mejoras de respuestas IA',
-      href: '/dashboard/ai-review'
-    },
+
     {
       id: 'configuration', 
       icon: Settings,
