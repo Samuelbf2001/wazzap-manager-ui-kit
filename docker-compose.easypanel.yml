@@ -1,0 +1,45 @@
+# EasyPanel Configuration for WhatsApp Manager UI Kit
+# Este archivo contiene la configuración específica para desplegar en EasyPanel
+
+version: '3.8'
+
+services:
+  whatsapp-manager-ui:
+    image: node:18-alpine
+    working_dir: /app
+    command: >
+      sh -c "
+        npm install &&
+        npm run build:prod &&
+        npm install -g serve &&
+        serve -s dist -l 8081
+      "
+    ports:
+      - "8081:8081"
+    environment:
+      # Evolution API Configuration
+      - VITE_EVOLUTION_API_URL=${EVOLUTION_API_URL}
+      - VITE_EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
+      
+      # HubSpot Configuration (opcional)
+      - VITE_HUBSPOT_API_KEY=${HUBSPOT_API_KEY}
+      - VITE_HUBSPOT_PORTAL_ID=${HUBSPOT_PORTAL_ID}
+      
+      # Production URLs
+      - VITE_PRODUCTION_URL=${PRODUCTION_URL}
+      - VITE_WEBHOOK_URL=${WEBHOOK_URL}
+      
+      # App Configuration
+      - VITE_APP_TITLE=WhatsApp Manager UI Kit
+      - VITE_APP_VERSION=1.0.0
+      - NODE_ENV=production
+      - PORT=8081
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

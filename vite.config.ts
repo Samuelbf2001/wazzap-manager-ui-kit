@@ -7,7 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 3000,
+    port: 8081,
     // 🔧 PROXY PARA EVITAR CORS CON N8N
     proxy: {
       '/api/webhook': {
@@ -29,6 +29,22 @@ export default defineConfig(({ mode }) => ({
       }
     },
   },
+  // 🚀 Configuración para producción
+  build: {
+    outDir: 'dist',
+    sourcemap: mode === 'development',
+    minify: mode === 'production',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+        },
+      },
+    },
+  },
+  // 🌐 Configuración base para despliegue
+  base: mode === 'production' ? '/' : '/',
   plugins: [
     react(),
     mode === 'development' &&
