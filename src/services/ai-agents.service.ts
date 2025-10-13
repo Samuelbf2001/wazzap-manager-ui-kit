@@ -285,6 +285,165 @@ Asegura que cada tarea sea asignada al agente más adecuado y que los resultados
         timeout: 90000,
         maxIterations: 25,
         fallbackBehavior: 'human_handoff'
+      },
+      {
+        id: '6',
+        name: 'Agente de Actualización de Información',
+        type: 'conversational',
+        status: 'active',
+        model: 'GPT-4',
+        knowledgeBases: ['kb1', 'kb2'],
+        created: new Date('2024-01-22'),
+        lastUsed: new Date('2024-01-22'),
+        totalConversations: 0,
+        avgResponseTime: 1.5,
+        successRate: 98.0,
+        systemPrompt: `Eres un agente especializado en actualización y sincronización de información. Tu función principal es:
+
+- **Actualizar datos de contactos**: Mantener información actualizada de clientes en HubSpot
+- **Sincronizar conversaciones**: Registrar interacciones de WhatsApp en el CRM
+- **Validar información**: Verificar y corregir datos inconsistentes
+- **Enriquecer perfiles**: Agregar información adicional basada en conversaciones
+- **Mantener historial**: Registrar todas las interacciones y cambios
+
+**Proceso de trabajo:**
+1. Identifica información nueva o modificada en las conversaciones
+2. Valida la información contra fuentes existentes
+3. Actualiza los registros correspondientes en HubSpot
+4. Registra el cambio con timestamp y contexto
+5. Notifica sobre actualizaciones importantes
+
+Mantén un registro detallado de todos los cambios y siempre preserva la integridad de los datos.`,
+        temperature: 0.2,
+        maxTokens: 1500,
+        tools: [
+          {
+            id: 'hubspot-update-1',
+            name: 'HubSpot Contact Update',
+            type: 'hubspot' as const,
+            description: 'Actualiza información de contactos en HubSpot',
+            config: { 
+              apiKey: 'xxx', 
+              operations: ['contacts', 'companies'], 
+              fields: ['firstname', 'lastname', 'email', 'phone', 'company', 'jobtitle', 'lifecyclestage']
+            },
+            enabled: true
+          },
+          {
+            id: 'conversation-log-1',
+            name: 'Registro de Conversaciones',
+            type: 'database' as const,
+            description: 'Registra conversaciones y cambios',
+            config: { database: 'conversations', table: 'logs' },
+            enabled: true
+          },
+          {
+            id: 'validation-1',
+            name: 'Validador de Datos',
+            type: 'custom' as const,
+            description: 'Valida y limpia información',
+            config: { validators: ['email', 'phone', 'name'], rules: 'strict' },
+            enabled: true
+          }
+        ],
+        useMemory: true,
+        memoryType: 'conversation',
+        memorySize: 2000,
+        timeout: 30000,
+        maxIterations: 8,
+        fallbackBehavior: 'human_handoff'
+      },
+      {
+        id: '7',
+        name: 'Agente de Recomendaciones Comerciales',
+        type: 'reasoning',
+        status: 'active',
+        model: 'GPT-4',
+        knowledgeBases: ['kb1', 'kb2', 'kb3'],
+        created: new Date('2024-01-22'),
+        lastUsed: new Date('2024-01-22'),
+        totalConversations: 0,
+        avgResponseTime: 3.2,
+        successRate: 95.5,
+        systemPrompt: `Eres un consultor comercial experto especializado en análisis de oportunidades y recomendaciones estratégicas. Tu función es:
+
+- **Análisis de oportunidades**: Identificar potencial comercial en conversaciones
+- **Recomendaciones personalizadas**: Sugerir acciones específicas basadas en el perfil del cliente
+- **Estrategias de seguimiento**: Proponer próximos pasos comerciales efectivos
+- **Segmentación inteligente**: Clasificar clientes según su potencial y comportamiento
+- **Optimización de conversiones**: Mejorar tasas de éxito comercial
+
+**Metodología de trabajo:**
+1. **Análisis del contexto**: Evalúa la situación actual del cliente
+2. **Identificación de necesidades**: Detecta problemas y oportunidades
+3. **Evaluación del potencial**: Calcula el valor comercial potencial
+4. **Generación de recomendaciones**: Propone acciones específicas y medibles
+5. **Priorización**: Ordena acciones por impacto y probabilidad de éxito
+
+**Tipos de recomendaciones:**
+- Seguimiento inmediato (24-48 horas)
+- Nurturing a largo plazo (semanas/meses)
+- Upselling/Cross-selling
+- Referencias y recomendaciones
+- Escalamiento a especialistas
+
+Siempre fundamenta tus recomendaciones con datos concretos y considera el contexto del cliente.`,
+        temperature: 0.6,
+        maxTokens: 2500,
+        tools: [
+          {
+            id: 'crm-analysis-1',
+            name: 'Análisis CRM',
+            type: 'hubspot' as const,
+            description: 'Analiza historial y comportamiento del cliente',
+            config: { 
+              apiKey: 'xxx', 
+              operations: ['contacts', 'deals', 'activities', 'companies'],
+              analysis: ['behavior', 'engagement', 'purchase_history']
+            },
+            enabled: true
+          },
+          {
+            id: 'scoring-1',
+            name: 'Motor de Scoring',
+            type: 'custom' as const,
+            description: 'Calcula puntuaciones de oportunidad comercial',
+            config: { 
+              models: ['lead_scoring', 'opportunity_scoring', 'churn_prediction'],
+              weights: { engagement: 0.3, budget: 0.25, authority: 0.25, timeline: 0.2 }
+            },
+            enabled: true
+          },
+          {
+            id: 'recommendation-engine-1',
+            name: 'Motor de Recomendaciones',
+            type: 'custom' as const,
+            description: 'Genera recomendaciones basadas en ML',
+            config: { 
+              algorithms: ['collaborative_filtering', 'content_based', 'hybrid'],
+              data_sources: ['conversations', 'crm', 'behavior']
+            },
+            enabled: true
+          },
+          {
+            id: 'market-intelligence-1',
+            name: 'Inteligencia de Mercado',
+            type: 'api' as const,
+            description: 'Accede a datos de mercado y tendencias',
+            config: { 
+              baseUrl: 'https://api.market-intelligence.com', 
+              endpoints: ['trends', 'competitors', 'pricing'],
+              auth: 'bearer'
+            },
+            enabled: true
+          }
+        ],
+        useMemory: true,
+        memoryType: 'graph',
+        memorySize: 3000,
+        timeout: 45000,
+        maxIterations: 12,
+        fallbackBehavior: 'human_handoff'
       }
     ];
   }
