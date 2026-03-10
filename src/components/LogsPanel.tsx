@@ -323,7 +323,7 @@ export function LogsPanel() {
       case 'connection_restored': return 'Conexión Restaurada';
       case 'message_sent': return 'Mensaje Enviado';
       case 'system_error': return 'Error Sistema';
-      default: return type.replace('_', ' ').toUpperCase();
+      default: return (type ?? '').replace('_', ' ').toUpperCase() || 'Desconocido';
     }
   };
 
