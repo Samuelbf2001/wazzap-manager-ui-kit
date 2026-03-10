@@ -27,6 +27,7 @@ import MensajesPage from './pages/MensajesPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 import RegisterPage from './pages/oauth/RegisterPage';
 import LoginPage from './pages/oauth/LoginPage';
+import HubSpotCallbackPage from './pages/HubSpotCallbackPage';
 import { connectionMonitorService } from './services/connection-monitor.service';
 
 // 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
@@ -45,6 +46,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/oauth/register" element={<RegisterPage />} />
           <Route path="/oauth/login" element={<LoginPage />} />
+
+          {/* Callback del login HubSpot: /dashboard?token=JWT&portalId=X */}
+          <Route path="/dashboard" element={<HubSpotCallbackPage />} />
           
           {/* Rutas protegidas del dashboard */}
           <Route path="/dashboard/conexiones" element={
