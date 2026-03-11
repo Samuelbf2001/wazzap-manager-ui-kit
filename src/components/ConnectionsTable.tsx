@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2 } from 'lucide-react';
 import { databaseService } from '@/services/database.service';
 import type { WhatsAppConnection } from '@/services/database.service';
+import { whatsfullApi } from '@/services/whatsfull-api.service';
 
 interface Connection {
   id: string;
@@ -28,29 +29,41 @@ export function ConnectionsTable() {
   const [editing, setEditing] = useState<Connection | null>(null);
   const [deletingConnection, setDeletingConnection] = useState<Connection | null>(null);
 
-  // 🔄 SUSCRIBIRSE A CAMBIOS DE LA BASE DE DATOS
+  // 🔄 CARGAR DESDE BACKEND + localStorage como fallback
   useEffect(() => {
-    const handleConnectionsUpdate = () => {
-      loadConnections();
-    };
-
-    // Suscribirse a cambios en la tabla de conexiones
+    const handleConnectionsUpdate = () => { loadConnections(); };
     databaseService.subscribe('whatsapp_connections', handleConnectionsUpdate);
-
-    // Cargar conexiones iniciales
     loadConnections();
-
-    // Cleanup
-    return () => {
-      databaseService.unsubscribe('whatsapp_connections', handleConnectionsUpdate);
-    };
+    return () => { databaseService.unsubscribe('whatsapp_connections', handleConnectionsUpdate); };
   }, []);
 
-  const loadConnections = () => {
+  const loadConnections = async () => {
+    try {
+      // Intentar cargar desde backend primero
+      const backendChannels = await whatsfullApi.getChannels();
+      if (backendChannels.length > 0) {
+        const tableConnections: Connection[] = backendChannels.map(ch => ({
+          id: ch.channel_account_id,
+          number: ch.whatsapp_phone_number || 'N/A',
+          name: ch.whatsapp_phone_number || ch.channel_account_id,
+          connected: ch.authorized,
+          features: ['Bot', 'Webhook', 'Variables', 'Logs'],
+          agent: 'Sin asignar',
+          status: ch.authorized ? 'connected' : 'inactive',
+          instance_state: null,
+          instance_name: ch.evolution_instance,
+          created_at: ch.created_at
+        }));
+        setConnections(tableConnections);
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend no disponible, usando localStorage:', err);
+    }
+
+    // Fallback: localStorage
     try {
       const dbConnections = databaseService.getAllConnections();
-      
-      // Convertir datos de la BD al formato de la tabla
       const tableConnections: Connection[] = dbConnections.map(conn => ({
         id: conn.id,
         number: conn.phone_number || 'N/A',
