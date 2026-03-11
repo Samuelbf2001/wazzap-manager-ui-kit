@@ -11,22 +11,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     const checkAuthentication = () => {
       try {
-        // Sesión HubSpot (JWT desde OAuth de WhatsAppHub)
         const hubAuth = localStorage.getItem('hubspot_auth');
         if (hubAuth) {
           const parsed = JSON.parse(hubAuth);
           if (parsed.token && parsed.portalId) {
-            setIsAuthenticated(true);
-            return;
-          }
-        }
-
-        // Sesión local (email/contraseña)
-        const stored = localStorage.getItem('authenticated_company');
-        if (stored) {
-          const company = JSON.parse(stored);
-          // Verificar que la sesión tenga los datos necesarios
-          if (company.id && company.name && company.email) {
             setIsAuthenticated(true);
             return;
           }
