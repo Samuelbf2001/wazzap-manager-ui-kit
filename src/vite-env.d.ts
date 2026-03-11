@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_REDIS_HOST: string;
   readonly VITE_REDIS_PORT: string;
   readonly VITE_REDIS_PASSWORD: string;
+  readonly VITE_BACKEND_URL: string;
+  readonly VITE_APP_URL: string;
   readonly VITE_EVOLUTION_API_URL: string;
   readonly VITE_EVOLUTION_API_KEY: string;
   readonly VITE_HUBSPOT_API_KEY: string;
