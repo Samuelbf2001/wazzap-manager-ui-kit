@@ -44,6 +44,21 @@ export interface LogsSummary {
   last_7d: string;
 }
 
+export interface Connection {
+  id: number;
+  portalId: string;
+  channelId: string;
+  channelAccountId: string;
+  inboxId: string;
+  phoneNumber: string;
+  provider: 'evolution' | 'gupshup';
+  evolutionInstance: string | null;
+  authorized: boolean;
+  connectionState: 'open' | 'close' | 'connecting' | 'unknown' | 'error' | 'unreachable' | 'n/a';
+  connected: boolean;
+  createdAt: string;
+}
+
 export interface LogsFilters {
   page?: number;
   limit?: number;
@@ -120,4 +135,10 @@ export const hubspotApi = {
     fetch(`${BACKEND_URL}/auth/verify`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(r => r.json()),
+
+  getConnections: (): Promise<{ success: boolean; connections: Connection[] }> =>
+    apiFetch('/api/connections'),
+
+  getConnectionStatus: (instanceName: string): Promise<{ instanceName: string; state: string; connected: boolean }> =>
+    apiFetch('/api/connections/status', { instanceName }),
 };
