@@ -30,6 +30,8 @@ interface WhatsAppConnectionModalProps {
   mode?: 'hubspot' | 'ghl';
   /** Solo en modo 'ghl': el locationId de la subcuenta */
   locationId?: string;
+  /** Solo en modo 'ghl' agency install: el companyId para pre-generar location token */
+  companyId?: string;
 }
 
 export function WhatsAppConnectionModal({
@@ -38,6 +40,7 @@ export function WhatsAppConnectionModal({
   onConnectionSuccess,
   mode = 'hubspot',
   locationId,
+  companyId,
 }: WhatsAppConnectionModalProps) {
   const { toast } = useToast();
   const isGHL = mode === 'ghl';
@@ -98,6 +101,7 @@ export function WhatsAppConnectionModal({
           locationId: locationId!,
           phoneNumber: formData.phone_number,
           evolutionInstance: formData.name.toLowerCase().replace(/\s+/g, '_') || undefined,
+          companyId: companyId || undefined,
         });
       } else {
         // Modo HubSpot

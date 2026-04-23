@@ -1,43 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Loader2, Building2, AlertCircle } from 'lucide-react';
+import { Plus, Building2, AlertCircle } from 'lucide-react';
 import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { ConnectionsTable } from '@/components/ConnectionsTable';
-
-const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
-
-interface Location {
-  id: string;
-  name: string;
-}
 
 export default function GHLSetupPage() {
   const [searchParams] = useSearchParams();
   const locationId = searchParams.get('locationId');
   const companyId  = searchParams.get('companyId');
 
-  const [locations, setLocations]             = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>(locationId || '');
-  const [loadingLocations, setLoadingLocations] = useState(false);
-  const [showModal, setShowModal]             = useState(false);
-  const [refreshKey, setRefreshKey]           = useState(0);
+  const [manualLocationId, setManualLocationId] = useState<string>('');
+  const [showModal, setShowModal]              = useState(false);
+  const [refreshKey, setRefreshKey]            = useState(0);
 
-  // Agency install: cargar locations de la company
-  useEffect(() => {
-    if (companyId && !locationId) {
-      setLoadingLocations(true);
-      fetch(`${BACKEND_URL}/api/ghl-company/locations?companyId=${companyId}`)
-        .then(r => r.json())
-        .then(data => { if (data.success) setLocations(data.locations || []); })
-        .catch(console.error)
-        .finally(() => setLoadingLocations(false));
-    }
-  }, [companyId, locationId]);
-
-  const activeLocation = selectedLocation || locationId || '';
+  const activeLocation = selectedLocation || manualLocationId || locationId || '';
 
   const handleSuccess = () => {
     setRefreshKey(k => k + 1);
@@ -68,40 +48,26 @@ export default function GHLSetupPage() {
           </div>
         </div>
 
-        {/* Selección de subcuenta (solo agency install) */}
+        {/* Agency install: ingresar locationId manualmente */}
         {companyId && !locationId && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Building2 className="h-4 w-4" />
-                Selecciona una subcuenta
+                Ingresa el ID de la subcuenta
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {loadingLocations ? (
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Cargando subcuentas...
-                </div>
-              ) : locations.length === 0 ? (
-                <p className="text-sm text-gray-500">No se encontraron subcuentas.</p>
-              ) : (
-                <div className="space-y-2 max-h-56 overflow-y-auto">
-                  {locations.map(loc => (
-                    <button
-                      key={loc.id}
-                      onClick={() => setSelectedLocation(loc.id)}
-                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                        selectedLocation === loc.id
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="font-medium text-sm">{loc.name}</div>
-                      <div className="text-xs text-gray-400 font-mono">{loc.id}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
+            <CardContent className="space-y-2">
+              <input
+                type="text"
+                value={manualLocationId}
+                onChange={e => setManualLocationId(e.target.value.trim())}
+                placeholder="ej: dMX4yw4WB0RZFivUhgyG"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <p className="text-xs text-gray-400">
+                Encuéntralo en GHL → Settings → Business Info → Location ID.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -144,6 +110,7 @@ export default function GHLSetupPage() {
         onConnectionSuccess={handleSuccess}
         mode="ghl"
         locationId={activeLocation}
+        companyId={companyId || undefined}
       />
     </div>
   );

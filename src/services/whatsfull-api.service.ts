@@ -18,6 +18,7 @@ export interface GHLChannelSetupParams {
   locationId: string;
   phoneNumber: string;
   evolutionInstance?: string;
+  companyId?: string;
 }
 
 export interface ChannelSetupResult {
@@ -126,6 +127,7 @@ class WhatsfullApiService {
         locationId: params.locationId,
         phoneNumber: params.phoneNumber,
         evolutionInstance: params.evolutionInstance || undefined,
+        companyId: params.companyId || undefined,
       }),
     });
     const data = await res.json();
