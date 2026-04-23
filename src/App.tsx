@@ -28,6 +28,7 @@ import ConfiguracionPage from './pages/ConfiguracionPage';
 import RegisterPage from './pages/oauth/RegisterPage';
 import LoginPage from './pages/oauth/LoginPage';
 import HubSpotCallbackPage from './pages/HubSpotCallbackPage';
+import GHLSetupPage from './pages/GHLSetupPage';
 import { connectionMonitorService } from './services/connection-monitor.service';
 
 // 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
@@ -136,6 +137,9 @@ const App = () => (
             </ProtectedRoute>
           } />
           
+          {/* GHL Setup — abierto por GHL después del OAuth, no requiere auth propia */}
+          <Route path="/ghl-setup" element={<GHLSetupPage />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
