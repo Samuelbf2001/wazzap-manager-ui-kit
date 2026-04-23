@@ -5,9 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2 } from 'lucide-react';
-import { databaseService } from '@/services/database.service';
-import type { WhatsAppConnection } from '@/services/database.service';
-import { whatsfullApi } from '@/services/whatsfull-api.service';
+import { hubspotApi } from '@/lib/hubspotApi';
 
 interface Connection {
   id: string;
@@ -22,65 +20,83 @@ interface Connection {
   created_at: string;
 }
 
+interface ConnectionsTableProps {
+  mode?: 'hubspot' | 'ghl';
+  locationId?: string;
+}
+
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 const AGENT_OPTIONS = ["Sin asignar", "Agent A", "Agent B", "Agent C"];
 
-export function ConnectionsTable() {
+export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTableProps) {
+  const isGHL = mode === 'ghl';
   const [connections, setConnections] = useState<Connection[]>([]);
   const [editing, setEditing] = useState<Connection | null>(null);
   const [deletingConnection, setDeletingConnection] = useState<Connection | null>(null);
 
-  // 🔄 CARGAR DESDE BACKEND + localStorage como fallback
   useEffect(() => {
-    const handleConnectionsUpdate = () => { loadConnections(); };
-    databaseService.subscribe('whatsapp_connections', handleConnectionsUpdate);
     loadConnections();
-    return () => { databaseService.unsubscribe('whatsapp_connections', handleConnectionsUpdate); };
-  }, []);
+  }, [mode, locationId]);
 
   const loadConnections = async () => {
     try {
-      // Intentar cargar desde backend primero
-      const backendChannels = await whatsfullApi.getChannels();
-      if (backendChannels.length > 0) {
-        const tableConnections: Connection[] = backendChannels.map(ch => ({
-          id: ch.channel_account_id,
-          number: ch.whatsapp_phone_number || 'N/A',
-          name: ch.whatsapp_phone_number || ch.channel_account_id,
-          connected: ch.authorized,
-          features: ['Bot', 'Webhook', 'Variables', 'Logs'],
-          agent: 'Sin asignar',
-          status: ch.authorized ? 'connected' : 'inactive',
-          instance_state: null,
-          instance_name: ch.evolution_instance,
-          created_at: ch.created_at
+      if (isGHL) {
+        // Cargar canales GHL desde /api/ghl-channels?locationId=
+        const url = locationId
+          ? `${BACKEND_URL}/api/ghl-channels?locationId=${locationId}`
+          : `${BACKEND_URL}/api/ghl-channels`;
+        const res  = await fetch(url);
+        const data = await res.json();
+        const channels = data.channels || [];
+
+        // Para cada canal, consultar el estado real de Evolution
+        const tableConnections: Connection[] = await Promise.all(
+          channels.map(async (c: Record<string, string | boolean | null>) => {
+            let instanceState = 'unknown';
+            if (c.evolution_instance) {
+              try {
+                const stateRes = await fetch(
+                  `${BACKEND_URL}/api/channels/state/${encodeURIComponent(c.evolution_instance as string)}`
+                );
+                const stateData = await stateRes.json();
+                instanceState = stateData.state || 'unknown';
+              } catch {}
+            }
+            const connected = instanceState === 'open';
+            return {
+              id:             String(c.id),
+              number:         `+${c.whatsapp_phone_number}`,
+              name:           (c.evolution_instance as string) || String(c.whatsapp_phone_number),
+              connected,
+              features:       ['Webhook', 'Logs'],
+              agent:          'Sin asignar',
+              status:         connected ? 'connected' : instanceState === 'connecting' ? 'active' : 'inactive',
+              instance_state: instanceState,
+              instance_name:  (c.evolution_instance as string) || null,
+              created_at:     String(c.created_at),
+            };
+          })
+        );
+        setConnections(tableConnections);
+      } else {
+        // Cargar canales HubSpot desde /api/connections
+        const res = await hubspotApi.getConnections();
+        const tableConnections: Connection[] = res.connections.map(c => ({
+          id:             c.channelAccountId,
+          number:         c.phoneNumber || 'N/A',
+          name:           c.phoneNumber || c.channelAccountId,
+          connected:      c.connected,
+          features:       ['Bot', 'Webhook', 'Variables', 'Logs'],
+          agent:          'Sin asignar',
+          status:         c.connected ? 'connected' : c.connectionState === 'connecting' ? 'active' : 'inactive',
+          instance_state: c.connectionState,
+          instance_name:  c.evolutionInstance,
+          created_at:     c.createdAt,
         }));
         setConnections(tableConnections);
-        return;
       }
     } catch (err) {
-      console.warn('Backend no disponible, usando localStorage:', err);
-    }
-
-    // Fallback: localStorage
-    try {
-      const dbConnections = databaseService.getAllConnections();
-      const tableConnections: Connection[] = dbConnections.map(conn => ({
-        id: conn.id,
-        number: conn.phone_number || 'N/A',
-        name: conn.name,
-        connected: conn.status === 'connected' && conn.instance_state === 'open',
-        features: conn.features || ['Bot', 'Webhook', 'Variables', 'Logs'],
-        agent: conn.agent_assigned || 'Sin asignar',
-        status: conn.status,
-        instance_state: conn.instance_state,
-        instance_name: conn.instance_name,
-        created_at: conn.created_at
-      }));
-      
-      console.log('🔄 Conexiones actualizadas desde BD:', tableConnections.length);
-      setConnections(tableConnections);
-    } catch (error) {
-      console.error('❌ Error cargando conexiones:', error);
+      console.error('❌ Error cargando conexiones:', err);
     }
   };
 
@@ -93,16 +109,11 @@ export function ConnectionsTable() {
 
   const confirmDelete = async () => {
     if (!deletingConnection) return;
-    
+
     try {
-      // Eliminar de la base de datos
-      const deleted = await databaseService.deleteConnection(deletingConnection.id);
-      
-      if (deleted) {
-        console.log(`🗑️ Conexión eliminada: ${deletingConnection.name}`);
-      } else {
-        console.error('❌ Error eliminando conexión');
-      }
+      await hubspotApi.deleteChannel(deletingConnection.id);
+      setConnections(prev => prev.filter(c => c.id !== deletingConnection.id));
+      console.log(`🗑️ Conexión eliminada: ${deletingConnection.name}`);
     } catch (error) {
       console.error('❌ Error eliminando conexión:', error);
     } finally {
@@ -110,33 +121,17 @@ export function ConnectionsTable() {
     }
   };
 
-  const handleEditSave = async () => {
+  const handleEditSave = () => {
     if (!editing) return;
-    
-    try {
-      // Actualizar en la base de datos
-      await databaseService.updateConnection(editing.id, {
-        name: editing.name,
-        agent_assigned: editing.agent,
-        status: editing.connected ? 'connected' : 'inactive'
-      });
-      
-      setEditing(null);
-      console.log('✅ Conexión actualizada');
-    } catch (error) {
-      console.error('❌ Error actualizando conexión:', error);
-    }
+    // Actualizar estado local (nombre y agente son solo UI, no se persisten en backend aún)
+    setConnections(prev => prev.map(c => c.id === editing.id ? { ...c, name: editing.name, agent: editing.agent } : c));
+    setEditing(null);
   };
 
-  const handleReconnect = async (connectionId: string) => {
-    try {
-      await databaseService.updateConnection(connectionId, {
-        status: 'active'
-      });
-      console.log('🔄 Reconectando:', connectionId);
-    } catch (error) {
-      console.error('❌ Error reconectando:', error);
-    }
+  const handleReconnect = (connectionId: string) => {
+    // Fuerza recarga del estado real desde Evolution
+    loadConnections();
+    console.log('🔄 Recargando estado de conexión:', connectionId);
   };
 
   return (

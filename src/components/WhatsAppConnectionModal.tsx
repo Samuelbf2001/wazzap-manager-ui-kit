@@ -1,10 +1,14 @@
 /**
  * Modal para crear una nueva conexión WhatsApp.
- * Flujo:
- *  1. Usuario llena nombre, teléfono e inbox de HubSpot
- *  2. POST /api/channels/setup → backend crea instancia Evolution + canal HubSpot
- *  3. GET Evolution API /instance/connect/{name} → obtiene QR
- *  4. Usuario escanea QR → conexión establecida
+ * Soporta dos modos:
+ *  - 'hubspot': pide inbox de HubSpot, llama a /api/channels/setup
+ *  - 'ghl':     pide locationId de GHL,  llama a /api/ghl-channels/setup
+ *
+ * Flujo común:
+ *  1. Usuario llena el formulario
+ *  2. Backend crea instancia Evolution + cuenta de canal
+ *  3. GET /api/channels/qr/{name} → obtiene QR
+ *  4. Usuario escanea QR → polling detecta estado 'open' → éxito
  */
 
 import { useState, useEffect } from "react";
@@ -22,10 +26,22 @@ interface WhatsAppConnectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConnectionSuccess: () => void;
+  /** 'hubspot' (default) o 'ghl' */
+  mode?: 'hubspot' | 'ghl';
+  /** Solo en modo 'ghl': el locationId de la subcuenta */
+  locationId?: string;
 }
 
-export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSuccess }: WhatsAppConnectionModalProps) {
+export function WhatsAppConnectionModal({
+  open,
+  onOpenChange,
+  onConnectionSuccess,
+  mode = 'hubspot',
+  locationId,
+}: WhatsAppConnectionModalProps) {
   const { toast } = useToast();
+  const isGHL = mode === 'ghl';
+
   const [step, setStep] = useState<'form' | 'qr' | 'success'>('form');
   const [loading, setLoading] = useState(false);
   const [qrCode, setQrCode] = useState<string>('');
@@ -37,15 +53,15 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
   const [formData, setFormData] = useState({
     name: '',
     phone_number: '',
-    inboxId: ''
+    inboxId: '',
   });
 
-  // Cargar inboxes al abrir el modal
+  // Cargar inboxes de HubSpot solo en modo hubspot
   useEffect(() => {
-    if (open) {
+    if (open && !isGHL) {
       loadInboxes();
     }
-  }, [open]);
+  }, [open, isGHL]);
 
   // Limpiar polling al cerrar
   useEffect(() => {
@@ -60,12 +76,9 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     try {
       const data = await whatsfullApi.getInboxes();
       setInboxes(data);
-      if (data.length > 0) {
-        setFormData(prev => ({ ...prev, inboxId: data[0].id }));
-      }
-    } catch (err) {
-      console.error('Error cargando inboxes:', err);
-      toast({ title: "Aviso", description: "No se pudieron cargar los inboxes de HubSpot.", variant: "destructive" });
+      if (data.length > 0) setFormData(prev => ({ ...prev, inboxId: data[0].id }));
+    } catch {
+      toast({ title: "Aviso", description: "No se pudieron cargar los inboxes.", variant: "destructive" });
     } finally {
       setLoadingInboxes(false);
     }
@@ -77,29 +90,38 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     setLoading(true);
 
     try {
-      // 1. Crear canal en backend (Evolution + HubSpot)
-      const result = await whatsfullApi.setupChannel({
-        phoneNumber: formData.phone_number,
-        displayName: formData.name,
-        inboxId: formData.inboxId,
-        evolutionInstance: formData.name.toLowerCase().replace(/\s+/g, '_')
-      });
+      let result: ChannelSetupResult;
+
+      if (isGHL) {
+        // Modo GHL: llamar a /api/ghl-channels/setup
+        result = await whatsfullApi.setupGHLChannel({
+          locationId: locationId!,
+          phoneNumber: formData.phone_number,
+          evolutionInstance: formData.name.toLowerCase().replace(/\s+/g, '_') || undefined,
+        });
+      } else {
+        // Modo HubSpot
+        result = await whatsfullApi.setupChannel({
+          phoneNumber: formData.phone_number,
+          displayName: formData.name,
+          inboxId: formData.inboxId,
+          evolutionInstance: formData.name.toLowerCase().replace(/\s+/g, '_'),
+        });
+      }
 
       setSetupResult(result);
-      console.log('✅ Canal creado:', result);
 
-      // 2. Obtener QR de Evolution API
-      if (result.evolutionInstance && result.evolutionApikey) {
+      // Obtener QR si hay instancia Evolution
+      if (result.evolutionInstance) {
         try {
           const qr = await whatsfullApi.getQRCode(result.evolutionInstance, result.evolutionApikey);
-          const qrData = qr.base64 || qr.code || '';
-          setQrCode(qrData);
+          setQrCode(qr.base64 || qr.code || '');
           setStep('qr');
 
-          // 3. Polling de estado cada 5s
+          // Polling cada 5s para detectar conexión
           const interval = setInterval(async () => {
             try {
-              const state = await whatsfullApi.getConnectionState(result.evolutionInstance!, result.evolutionApikey!);
+              const state = await whatsfullApi.getConnectionState(result.evolutionInstance!, result.evolutionApikey);
               if (state === 'open') {
                 clearInterval(interval);
                 setPollingInterval(null);
@@ -110,22 +132,19 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
           setPollingInterval(interval);
 
           toast({ title: "✅ QR generado", description: "Escanea con tu WhatsApp para conectar." });
-        } catch (qrErr) {
-          console.warn('No se pudo obtener QR inmediatamente:', qrErr);
+        } catch {
           setStep('qr');
-          toast({ title: "Canal creado", description: "El QR estará disponible en unos segundos. Refresca si no aparece." });
+          toast({ title: "Canal creado", description: "El QR estará disponible en unos segundos." });
         }
       } else {
-        // Canal creado pero sin Evolution (ej. Gupshup)
         handleAutomaticSuccess();
       }
 
     } catch (error) {
-      console.error('Error creando canal:', error);
       toast({
         title: "❌ Error",
         description: error instanceof Error ? error.message : "No se pudo crear el canal.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -133,17 +152,10 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
   };
 
   const handleAutomaticSuccess = () => {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      setPollingInterval(null);
-    }
+    if (pollingInterval) { clearInterval(pollingInterval); setPollingInterval(null); }
     setStep('success');
-    toast({ title: "🎉 ¡Conectado!", description: "WhatsApp vinculado correctamente con HubSpot." });
-    setTimeout(() => {
-      onConnectionSuccess();
-      onOpenChange(false);
-      resetForm();
-    }, 2000);
+    toast({ title: "🎉 ¡Conectado!", description: `WhatsApp vinculado correctamente con ${isGHL ? 'GoHighLevel' : 'HubSpot'}.` });
+    setTimeout(() => { onConnectionSuccess(); onOpenChange(false); resetForm(); }, 2000);
   };
 
   const resetForm = () => {
@@ -154,10 +166,7 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
   };
 
   const handleClose = () => {
-    if (pollingInterval) {
-      clearInterval(pollingInterval);
-      setPollingInterval(null);
-    }
+    if (pollingInterval) { clearInterval(pollingInterval); setPollingInterval(null); }
     onOpenChange(false);
     resetForm();
   };
@@ -166,20 +175,26 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Conectar WhatsApp</DialogTitle>
+          <DialogTitle>
+            {isGHL ? 'Conectar WhatsApp a GHL' : 'Conectar WhatsApp'}
+          </DialogTitle>
+          {isGHL && locationId && (
+            <p className="text-xs text-gray-400 font-mono mt-1">Location: {locationId}</p>
+          )}
         </DialogHeader>
 
         {step === 'form' && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre de la conexión *</Label>
+              <Label htmlFor="name">Nombre de la instancia *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Ej: Soporte Principal"
+                placeholder="Ej: ernesto_soporte"
                 required
               />
+              <p className="text-xs text-gray-400">Se usa como nombre de la instancia en EvolutionAPI.</p>
             </div>
 
             <div className="space-y-2">
@@ -188,28 +203,31 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
                 id="phone_number"
                 value={formData.phone_number}
                 onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                placeholder="Ej: +521234567890"
+                placeholder="Ej: +573004188522"
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="inboxId">Inbox de HubSpot *</Label>
-              <Select
-                value={formData.inboxId}
-                onValueChange={(val) => setFormData({ ...formData, inboxId: val })}
-                disabled={loadingInboxes}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={loadingInboxes ? "Cargando inboxes..." : "Selecciona un inbox"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {inboxes.map(inbox => (
-                    <SelectItem key={inbox.id} value={inbox.id}>{inbox.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Selector de inbox solo en modo HubSpot */}
+            {!isGHL && (
+              <div className="space-y-2">
+                <Label htmlFor="inboxId">Inbox de HubSpot *</Label>
+                <Select
+                  value={formData.inboxId}
+                  onValueChange={(val) => setFormData({ ...formData, inboxId: val })}
+                  disabled={loadingInboxes}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingInboxes ? "Cargando..." : "Selecciona un inbox"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {inboxes.map(inbox => (
+                      <SelectItem key={inbox.id} value={inbox.id}>{inbox.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
@@ -217,7 +235,7 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
               </Button>
               <Button
                 type="submit"
-                disabled={loading || !formData.inboxId}
+                disabled={loading || (!isGHL && !formData.inboxId)}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</> : 'Conectar'}
@@ -243,6 +261,9 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
                 <QRCodeSVG value={qrCode} size={200} />
               )}
             </div>
+            {setupResult?.evolutionInstance && (
+              <p className="text-xs text-gray-400 font-mono">Instancia: {setupResult.evolutionInstance}</p>
+            )}
             <p className="text-sm text-gray-600">
               WhatsApp → Ajustes → Dispositivos vinculados → Vincular dispositivo
             </p>
@@ -261,7 +282,9 @@ export function WhatsAppConnectionModal({ open, onOpenChange, onConnectionSucces
               </svg>
             </div>
             <h3 className="text-lg font-medium text-green-600">¡Conexión exitosa!</h3>
-            <p className="text-sm text-gray-600">WhatsApp vinculado con HubSpot correctamente.</p>
+            <p className="text-sm text-gray-600">
+              WhatsApp vinculado con {isGHL ? 'GoHighLevel' : 'HubSpot'} correctamente.
+            </p>
           </div>
         )}
       </DialogContent>

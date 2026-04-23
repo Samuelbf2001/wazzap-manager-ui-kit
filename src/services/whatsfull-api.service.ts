@@ -6,12 +6,17 @@
 import { getHubSpotAuth } from '@/lib/hubspotApi';
 
 const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
-const EVOLUTION_API_URL = (import.meta.env.VITE_EVOLUTION_API_URL as string) || '';
 
 export interface ChannelSetupParams {
   phoneNumber: string;
   displayName: string;
   inboxId: string;
+  evolutionInstance?: string;
+}
+
+export interface GHLChannelSetupParams {
+  locationId: string;
+  phoneNumber: string;
   evolutionInstance?: string;
 }
 
@@ -99,25 +104,59 @@ class WhatsfullApiService {
   }
 
   /**
-   * Conecta una instancia Evolution y obtiene el QR.
-   * Llama directamente a Evolution API usando la apikey de la instancia.
+   * Obtiene el QR de una instancia Evolution vía proxy del backend (evita CORS).
+   * Los parámetros de apikey son ignorados: el backend los lee de su DB.
    */
-  async getQRCode(instanceName: string, instanceApikey: string): Promise<QRCodeResult> {
-    const url = `${EVOLUTION_API_URL}/instance/connect/${instanceName}`;
-    const res = await fetch(url, {
-      headers: { apikey: instanceApikey }
+  async getQRCode(instanceName: string, _instanceApikey?: string): Promise<QRCodeResult> {
+    const auth = getHubSpotAuth();
+    if (!auth) throw new Error('No autenticado');
+    const res = await fetch(`${BACKEND_URL}/api/channels/qr/${encodeURIComponent(instanceName)}`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
     });
-    if (!res.ok) throw new Error(`Evolution API error ${res.status}`);
+    if (!res.ok) throw new Error(`QR proxy error ${res.status}`);
     return await res.json() as QRCodeResult;
   }
 
-  /** Verifica el estado de conexión de una instancia */
-  async getConnectionState(instanceName: string, instanceApikey: string): Promise<string> {
-    const url = `${EVOLUTION_API_URL}/instance/connectionState/${instanceName}`;
-    const res = await fetch(url, { headers: { apikey: instanceApikey } });
-    if (!res.ok) return 'unknown';
+  /** Crea o actualiza un canal GHL (Evolution + webhook configurado automáticamente) */
+  async setupGHLChannel(params: GHLChannelSetupParams): Promise<ChannelSetupResult> {
+    const res = await fetch(`${BACKEND_URL}/api/ghl-channels/setup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        locationId: params.locationId,
+        phoneNumber: params.phoneNumber,
+        evolutionInstance: params.evolutionInstance || undefined,
+      }),
+    });
     const data = await res.json();
-    return data.instance?.state || data.state || 'unknown';
+    if (!res.ok) throw new Error(data.details || data.error || 'Error configurando canal GHL');
+    // Normalizar respuesta al mismo formato que ChannelSetupResult
+    return {
+      success: data.success,
+      channelId: data.locationId,
+      channelAccountId: data.locationId,
+      inboxId: '',
+      phoneNumber: data.phoneNumber,
+      provider: data.provider,
+      evolutionInstance: data.evolutionInstance,
+      evolutionApikey: data.evolutionApikey,
+    } as ChannelSetupResult;
+  }
+
+  /** Verifica el estado de conexión de una instancia vía proxy del backend */
+  async getConnectionState(instanceName: string, _instanceApikey?: string): Promise<string> {
+    const auth = getHubSpotAuth();
+    if (!auth) return 'unknown';
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/channels/state/${encodeURIComponent(instanceName)}`, {
+        headers: { Authorization: `Bearer ${auth.token}` }
+      });
+      if (!res.ok) return 'unknown';
+      const data = await res.json();
+      return data.state || 'unknown';
+    } catch {
+      return 'unknown';
+    }
   }
 }
 
