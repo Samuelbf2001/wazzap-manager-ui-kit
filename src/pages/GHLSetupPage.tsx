@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Building2, AlertCircle } from 'lucide-react';
+import { Plus, Building2, AlertCircle, Loader2, ChevronDown } from 'lucide-react';
 import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { ConnectionsTable } from '@/components/ConnectionsTable';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
+
+interface GHLLocation {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+}
 
 export default function GHLSetupPage() {
   const [searchParams] = useSearchParams();
@@ -13,11 +22,33 @@ export default function GHLSetupPage() {
   const companyId  = searchParams.get('companyId');
 
   const [selectedLocation, setSelectedLocation] = useState<string>(locationId || '');
-  const [manualLocationId, setManualLocationId] = useState<string>('');
-  const [showModal, setShowModal]              = useState(false);
-  const [refreshKey, setRefreshKey]            = useState(0);
+  const [locations, setLocations]               = useState<GHLLocation[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+  const [locationsError, setLocationsError]     = useState('');
+  const [showModal, setShowModal]               = useState(false);
+  const [refreshKey, setRefreshKey]             = useState(0);
 
-  const activeLocation = selectedLocation || manualLocationId || locationId || '';
+  // Cargar locations cuando hay companyId (instalación agency)
+  useEffect(() => {
+    if (!companyId || locationId) return;
+    setLoadingLocations(true);
+    setLocationsError('');
+    fetch(`${BACKEND_URL}/api/ghl-company/locations?companyId=${companyId}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          setLocations(data.locations || []);
+        } else {
+          setLocationsError(data.error || 'Error cargando subcuentas');
+        }
+      })
+      .catch(() => setLocationsError('No se pudieron cargar las subcuentas'))
+      .finally(() => setLoadingLocations(false));
+  }, [companyId, locationId]);
+
+  const activeLocation = selectedLocation || locationId || '';
+
+  const selectedLocationName = locations.find(l => l.id === selectedLocation)?.name || '';
 
   const handleSuccess = () => {
     setRefreshKey(k => k + 1);
@@ -40,39 +71,64 @@ export default function GHLSetupPage() {
           </div>
           <p className="text-gray-500 text-sm">Conecta números de WhatsApp a GoHighLevel</p>
           <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
-            {locationId && <Badge variant="secondary">Location: {locationId}</Badge>}
-            {companyId  && <Badge variant="secondary">Agency: {companyId}</Badge>}
-            {activeLocation && activeLocation !== locationId && (
-              <Badge variant="outline">Subcuenta: {activeLocation}</Badge>
+            {locationId  && <Badge variant="secondary">Location: {locationId}</Badge>}
+            {companyId   && <Badge variant="secondary">Agency: {companyId}</Badge>}
+            {activeLocation && activeLocation !== locationId && selectedLocationName && (
+              <Badge variant="outline">{selectedLocationName}</Badge>
             )}
           </div>
         </div>
 
-        {/* Agency install: ingresar locationId manualmente */}
+        {/* Agency install: selector de subcuentas */}
         {companyId && !locationId && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Building2 className="h-4 w-4" />
-                Ingresa el ID de la subcuenta
+                Selecciona la subcuenta
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <input
-                type="text"
-                value={manualLocationId}
-                onChange={e => setManualLocationId(e.target.value.trim())}
-                placeholder="ej: dMX4yw4WB0RZFivUhgyG"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-              <p className="text-xs text-gray-400">
-                Encuéntralo en GHL → Settings → Business Info → Location ID.
-              </p>
+            <CardContent className="space-y-3">
+              {loadingLocations ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Cargando subcuentas…
+                </div>
+              ) : locationsError ? (
+                <div className="text-sm text-red-500 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  {locationsError}
+                </div>
+              ) : locations.length === 0 ? (
+                <div className="text-sm text-gray-400">No se encontraron subcuentas para esta agencia.</div>
+              ) : (
+                <div className="relative">
+                  <select
+                    value={selectedLocation}
+                    onChange={e => setSelectedLocation(e.target.value)}
+                    className="w-full appearance-none px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                  >
+                    <option value="">— Elige una subcuenta —</option>
+                    {locations.map(loc => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.name} ({loc.id})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+              )}
+
+              {selectedLocation && (
+                <p className="text-xs text-green-600 font-mono">
+                  Location ID: {selectedLocation}
+                </p>
+              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Sin location */}
+        {/* Sin location ni company */}
         {!activeLocation && !companyId && (
           <Card>
             <CardContent className="py-10 text-center text-gray-400">
@@ -87,7 +143,12 @@ export default function GHLSetupPage() {
         {activeLocation && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Números conectados</h2>
+              <h2 className="font-semibold text-gray-900">
+                Números conectados
+                {selectedLocationName && (
+                  <span className="ml-2 text-sm text-gray-400 font-normal">— {selectedLocationName}</span>
+                )}
+              </h2>
               <Button
                 onClick={() => setShowModal(true)}
                 className="bg-green-600 hover:bg-green-700"
