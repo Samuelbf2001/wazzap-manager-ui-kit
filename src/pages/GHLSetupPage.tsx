@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Building2, AlertCircle, Loader2, ChevronDown } from 'lucide-react';
+import { Plus, Building2, AlertCircle, Loader2, ChevronDown, LayoutGrid } from 'lucide-react';
 import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { ConnectionsTable } from '@/components/ConnectionsTable';
 
@@ -17,6 +17,7 @@ interface GHLLocation {
 }
 
 export default function GHLSetupPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const locationId = searchParams.get('locationId');
   const companyId  = searchParams.get('companyId');
@@ -57,6 +58,19 @@ export default function GHLSetupPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-12 px-4">
       <div className="w-full max-w-3xl space-y-6">
+
+        {/* Nav GHL admin */}
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/ghl-admin')}
+            className="text-gray-500 hover:text-gray-700 text-xs"
+          >
+            <LayoutGrid className="w-3 h-3 mr-1" />
+            Ver todas las instancias
+          </Button>
+        </div>
 
         {/* Header */}
         <div className="text-center">

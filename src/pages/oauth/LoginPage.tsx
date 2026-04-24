@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, LogIn, Settings, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ExternalLink, LogIn, Settings, ChevronDown, Zap } from 'lucide-react';
 
 const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 
@@ -87,6 +87,36 @@ export default function LoginPage() {
               <p className="text-xs text-center text-gray-400">
                 Accede desde los ajustes de tu portal de HubSpot.
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Separador GHL */}
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-xs text-gray-400 whitespace-nowrap">¿Usuario de GoHighLevel?</span>
+            <div className="flex-1 h-px bg-gray-200" />
+          </div>
+
+          {/* Card GHL */}
+          <Card className="w-full bg-orange-50/80 backdrop-blur-sm shadow-md border border-orange-100">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <Zap className="h-4 w-4 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">GoHighLevel Admin</p>
+                  <p className="text-xs text-gray-500">Accede sin necesitar cuenta HubSpot</p>
+                </div>
+              </div>
+              <Button
+                onClick={() => navigate('/ghl-admin')}
+                variant="outline"
+                className="w-full border-orange-200 text-orange-700 hover:bg-orange-100 hover:text-orange-800 font-semibold"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Ver instancias GHL
+              </Button>
             </CardContent>
           </Card>
         </div>
