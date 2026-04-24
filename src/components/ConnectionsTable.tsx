@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { hubspotApi } from '@/lib/hubspotApi';
 import { whatsfullApi } from '@/services/whatsfull-api.service';
 
@@ -34,15 +35,23 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
   const [connections, setConnections] = useState<Connection[]>([]);
   const [editing, setEditing] = useState<Connection | null>(null);
   const [deletingConnection, setDeletingConnection] = useState<Connection | null>(null);
+  const [reconnecting, setReconnecting] = useState<Connection | null>(null);
+  const [qrCode, setQrCode] = useState<string>('');
+  const [qrLoading, setQrLoading] = useState(false);
+  const [pollingInterval, setPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     loadConnections();
   }, [mode, locationId]);
 
+  // Limpiar polling al desmontar
+  useEffect(() => {
+    return () => { if (pollingInterval) clearInterval(pollingInterval); };
+  }, [pollingInterval]);
+
   const loadConnections = async () => {
     try {
       if (isGHL) {
-        // Cargar canales GHL desde /api/ghl-channels?locationId=
         const url = locationId
           ? `${BACKEND_URL}/api/ghl-channels?locationId=${locationId}`
           : `${BACKEND_URL}/api/ghl-channels`;
@@ -50,14 +59,13 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
         const data = await res.json();
         const channels = data.channels || [];
 
-        // Para cada canal, consultar el estado real de Evolution
         const tableConnections: Connection[] = await Promise.all(
           channels.map(async (c: Record<string, string | boolean | null>) => {
             let instanceState = 'unknown';
             if (c.evolution_instance) {
               try {
                 const stateRes = await fetch(
-                  `${BACKEND_URL}/api/channels/state/${encodeURIComponent(c.evolution_instance as string)}`
+                  `${BACKEND_URL}/api/ghl-channels/state/${encodeURIComponent(c.evolution_instance as string)}`
                 );
                 const stateData = await stateRes.json();
                 instanceState = stateData.state || 'unknown';
@@ -80,7 +88,6 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
         );
         setConnections(tableConnections);
       } else {
-        // Cargar canales HubSpot desde /api/connections
         const res = await hubspotApi.getConnections();
         const tableConnections: Connection[] = res.connections.map(c => ({
           id:             c.channelAccountId,
@@ -103,14 +110,11 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
 
   const handleDelete = (id: string) => {
     const connection = connections.find(c => c.id === id);
-    if (connection) {
-      setDeletingConnection(connection);
-    }
+    if (connection) setDeletingConnection(connection);
   };
 
   const confirmDelete = async () => {
     if (!deletingConnection) return;
-
     try {
       if (isGHL) {
         await whatsfullApi.deleteGHLChannel(deletingConnection.id);
@@ -118,7 +122,6 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
         await hubspotApi.deleteChannel(deletingConnection.id);
       }
       setConnections(prev => prev.filter(c => c.id !== deletingConnection.id));
-      console.error(`🗑️ Conexión eliminada: ${deletingConnection.name}`);
     } catch (error) {
       console.error('❌ Error eliminando conexión:', error);
     } finally {
@@ -128,22 +131,66 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
 
   const handleEditSave = () => {
     if (!editing) return;
-    // Actualizar estado local (nombre y agente son solo UI, no se persisten en backend aún)
     setConnections(prev => prev.map(c => c.id === editing.id ? { ...c, name: editing.name, agent: editing.agent } : c));
     setEditing(null);
   };
 
-  const handleReconnect = (connectionId: string) => {
-    // Fuerza recarga del estado real desde Evolution
-    loadConnections();
-    console.log('🔄 Recargando estado de conexión:', connectionId);
+  const handleReconnect = async (conn: Connection) => {
+    if (!conn.instance_name) return;
+    setReconnecting(conn);
+    setQrCode('');
+    setQrLoading(true);
+
+    try {
+      const qr = isGHL
+        ? await whatsfullApi.getGHLQRCode(conn.instance_name)
+        : await whatsfullApi.getQRCode(conn.instance_name);
+      setQrCode(qr.base64 || qr.code || '');
+    } catch {
+      // QR puede tardar unos segundos en estar disponible
+    } finally {
+      setQrLoading(false);
+    }
+
+    // Polling hasta detectar conexión
+    if (pollingInterval) clearInterval(pollingInterval);
+    const interval = setInterval(async () => {
+      try {
+        const state = isGHL
+          ? await whatsfullApi.getGHLConnectionState(conn.instance_name!)
+          : await whatsfullApi.getConnectionState(conn.instance_name!);
+        if (state === 'open') {
+          clearInterval(interval);
+          setPollingInterval(null);
+          setReconnecting(null);
+          setQrCode('');
+          loadConnections();
+        }
+        // Refrescar QR si sigue pendiente
+        if (!qrCode && state !== 'open') {
+          try {
+            const qr = isGHL
+              ? await whatsfullApi.getGHLQRCode(conn.instance_name!)
+              : await whatsfullApi.getQRCode(conn.instance_name!);
+            if (qr.base64 || qr.code) setQrCode(qr.base64 || qr.code || '');
+          } catch {}
+        }
+      } catch {}
+    }, 5000);
+    setPollingInterval(interval);
+  };
+
+  const handleCloseReconnect = () => {
+    if (pollingInterval) { clearInterval(pollingInterval); setPollingInterval(null); }
+    setReconnecting(null);
+    setQrCode('');
   };
 
   return (
     <div>
       <h2 className="text-xl font-bold mb-2">Números de WhatsApp Conectados</h2>
       <p className="text-sm text-gray-600 mb-4">Administra tus conexiones de WhatsApp y su estado actual.</p>
-      
+
       <table className="min-w-full text-sm">
         <thead className="bg-gray-50 text-gray-600">
           <tr>
@@ -182,9 +229,7 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
                     </span>
                   )}
                   {conn.instance_name && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Instancia: {conn.instance_name}
-                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Instancia: {conn.instance_name}</div>
                   )}
                   <div className="text-xs text-gray-400 mt-1">
                     Creado: {new Date(conn.created_at).toLocaleDateString()}
@@ -194,41 +239,35 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
                 <td className="px-4 py-2 text-left">{conn.name}</td>
                 <td className="px-4 py-2 text-center space-x-1">
                   {conn.features.map((f, i) => (
-                    <span
-                      key={i}
-                      className={
-                        `px-2 py-1 rounded-full text-xs font-medium ` +
-                        (f === 'Bot' ? 'bg-blue-100 text-blue-700 ' :
-                         f === 'Webhook' ? 'bg-purple-100 text-purple-700 ' :
-                         f === 'Variables' ? 'bg-yellow-100 text-yellow-800 ' :
-                         f === 'Logs' ? 'bg-green-100 text-green-700 ' : '')
-                      }
-                    >
+                    <span key={i} className={
+                      `px-2 py-1 rounded-full text-xs font-medium ` +
+                      (f === 'Bot' ? 'bg-blue-100 text-blue-700 ' :
+                       f === 'Webhook' ? 'bg-purple-100 text-purple-700 ' :
+                       f === 'Variables' ? 'bg-yellow-100 text-yellow-800 ' :
+                       f === 'Logs' ? 'bg-green-100 text-green-700 ' : '')
+                    }>
                       {f}
                     </span>
                   ))}
                 </td>
                 <td className="px-4 py-2 text-center">
                   <div className="flex gap-2 justify-center">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setEditing(conn)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setEditing(conn)}>
                       Editar
                     </Button>
-                    {!conn.connected && (
-                      <Button 
-                        variant="outline" 
+                    {!conn.connected && conn.instance_name && (
+                      <Button
+                        variant="outline"
                         size="sm"
-                        onClick={() => handleReconnect(conn.id)}
+                        onClick={() => handleReconnect(conn)}
                         className="text-blue-600 hover:text-blue-700"
                       >
+                        <RefreshCw className="w-3 h-3 mr-1" />
                         Reconectar
                       </Button>
                     )}
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDelete(conn.id)}
                       className="text-red-600 hover:text-red-700"
@@ -242,6 +281,50 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
           )}
         </tbody>
       </table>
+
+      {/* Modal QR de reconexión */}
+      {reconnecting && (
+        <Dialog open={true} onOpenChange={handleCloseReconnect}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Reconectar WhatsApp</DialogTitle>
+            </DialogHeader>
+            <div className="text-center space-y-4">
+              <p className="text-sm text-gray-500">
+                Instancia: <span className="font-mono">{reconnecting.instance_name}</span>
+              </p>
+              <div className="flex justify-center">
+                {qrLoading ? (
+                  <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded">
+                    <div className="text-center">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-500">Generando QR…</p>
+                    </div>
+                  </div>
+                ) : !qrCode ? (
+                  <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded">
+                    <div className="text-center">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-500">Esperando QR…</p>
+                    </div>
+                  </div>
+                ) : qrCode.startsWith('data:image/') ? (
+                  <img src={qrCode} alt="QR Code" className="w-48 h-48 border rounded" />
+                ) : (
+                  <QRCodeSVG value={qrCode} size={200} />
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                WhatsApp → Ajustes → Dispositivos vinculados → Vincular dispositivo
+              </p>
+              <p className="text-xs text-gray-400">Verificando conexión automáticamente…</p>
+              <Button variant="outline" onClick={handleCloseReconnect} className="w-full">
+                Cancelar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Modal de edición */}
       {editing && (
@@ -280,12 +363,8 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
                 </Select>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditing(null)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleEditSave}>
-                  Guardar cambios
-                </Button>
+                <Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button>
+                <Button onClick={handleEditSave}>Guardar cambios</Button>
               </div>
             </div>
           </DialogContent>
@@ -305,9 +384,7 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              <p className="text-gray-600 mb-4">
-                Estás a punto de eliminar permanentemente la conexión:
-              </p>
+              <p className="text-gray-600 mb-4">Estás a punto de eliminar permanentemente la conexión:</p>
               <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-red-500">
                 <div className="font-semibold text-gray-900">{deletingConnection.name}</div>
                 <div className="text-sm text-gray-600">{deletingConnection.number}</div>
@@ -315,22 +392,13 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
                   Creado: {new Date(deletingConnection.created_at).toLocaleDateString()}
                 </div>
               </div>
-              <p className="text-sm text-red-600 mt-4 font-medium">
-                ⚠️ Esta acción no se puede deshacer
-              </p>
+              <p className="text-sm text-red-600 mt-4 font-medium">⚠️ Esta acción no se puede deshacer</p>
             </div>
             <div className="flex justify-end gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setDeletingConnection(null)}
-                className="px-6"
-              >
+              <Button variant="outline" onClick={() => setDeletingConnection(null)} className="px-6">
                 No, mantener
               </Button>
-              <Button 
-                onClick={confirmDelete}
-                className="bg-red-600 hover:bg-red-700 text-white px-6"
-              >
+              <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white px-6">
                 Sí, eliminar
               </Button>
             </div>
