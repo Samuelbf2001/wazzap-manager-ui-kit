@@ -19,7 +19,8 @@ import {
   Play,
   Bot,
   ShieldCheck,
-  MonitorSpeaker
+  MonitorSpeaker,
+  Zap
 } from "lucide-react";
 import { useState } from "react";
 
@@ -65,6 +66,7 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       '/dashboard/demo-flujos': 'demo',
       '/dashboard/suscripcion': 'suscripcion',
       '/dashboard/hubspot': 'hubspot',
+      '/dashboard/gohighlevel': 'gohighlevel',
       '/dashboard/mensajes': 'mensajes',
       '/dashboard/bandeja': 'bandeja',
       '/dashboard/whatsapp-ai': 'whatsapp-ai',
@@ -145,6 +147,13 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       label: 'HubSpot',
       description: 'Integración con HubSpot CRM',
       href: '/dashboard/hubspot'
+    },
+    {
+      id: 'gohighlevel',
+      icon: Zap,
+      label: 'GoHighLevel',
+      description: 'Instancias WhatsApp conectadas a GHL',
+      href: '/dashboard/gohighlevel'
     },
     {
       id: 'mensajes',

@@ -29,6 +29,7 @@ import RegisterPage from './pages/oauth/RegisterPage';
 import LoginPage from './pages/oauth/LoginPage';
 import HubSpotCallbackPage from './pages/HubSpotCallbackPage';
 import GHLSetupPage from './pages/GHLSetupPage';
+import GHLDashboardPage from './pages/GHLDashboardPage';
 import { connectionMonitorService } from './services/connection-monitor.service';
 
 // 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
@@ -87,6 +88,11 @@ const App = () => (
           <Route path="/dashboard/hubspot" element={
             <ProtectedRoute>
               <Layout><HubSpotPage /></Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard/gohighlevel" element={
+            <ProtectedRoute>
+              <Layout><GHLDashboardPage /></Layout>
             </ProtectedRoute>
           } />
           <Route path="/dashboard/mensajes" element={
