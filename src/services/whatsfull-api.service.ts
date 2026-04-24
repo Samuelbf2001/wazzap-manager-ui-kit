@@ -160,6 +160,36 @@ class WhatsfullApiService {
       return 'unknown';
     }
   }
+
+  /** QR de una instancia GHL — no requiere HubSpot auth */
+  async getGHLQRCode(instanceName: string): Promise<QRCodeResult> {
+    const res = await fetch(`${BACKEND_URL}/api/ghl-channels/qr/${encodeURIComponent(instanceName)}`);
+    if (!res.ok) throw new Error(`QR GHL error ${res.status}`);
+    return await res.json() as QRCodeResult;
+  }
+
+  /** Estado de conexión de una instancia GHL — no requiere HubSpot auth */
+  async getGHLConnectionState(instanceName: string): Promise<string> {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/ghl-channels/state/${encodeURIComponent(instanceName)}`);
+      if (!res.ok) return 'unknown';
+      const data = await res.json();
+      return data.state || 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  }
+
+  /** Elimina un canal GHL por id — no requiere HubSpot auth */
+  async deleteGHLChannel(id: string): Promise<void> {
+    const res = await fetch(`${BACKEND_URL}/api/ghl-channels/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `Error eliminando canal GHL: ${res.status}`);
+    }
+  }
 }
 
 export const whatsfullApi = new WhatsfullApiService();

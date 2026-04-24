@@ -118,14 +118,18 @@ export function WhatsAppConnectionModal({
       // Obtener QR si hay instancia Evolution
       if (result.evolutionInstance) {
         try {
-          const qr = await whatsfullApi.getQRCode(result.evolutionInstance, result.evolutionApikey);
+          const qr = isGHL
+            ? await whatsfullApi.getGHLQRCode(result.evolutionInstance)
+            : await whatsfullApi.getQRCode(result.evolutionInstance, result.evolutionApikey);
           setQrCode(qr.base64 || qr.code || '');
           setStep('qr');
 
           // Polling cada 5s para detectar conexión
           const interval = setInterval(async () => {
             try {
-              const state = await whatsfullApi.getConnectionState(result.evolutionInstance!, result.evolutionApikey);
+              const state = isGHL
+                ? await whatsfullApi.getGHLConnectionState(result.evolutionInstance!)
+                : await whatsfullApi.getConnectionState(result.evolutionInstance!, result.evolutionApikey);
               if (state === 'open') {
                 clearInterval(interval);
                 setPollingInterval(null);

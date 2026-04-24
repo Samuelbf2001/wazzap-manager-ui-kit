@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2 } from 'lucide-react';
 import { hubspotApi } from '@/lib/hubspotApi';
+import { whatsfullApi } from '@/services/whatsfull-api.service';
 
 interface Connection {
   id: string;
@@ -111,9 +112,13 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
     if (!deletingConnection) return;
 
     try {
-      await hubspotApi.deleteChannel(deletingConnection.id);
+      if (isGHL) {
+        await whatsfullApi.deleteGHLChannel(deletingConnection.id);
+      } else {
+        await hubspotApi.deleteChannel(deletingConnection.id);
+      }
       setConnections(prev => prev.filter(c => c.id !== deletingConnection.id));
-      console.log(`🗑️ Conexión eliminada: ${deletingConnection.name}`);
+      console.error(`🗑️ Conexión eliminada: ${deletingConnection.name}`);
     } catch (error) {
       console.error('❌ Error eliminando conexión:', error);
     } finally {
