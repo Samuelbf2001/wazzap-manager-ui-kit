@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { hubspotApi, clearHubSpotAuth, getHubSpotAuth } from '@/lib/hubspotApi';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,27 +10,32 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkAuthentication = () => {
+    const checkAuthentication = async () => {
       try {
-        const hubAuth = localStorage.getItem('hubspot_auth');
-        if (hubAuth) {
-          const parsed = JSON.parse(hubAuth);
-          if (parsed.token && parsed.portalId) {
-            setIsAuthenticated(true);
-            return;
-          }
+        const auth = getHubSpotAuth();
+        if (!auth?.token || !auth?.portalId) {
+          setIsAuthenticated(false);
+          return;
         }
-        setIsAuthenticated(false);
-      } catch (error) {
-        console.error('Error verificando autenticación:', error);
-        setIsAuthenticated(false);
+
+        // Verificar con el backend que el token no expiró
+        const result = await hubspotApi.verifyAuth(auth.token);
+        if (result.authenticated) {
+          setIsAuthenticated(true);
+        } else {
+          clearHubSpotAuth();
+          setIsAuthenticated(false);
+        }
+      } catch {
+        // Si el backend no responde, confiar en el token local
+        const auth = getHubSpotAuth();
+        setIsAuthenticated(!!(auth?.token && auth?.portalId));
       }
     };
 
     checkAuthentication();
   }, []);
 
-  // Mostrar loading mientras verifica
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -41,11 +47,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Redirigir al login si no está autenticado
   if (!isAuthenticated) {
     return <Navigate to="/oauth/login" replace />;
   }
 
-  // Renderizar contenido protegido
   return <>{children}</>;
-} 
+}

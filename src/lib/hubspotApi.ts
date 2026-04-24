@@ -4,7 +4,7 @@
  * El token y portalId se guardan en localStorage bajo la clave 'hubspot_auth'.
  */
 
-const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsapphub.cloud';
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 
 export interface HubSpotAuth {
   token: string;
@@ -118,6 +118,27 @@ async function apiFetch<T>(path: string, params?: Record<string, string>): Promi
 // ─── API methods ─────────────────────────────────────────────────────────────
 
 export const hubspotApi = {
+  deleteChannel: (channelAccountId: string): Promise<{ success: boolean; deleted: string }> => {
+    const auth = getHubSpotAuth();
+    if (!auth) throw new Error('No autenticado con HubSpot');
+    return fetch(`${BACKEND_URL}/api/channels/${encodeURIComponent(channelAccountId)}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${auth.token}` }
+    }).then(async r => {
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error || `Error ${r.status}`);
+      }
+      return r.json();
+    });
+  },
+
+  getChannelQR: (instanceName: string): Promise<{ base64?: string; code?: string; pairingCode?: string | null }> =>
+    apiFetch(`/api/channels/qr/${encodeURIComponent(instanceName)}`),
+
+  getChannelState: (instanceName: string): Promise<{ instanceName: string; state: string; connected: boolean }> =>
+    apiFetch(`/api/channels/state/${encodeURIComponent(instanceName)}`),
+
   getLogs: (filters: LogsFilters = {}): Promise<LogsResponse> => {
     const params: Record<string, string> = {};
     if (filters.page) params.page = String(filters.page);

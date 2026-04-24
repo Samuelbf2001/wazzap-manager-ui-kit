@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from 'react';
-import { databaseService } from '@/services/database.service';
+import { hubspotApi, getHubSpotAuth } from '@/lib/hubspotApi';
 
 // Hook personalizado para obtener configuración del plan
 const useSubscriptionConfig = () => {
@@ -51,47 +51,45 @@ export const MetricsCards = memo(function MetricsCards() {
     pending: 0,
     inactive: 0
   });
+  const [messageStats, setMessageStats] = useState<{ outgoing: string; last24h: string } | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const subscriptionConfig = useSubscriptionConfig();
 
-  // Inicializar configuración por defecto si es la primera vez
   useEffect(() => {
-    const savedConfig = localStorage.getItem('subscription_config');
-    if (!savedConfig) {
-      const defaultConfig = {
-        whatsAppLimit: 10,
-        iaAgents: 2,
-        currentPlan: 'Pro'
-      };
-      localStorage.setItem('subscription_config', JSON.stringify(defaultConfig));
-      console.log('🔧 Configuración inicial creada:', defaultConfig);
-    }
-  }, []);
+    const auth = getHubSpotAuth();
+    if (!auth) return;
 
-  // Cargar estadísticas de conexiones en tiempo real
-  useEffect(() => {
-    const loadStats = () => {
-      const stats = databaseService.getConnectionStats();
-      setConnectionStats(stats);
+    const loadAll = async () => {
+      try {
+        const [connsRes, summaryRes] = await Promise.all([
+          hubspotApi.getConnections(),
+          hubspotApi.getLogsSummary()
+        ]);
+
+        const conns = connsRes.connections;
+        setConnectionStats({
+          total: conns.length,
+          connected: conns.filter(c => c.connected).length,
+          active: conns.filter(c => c.connectionState === 'connecting').length,
+          pending: 0,
+          inactive: conns.filter(c => !c.connected).length
+        });
+
+        setMessageStats({
+          outgoing: summaryRes.summary.outgoing_total,
+          last24h: summaryRes.summary.last_24h
+        });
+
+        setLastUpdated(new Date());
+      } catch {
+        // silencioso — no romper la UI si falla
+      }
     };
 
-    // Cargar estadísticas iniciales
-    loadStats();
-
-    // Suscribirse a cambios en las conexiones
-    const handleConnectionUpdate = () => {
-      loadStats();
-    };
-
-    databaseService.subscribe('whatsapp_connections', handleConnectionUpdate);
-
-    // Actualizar cada 30 segundos
-    const interval = setInterval(loadStats, 30000);
-
-    return () => {
-      databaseService.unsubscribe('whatsapp_connections', handleConnectionUpdate);
-      clearInterval(interval);
-    };
+    loadAll();
+    const interval = setInterval(loadAll, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Calcular porcentaje dinámicamente
@@ -159,8 +157,12 @@ export const MetricsCards = memo(function MetricsCards() {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div>
           <p className="text-sm font-medium text-gray-600">Mensajes Enviados</p>
-          <p className="text-3xl font-bold text-gray-900">12,543</p>
-          <p className="text-sm text-gray-500 mt-1">+12% en las últimas 24 horas</p>
+          <p className="text-3xl font-bold text-gray-900">
+            {messageStats ? Number(messageStats.outgoing).toLocaleString() : '—'}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            {messageStats ? `${messageStats.last24h} en las últimas 24h` : 'Cargando...'}
+          </p>
         </div>
       </div>
 
@@ -170,12 +172,16 @@ export const MetricsCards = memo(function MetricsCards() {
           <div>
             <p className="text-sm font-medium text-gray-600">Estado del Servicio</p>
             <div className="flex items-center mt-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></div>
               <span className="text-lg font-semibold text-gray-900">Operativo</span>
             </div>
           </div>
         </div>
-        <p className="text-sm text-gray-500 mt-2">Última actualización: hace 5 minutos</p>
+        <p className="text-sm text-gray-500 mt-2">
+          {lastUpdated
+            ? `Actualizado: ${lastUpdated.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}`
+            : 'Actualizando...'}
+        </p>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, LogIn, Settings, ChevronDown } from 'lucide-react';
 
-const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsapphub.cloud';
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 
 export default function LoginPage() {
   const navigate = useNavigate();
