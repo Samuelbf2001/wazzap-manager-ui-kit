@@ -146,6 +146,9 @@ const App = () => (
           {/* GHL Setup — abierto por GHL después del OAuth, no requiere auth propia */}
           <Route path="/ghl-setup" element={<GHLSetupPage />} />
 
+          {/* GHL Admin — panel público de instancias (sin auth HubSpot, auth propia después) */}
+          <Route path="/ghl-admin" element={<GHLDashboardPage />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

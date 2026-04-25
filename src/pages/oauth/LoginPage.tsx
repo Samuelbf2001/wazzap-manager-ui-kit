@@ -14,6 +14,10 @@ export default function LoginPage() {
     window.location.href = `${BACKEND_URL}/auth/login`;
   };
 
+  const handleGHLInstall = () => {
+    window.location.href = `${BACKEND_URL}/ghl/install`;
+  };
+
   const handleLoginGuide = () => {
     guideRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -51,7 +55,7 @@ export default function LoginPage() {
                 Acceder a WhatsFull
               </CardTitle>
               <CardDescription className="text-gray-500 mt-1">
-                Conecta tu portal de HubSpot o accede desde tu cuenta existente
+                Conecta tu HubSpot, GoHighLevel o accede desde tu cuenta existente
               </CardDescription>
             </CardHeader>
 
@@ -91,32 +95,58 @@ export default function LoginPage() {
           </Card>
 
           {/* Separador GHL */}
-          <div className="relative flex items-center gap-3">
+          <div className="relative flex items-center gap-3 py-2">
             <div className="flex-1 h-px bg-gray-200" />
             <span className="text-xs text-gray-400 whitespace-nowrap">¿Usuario de GoHighLevel?</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          {/* Card GHL */}
-          <Card className="w-full bg-orange-50/80 backdrop-blur-sm shadow-md border border-orange-100">
-            <CardContent className="pt-5 pb-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
-                  <Zap className="h-4 w-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">GoHighLevel Admin</p>
-                  <p className="text-xs text-gray-500">Accede sin necesitar cuenta HubSpot</p>
-                </div>
+          {/* Card GHL — Primera instalación */}
+          <Card className="w-full bg-gradient-to-br from-orange-50 to-yellow-50 backdrop-blur-sm shadow-lg border border-orange-150">
+            <CardHeader className="text-center pb-2">
+              <div className="mx-auto mb-3 flex items-center justify-center w-12 h-12 rounded-xl bg-orange-100 border border-orange-200">
+                <Zap className="h-6 w-6 text-orange-600" />
               </div>
+              <CardTitle className="text-xl font-bold text-gray-900">
+                GoHighLevel
+              </CardTitle>
+              <CardDescription className="text-gray-600 mt-1">
+                Conecta WhatsApp directamente a tu cuenta GHL
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="pt-3 space-y-3">
+              {/* Botón instalación/OAuth GHL */}
+              <Button
+                onClick={handleGHLInstall}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-6 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <ExternalLink className="h-5 w-5 mr-2" />
+                Conectar con GoHighLevel
+              </Button>
+              <p className="text-xs text-center text-gray-500">
+                Instala desde el Marketplace de GHL y autoriza el acceso.
+              </p>
+
+              <div className="relative flex items-center gap-2 py-1">
+                <div className="flex-1 h-px bg-gray-200" />
+                <span className="text-xs text-gray-400">ya estás conectado?</span>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+
+              {/* Botón admin GHL */}
               <Button
                 onClick={() => navigate('/ghl-admin')}
                 variant="outline"
-                className="w-full border-orange-200 text-orange-700 hover:bg-orange-100 hover:text-orange-800 font-semibold"
+                className="w-full border-orange-300 text-orange-700 hover:bg-orange-100 hover:text-orange-800 font-semibold py-5"
               >
                 <Zap className="h-4 w-4 mr-2" />
-                Ver instancias GHL
+                Panel de instancias GHL
+                <ChevronDown className="h-4 w-4 ml-auto text-orange-600" />
               </Button>
+              <p className="text-xs text-center text-gray-500">
+                Accede a tu panel de control y administra instancias.
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -194,7 +224,7 @@ export default function LoginPage() {
       </section>
 
       <footer className="w-full p-6 text-center text-gray-400 text-xs">
-        © 2024 WhatsFull · Integración WhatsApp Business + HubSpot
+        © 2024 WhatsFull · Integración WhatsApp Business + HubSpot/GoHighLevel
       </footer>
     </div>
   );
