@@ -20,7 +20,9 @@ import {
   Bot,
   ShieldCheck,
   MonitorSpeaker,
-  Zap
+  Zap,
+  Wifi,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 
@@ -67,6 +69,8 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       '/dashboard/suscripcion': 'suscripcion',
       '/dashboard/hubspot': 'hubspot',
       '/dashboard/gohighlevel': 'gohighlevel',
+      '/ghl-monitor': 'ghl-monitor',
+      '/ghl-registros': 'ghl-registros',
       '/dashboard/mensajes': 'mensajes',
       '/dashboard/bandeja': 'bandeja',
       '/dashboard/whatsapp-ai': 'whatsapp-ai',
@@ -154,6 +158,20 @@ export function Sidebar({ activeTab, onTabChange, onLogoClick }: SidebarProps) {
       label: 'GoHighLevel',
       description: 'Instancias WhatsApp conectadas a GHL',
       href: '/dashboard/gohighlevel'
+    },
+    {
+      id: 'ghl-monitor',
+      icon: Wifi,
+      label: 'Monitor GHL',
+      description: 'Estado en tiempo real de instancias GHL',
+      href: '/ghl-monitor'
+    },
+    {
+      id: 'ghl-registros',
+      icon: FileText,
+      label: 'Registros GHL',
+      description: 'Tokens OAuth y canales configurados de GHL',
+      href: '/ghl-registros'
     },
     {
       id: 'mensajes',

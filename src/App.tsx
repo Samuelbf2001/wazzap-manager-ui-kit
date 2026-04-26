@@ -30,6 +30,8 @@ import LoginPage from './pages/oauth/LoginPage';
 import HubSpotCallbackPage from './pages/HubSpotCallbackPage';
 import GHLSetupPage from './pages/GHLSetupPage';
 import GHLDashboardPage from './pages/GHLDashboardPage';
+import GHLMonitorPage from './pages/GHLMonitorPage';
+import GHLRegistrosPage from './pages/GHLRegistrosPage';
 import { connectionMonitorService } from './services/connection-monitor.service';
 
 // 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
@@ -148,6 +150,12 @@ const App = () => (
 
           {/* GHL Admin — panel público de instancias (sin auth HubSpot, auth propia después) */}
           <Route path="/ghl-admin" element={<GHLDashboardPage />} />
+
+          {/* GHL Monitor — estado en tiempo real, polling 30s, sin auth HubSpot */}
+          <Route path="/ghl-monitor" element={<GHLMonitorPage />} />
+
+          {/* GHL Registros — tokens OAuth y canales configurados, sin auth HubSpot */}
+          <Route path="/ghl-registros" element={<GHLRegistrosPage />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
