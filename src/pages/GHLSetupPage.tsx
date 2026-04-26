@@ -64,8 +64,9 @@ export default function GHLSetupPage() {
         if (!result.readyForQR) {
           setValidationError(result.error || 'Location no está lista para conectar');
         }
-        // Si readyForQR es true, mostrar modal automáticamente después de validar
-        if (result.readyForQR) {
+        // Auto-abrir modal SOLO si no hay instancia existente (primera instalación)
+        // Si ya hay instancia, el usuario ve la tabla y decide desde ahí
+        if (result.readyForQR && !result.instanceExists) {
           setTimeout(() => setShowAutoQRModal(true), 500);
         }
       })
@@ -226,7 +227,7 @@ export default function GHLSetupPage() {
               </Button>
             </div>
 
-            <ConnectionsTable mode="ghl" locationId={activeLocation} key={refreshKey} />
+            <ConnectionsTable mode="ghl" locationId={activeLocation} key={refreshKey} hideTitle />
           </div>
         )}
       </div>

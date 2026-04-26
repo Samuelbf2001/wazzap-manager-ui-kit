@@ -25,12 +25,13 @@ interface Connection {
 interface ConnectionsTableProps {
   mode?: 'hubspot' | 'ghl';
   locationId?: string;
+  hideTitle?: boolean;
 }
 
 const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 const AGENT_OPTIONS = ["Sin asignar", "Agent A", "Agent B", "Agent C"];
 
-export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTableProps) {
+export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = false }: ConnectionsTableProps) {
   const isGHL = mode === 'ghl';
   const [connections, setConnections] = useState<Connection[]>([]);
   const [editing, setEditing] = useState<Connection | null>(null);
@@ -188,8 +189,12 @@ export function ConnectionsTable({ mode = 'hubspot', locationId }: ConnectionsTa
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-2">Números de WhatsApp Conectados</h2>
-      <p className="text-sm text-gray-600 mb-4">Administra tus conexiones de WhatsApp y su estado actual.</p>
+      {!hideTitle && (
+        <>
+          <h2 className="text-xl font-bold mb-2">Números de WhatsApp Conectados</h2>
+          <p className="text-sm text-gray-600 mb-4">Administra tus conexiones de WhatsApp y su estado actual.</p>
+        </>
+      )}
 
       <table className="min-w-full text-sm">
         <thead className="bg-gray-50 text-gray-600">
