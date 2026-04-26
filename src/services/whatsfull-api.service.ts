@@ -30,6 +30,8 @@ export interface ChannelSetupResult {
   provider: string;
   evolutionInstance?: string;
   evolutionApikey?: string;
+  qrBase64?: string | null;
+  instanceState?: string;
 }
 
 export interface HubSpotInbox {
@@ -133,6 +135,7 @@ class WhatsfullApiService {
     const data = await res.json();
     if (!res.ok) throw new Error(data.details || data.error || 'Error configurando canal GHL');
     // Normalizar respuesta al mismo formato que ChannelSetupResult
+    // backend devuelve instanceName (no evolutionInstance) desde el refactor
     return {
       success: data.success,
       channelId: data.locationId,
@@ -140,8 +143,10 @@ class WhatsfullApiService {
       inboxId: '',
       phoneNumber: data.phoneNumber,
       provider: data.provider,
-      evolutionInstance: data.evolutionInstance,
+      evolutionInstance: data.instanceName ?? data.evolutionInstance,
       evolutionApikey: data.evolutionApikey,
+      qrBase64: data.qrBase64 ?? null,
+      instanceState: data.instanceState,
     } as ChannelSetupResult;
   }
 
@@ -192,18 +197,33 @@ class WhatsfullApiService {
   }
 
   /**
-   * Valida si una locationId de GHL está lista para crear una instancia Evolution.
-   * Retorna { readyForQR: boolean, error?: string }
+   * Valida si una locationId de GHL tiene tokens OAuth y si existe una instancia Evolution.
+   * Retorna objeto con estado completo incluyendo readyForQR.
    */
-  async validateGHLLocation(locationId: string): Promise<{ readyForQR: boolean; error?: string }> {
+  async validateGHLLocation(locationId: string): Promise<{
+    readyForQR: boolean;
+    hasTokens?: boolean;
+    instanceExists?: boolean;
+    instanceName?: string;
+    instanceState?: string;
+    phoneNumber?: string;
+    error?: string;
+  }> {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/ghl-company/validate?locationId=${encodeURIComponent(locationId)}`);
+      const res = await fetch(`${BACKEND_URL}/api/ghl-channels/validate/${encodeURIComponent(locationId)}`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         return { readyForQR: false, error: data.error || 'Error validando location' };
       }
       const data = await res.json();
-      return { readyForQR: data.success !== false, error: data.error };
+      return {
+        readyForQR: data.readyForQR ?? false,
+        hasTokens: data.hasTokens,
+        instanceExists: data.instanceExists,
+        instanceName: data.instanceName,
+        instanceState: data.instanceState,
+        phoneNumber: data.phoneNumber,
+      };
     } catch (err) {
       return { readyForQR: false, error: err instanceof Error ? err.message : 'Error desconocido' };
     }
