@@ -190,6 +190,24 @@ class WhatsfullApiService {
       throw new Error(data.error || `Error eliminando canal GHL: ${res.status}`);
     }
   }
+
+  /**
+   * Valida si una locationId de GHL está lista para crear una instancia Evolution.
+   * Retorna { readyForQR: boolean, error?: string }
+   */
+  async validateGHLLocation(locationId: string): Promise<{ readyForQR: boolean; error?: string }> {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/ghl-company/validate?locationId=${encodeURIComponent(locationId)}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        return { readyForQR: false, error: data.error || 'Error validando location' };
+      }
+      const data = await res.json();
+      return { readyForQR: data.success !== false, error: data.error };
+    } catch (err) {
+      return { readyForQR: false, error: err instanceof Error ? err.message : 'Error desconocido' };
+    }
+  }
 }
 
 export const whatsfullApi = new WhatsfullApiService();

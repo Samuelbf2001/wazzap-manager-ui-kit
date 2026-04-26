@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Building2, AlertCircle, Loader2, ChevronDown, LayoutGrid } from 'lucide-react';
 import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { ConnectionsTable } from '@/components/ConnectionsTable';
+import { whatsfullApi } from '@/services/whatsfull-api.service';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
 
@@ -29,6 +30,11 @@ export default function GHLSetupPage() {
   const [showModal, setShowModal]               = useState(false);
   const [refreshKey, setRefreshKey]             = useState(0);
 
+  // Nuevos estados para validación automática
+  const [validating, setValidating]             = useState(false);
+  const [validationError, setValidationError]   = useState('');
+  const [showAutoQRModal, setShowAutoQRModal]   = useState(false);
+
   // Cargar locations cuando hay companyId (instalación agency)
   useEffect(() => {
     if (!companyId || locationId) return;
@@ -47,12 +53,36 @@ export default function GHLSetupPage() {
       .finally(() => setLoadingLocations(false));
   }, [companyId, locationId]);
 
+  // Validar automáticamente locationId si viene en URL (instalación directa)
+  useEffect(() => {
+    if (!locationId) return;
+    setValidating(true);
+    setValidationError('');
+    whatsfullApi
+      .validateGHLLocation(locationId)
+      .then((result) => {
+        if (!result.readyForQR) {
+          setValidationError(result.error || 'Location no está lista para conectar');
+        }
+        // Si readyForQR es true, mostrar modal automáticamente después de validar
+        if (result.readyForQR) {
+          setTimeout(() => setShowAutoQRModal(true), 500);
+        }
+      })
+      .catch((err) => {
+        setValidationError(err instanceof Error ? err.message : 'Error validando location');
+      })
+      .finally(() => setValidating(false));
+  }, [locationId]);
+
   const activeLocation = selectedLocation || locationId || '';
 
   const selectedLocationName = locations.find(l => l.id === selectedLocation)?.name || '';
 
   const handleSuccess = () => {
     setRefreshKey(k => k + 1);
+    setShowModal(false);
+    setShowAutoQRModal(false);
   };
 
   return (
@@ -142,8 +172,31 @@ export default function GHLSetupPage() {
           </Card>
         )}
 
+        {/* Validando locationId */}
+        {locationId && validating && (
+          <Card>
+            <CardContent className="py-10 text-center">
+              <Loader2 className="h-8 w-8 mx-auto mb-3 text-green-600 animate-spin" />
+              <p className="text-sm text-gray-600">Validando location...</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Error de validación */}
+        {locationId && validationError && !validating && (
+          <Card>
+            <CardContent className="py-10 text-center">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-red-500" />
+              <p className="text-sm text-red-600">{validationError}</p>
+              <p className="text-xs text-gray-400 mt-2">
+                Intenta hacer click en el botón "Agregar número" a continuación.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Sin location ni company */}
-        {!activeLocation && !companyId && (
+        {!activeLocation && !companyId && !locationId && (
           <Card>
             <CardContent className="py-10 text-center text-gray-400">
               <AlertCircle className="h-8 w-8 mx-auto mb-2 text-gray-300" />
@@ -178,13 +231,23 @@ export default function GHLSetupPage() {
         )}
       </div>
 
-      {/* Modal reutilizable en modo GHL */}
+      {/* Modal manual (botón "Nueva conexión") */}
       <WhatsAppConnectionModal
         open={showModal}
         onOpenChange={setShowModal}
         onConnectionSuccess={handleSuccess}
         mode="ghl"
         locationId={activeLocation}
+        companyId={companyId || undefined}
+      />
+
+      {/* Modal automático (se abre si locationId se valida exitosamente) */}
+      <WhatsAppConnectionModal
+        open={showAutoQRModal}
+        onOpenChange={setShowAutoQRModal}
+        onConnectionSuccess={handleSuccess}
+        mode="ghl"
+        locationId={locationId || ''}
         companyId={companyId || undefined}
       />
     </div>

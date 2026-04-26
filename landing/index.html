@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Gateway — Sixteam.pro | WhatsApp en HubSpot y GoHighLevel</title>
+  <meta name="description" content="Conecta WhatsApp Business con HubSpot y GoHighLevel. Mensajes bidireccionales en tiempo real desde tu inbox del CRM. Powered by EvolutionAPI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    /* =====================================================
+       RESET & BASE
+    ===================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --green: #25D366;
+      --green-dark: #128C7E;
+      --green-light: #dcfce7;
+      --green-glow: rgba(37, 211, 102, 0.18);
+      --navy: #1a1a2e;
+      --navy-mid: #16213e;
+      --navy-light: #0f3460;
+      --white: #ffffff;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-400: #94a3b8;
+      --gray-600: #475569;
+      --gray-800: #1e293b;
+      --hubspot: #FF7A59;
+      --hubspot-dark: #e8622a;
+      --ghl: #2B6CE6;
+      --ghl-dark: #1d4ec0;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-xl: 32px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.07);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,.14), 0 4px 14px rgba(0,0,0,.08);
+      --shadow-xl: 0 24px 64px rgba(0,0,0,.18), 0 8px 24px rgba(0,0,0,.1);
+      --shadow-green: 0 8px 32px rgba(37,211,102,.28);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--gray-800);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* =====================================================
+       TYPOGRAPHY
+    ===================================================== */
+    h1, h2, h3, h4 {
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    h1 { font-size: clamp(2rem, 5vw, 3.75rem); }
+    h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); }
+    h3 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
+
+    p { line-height: 1.75; }
+
+    /* =====================================================
+       UTILITIES
+    ===================================================== */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: var(--white);
+      box-shadow: var(--shadow-green);
+    }
+
+    .btn-green:hover {
+      background: var(--green-dark);
+      box-shadow: 0 12px 40px rgba(37,211,102,.38);
+    }
+
+    .btn-hubspot {
+      background: var(--hubspot);
+      color: var(--white);
+      box-shadow: 0 8px 28px rgba(255,122,89,.3);
+    }
+
+    .btn-hubspot:hover {
+      background: var(--hubspot-dark);
+      box-shadow: 0 12px 36px rgba(255,122,89,.42);
+    }
+
+    .btn-ghl {
+      background: var(--ghl);
+      color: var(--white);
+      box-shadow: 0 8px 28px rgba(43,108,230,.3);
+    }
+
+    .btn-ghl:hover {
+      background: var(--ghl-dark);
+      box-shadow: 0 12px 36px rgba(43,108,230,.42);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.65);
+    }
+
+    .btn-outline-dark {
+      background: transparent;
+      color: var(--navy);
+      border: 2px solid var(--gray-200);
+    }
+
+    .btn-outline-dark:hover {
+      border-color: var(--green);
+      color: var(--green-dark);
+    }
+
+    /* =====================================================
+       ANIMATIONS
+    ===================================================== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.65s cubic-bezier(.22,.68,0,1.2), transform 0.65s cubic-bezier(.22,.68,0,1.2);
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+    .delay-4 { transition-delay: 0.4s; }
+    .delay-5 { transition-delay: 0.5s; }
+    .delay-6 { transition-delay: 0.6s; }
+
+    /* =====================================================
+       NAVBAR
+    ===================================================== */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+    }
+
+    #navbar.scrolled {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.08), var(--shadow-sm);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .nav-logo-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--green);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(37,211,102,.35);
+    }
+
+    .nav-logo-text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.03em;
+    }
+
+    .nav-logo-text span {
+      color: var(--green-dark);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--gray-600);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--navy);
+      background: var(--gray-100);
+    }
+
+    .nav-ctas {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-ctas .btn {
+      padding: 10px 18px;
+      font-size: 0.85rem;
+    }
+
+    .nav-mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      color: var(--navy);
+    }
+
+    @media (max-width: 960px) {
+      .nav-links { display: none; }
+      .nav-ctas .btn-outline-dark { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-ctas { display: none; }
+      .nav-mobile-toggle { display: flex; }
+    }
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+    #hero {
+      min-height: 100vh;
+      background: linear-gradient(145deg, var(--navy) 0%, var(--navy-mid) 45%, #0a2744 100%);
+      display: flex;
+      align-items: center;
+      padding: 120px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 50%, rgba(37,211,102,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 30%, rgba(43,108,230,.1) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* Animated background dots */
+    #hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content { }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(37,211,102,.15);
+      border: 1px solid rgba(37,211,102,.3);
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-badge-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-headline {
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+
+    .hero-headline .highlight {
+      background: linear-gradient(135deg, var(--green) 0%, #4ade80 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subheadline {
+      color: rgba(255,255,255,0.68);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      margin-bottom: 40px;
+      max-width: 520px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hero-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--white);
+    }
+
+    .hero-stat-label {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+
+    .hero-stat-divider {
+      width: 1px;
+      background: rgba(255,255,255,0.12);
+      align-self: stretch;
+    }
+
+    /* =====================================================
+       MOCKUP — Phone + CRM panel
+    ===================================================== */
+    .hero-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .mockup-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* Glow blob behind */
+    .mockup-glow {
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(ellipse at center, rgba(37,211,102,.22) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: glow-breathe 4s ease-in-out infinite;
+    }
+
+    @keyframes glow-breathe {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.08); }
+    }
+
+    .mockup-scene {
+      position: relative;
+      display: flex;
+      gap: 14px;
+      align-items: flex-end;
+    }
+
+    /* Phone mockup */
+    .phone-mockup {
+      width: 190px;
+      flex-shrink: 0;
+      background: #111827;
+      border-radius: 32px;
+      padding: 12px;
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.07);
+      position: relative;
+    }
+
+    .phone-notch {
+      width: 70px;
+      height: 10px;
+      background: #000;
+      border-radius: 100px;
+      margin: 0 auto 10px;
+    }
+
+    .phone-screen {
+      background: #fff;
+      border-radius: 22px;
+      overflow: hidden;
+    }
+
+    .phone-wa-header {
+      background: var(--green-dark);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wa-avatar {
+      width: 30px;
+      height: 30px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .wa-contact-info {
+      flex: 1;
+    }
+
+    .wa-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .wa-status {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .phone-chat {
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #ece5dd url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8b8a2' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      min-height: 200px;
+    }
+
+    .chat-bubble {
+      max-width: 82%;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      line-height: 1.45;
+      position: relative;
+    }
+
+    .chat-bubble-in {
+      background: #fff;
+      border-radius: 0 10px 10px 10px;
+      align-self: flex-start;
+      color: #111;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+
+    .chat-bubble-out {
+      background: #dcf8c6;
+      border-radius: 10px 10px 0 10px;
+      align-self: flex-end;
+      color: #111;
+      box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+
+    .chat-time {
+      font-size: 0.52rem;
+      color: rgba(0,0,0,.38);
+      float: right;
+      margin-left: 8px;
+      margin-top: 2px;
+    }
+
+    .phone-input-bar {
+      background: #f0f0f0;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .phone-input-field {
+      flex: 1;
+      background: #fff;
+      border-radius: 20px;
+      height: 28px;
+      font-size: 0.6rem;
+      padding: 0 10px;
+      color: var(--gray-400);
+      display: flex;
+      align-items: center;
+    }
+
+    .phone-send-btn {
+      width: 28px;
+      height: 28px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* CRM panel mockup */
+    .crm-panel {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .crm-header {
+      background: rgba(255,255,255,0.08);
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .crm-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .crm-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .crm-title {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      flex: 1;
+      text-align: center;
+    }
+
+    .crm-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .crm-conversation {
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .crm-conversation.active {
+      background: rgba(37,211,102,.18);
+      border-color: rgba(37,211,102,.3);
+    }
+
+    .crm-conv-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .crm-conv-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .crm-conv-name {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .crm-conv-preview {
+      font-size: 0.56rem;
+      color: rgba(255,255,255,0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .crm-conv-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .crm-conv-time {
+      font-size: 0.52rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .crm-unread {
+      width: 14px;
+      height: 14px;
+      background: var(--green);
+      border-radius: 50%;
+      font-size: 0.5rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Arrow connector */
+    .mockup-arrow {
+      position: absolute;
+      top: 50%;
+      left: 188px;
+      transform: translateY(-50%);
+      z-index: 10;
+    }
+
+    .arrow-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      box-shadow: 0 0 0 6px rgba(37,211,102,.2), var(--shadow-green);
+      animation: arrow-bounce 2.5s ease-in-out infinite;
+    }
+
+    @keyframes arrow-bounce {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(4px); }
+    }
+
+    /* Floating badges on mockup */
+    .mockup-badge {
+      position: absolute;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .mockup-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .mockup-badge-text {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .mockup-badge-sub {
+      font-size: 0.56rem;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .badge-top-left {
+      top: -18px;
+      left: -10px;
+      animation: float-badge1 3.5s ease-in-out infinite;
+    }
+
+    .badge-bottom-right {
+      bottom: -18px;
+      right: -10px;
+      animation: float-badge2 4s ease-in-out infinite 0.7s;
+    }
+
+    @keyframes float-badge1 {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes float-badge2 {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 56px;
+        text-align: center;
+      }
+
+      .hero-subheadline, .hero-ctas {
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-ctas { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-visual { justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .mockup-wrapper { max-width: 340px; }
+      .phone-mockup { width: 150px; }
+      .mockup-badge { display: none; }
+    }
+
+    /* =====================================================
+       HOW IT WORKS
+    ===================================================== */
+    #how-it-works {
+      padding: 100px 0;
+      background: var(--gray-50);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #how-it-works::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(ellipse at center, rgba(37,211,102,.06) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .section-header h2 {
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+
+    .section-header p {
+      color: var(--gray-600);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      position: relative;
+    }
+
+    /* Connector line */
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 52px;
+      left: calc(16.67% + 24px);
+      right: calc(16.67% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--green-light) 0%, var(--green) 50%, var(--green-light) 100%);
+      z-index: 0;
+    }
+
+    .step-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--gray-100);
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .step-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .step-number {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--white);
+      margin: 0 auto 20px;
+      box-shadow: var(--shadow-green);
+      border: 3px solid var(--white);
+      outline: 3px solid var(--green-light);
+    }
+
+    .step-icon-wrap {
+      width: 56px;
+      height: 56px;
+      background: var(--green-light);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      color: var(--green-dark);
+    }
+
+    .step-card h3 {
+      color: var(--navy);
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    .step-card p {
+      color: var(--gray-600);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .steps-grid::before { display: none; }
+    }
+
+    /* =====================================================
+       INTEGRATIONS
+    ===================================================== */
+    #integrations {
+      padding: 100px 0;
+      background: var(--white);
+    }
+
+    .integration-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      margin-top: 16px;
+    }
+
+    .integration-card {
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .integration-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .integration-card-hubspot {
+      background: linear-gradient(145deg, #fff5f2 0%, #fff0ea 100%);
+      border: 1px solid rgba(255,122,89,.18);
+      box-shadow: 0 8px 40px rgba(255,122,89,.1), var(--shadow-md);
+    }
+
+    .integration-card-hubspot:hover {
+      box-shadow: 0 20px 60px rgba(255,122,89,.2), var(--shadow-lg);
+    }
+
+    .integration-card-ghl {
+      background: linear-gradient(145deg, #f0f4ff 0%, #eaf0ff 100%);
+      border: 1px solid rgba(43,108,230,.18);
+      box-shadow: 0 8px 40px rgba(43,108,230,.1), var(--shadow-md);
+    }
+
+    .integration-card-ghl:hover {
+      box-shadow: 0 20px 60px rgba(43,108,230,.2), var(--shadow-lg);
+    }
+
+    .integration-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      opacity: 0.06;
+    }
+
+    .integration-card-hubspot::before {
+      background: var(--hubspot);
+    }
+
+    .integration-card-ghl::before {
+      background: var(--ghl);
+    }
+
+    .integration-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .integration-logo-hubspot {
+      background: var(--hubspot);
+    }
+
+    .integration-logo-ghl {
+      background: var(--ghl);
+    }
+
+    .integration-card h3 {
+      font-size: 1.5rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .integration-card .tagline {
+      color: var(--gray-600);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .integration-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 36px;
+    }
+
+    .integration-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--gray-700, #374151);
+    }
+
+    .feature-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feature-check-hubspot {
+      background: rgba(255,122,89,.15);
+      color: var(--hubspot-dark);
+    }
+
+    .feature-check-ghl {
+      background: rgba(43,108,230,.15);
+      color: var(--ghl-dark);
+    }
+
+    @media (max-width: 720px) {
+      .integration-cards { grid-template-columns: 1fr; }
+      .integration-card { padding: 36px 28px; }
+    }
+
+    /* =====================================================
+       FEATURES
+    ===================================================== */
+    #features {
+      padding: 100px 0;
+      background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--green-light);
+    }
+
+    .feature-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--green-light) 0%, #bbf7d0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: var(--green-dark);
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon-wrap {
+      transform: scale(1.08) rotate(-3deg);
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--gray-600);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =====================================================
+       FAQ
+    ===================================================== */
+    #faq {
+      padding: 100px 0;
+      background: var(--navy);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #faq::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(37,211,102,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 20%, rgba(43,108,230,.07) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    #faq .section-header h2 {
+      color: var(--white);
+    }
+
+    #faq .section-header p {
+      color: rgba(255,255,255,.55);
+    }
+
+    #faq .section-label {
+      background: rgba(37,211,102,.15);
+      color: var(--green);
+      border: 1px solid rgba(37,211,102,.25);
+    }
+
+    .faq-list {
+      max-width: 780px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .faq-item {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .faq-item.open {
+      border-color: rgba(37,211,102,.3);
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .faq-question-text {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.9);
+      line-height: 1.4;
+    }
+
+    .faq-chevron {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      flex-shrink: 0;
+      transition: background 0.25s, transform 0.35s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    .faq-item.open .faq-chevron {
+      background: rgba(37,211,102,.18);
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0,1,0,1);
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+      transition: max-height 0.5s cubic-bezier(1,0,1,0);
+    }
+
+    .faq-answer-inner {
+      padding: 0 28px 22px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,.58);
+      line-height: 1.8;
+    }
+
+    .faq-answer-inner strong {
+      color: rgba(255,255,255,.82);
+    }
+
+    /* =====================================================
+       CTA BAND
+    ===================================================== */
+    #cta-band {
+      padding: 80px 0;
+      background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #cta-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.08) 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+    }
+
+    .cta-band-inner {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-band-inner h2 {
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+
+    .cta-band-inner p {
+      color: rgba(255,255,255,.8);
+      font-size: 1.05rem;
+      margin-bottom: 36px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-band-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .btn-white {
+      background: var(--white);
+      color: var(--green-dark);
+    }
+
+    .btn-white:hover {
+      background: var(--gray-50);
+      box-shadow: 0 8px 28px rgba(0,0,0,.18);
+    }
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+    footer {
+      background: var(--navy);
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 64px 0 40px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 56px;
+    }
+
+    .footer-brand p {
+      color: rgba(255,255,255,.48);
+      font-size: 0.88rem;
+      line-height: 1.75;
+      margin-top: 16px;
+      max-width: 280px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 18px;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,.6);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--green);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.07);
+      padding-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 16px;
+    }
+
+    .footer-bottom p {
+      color: rgba(255,255,255,.3);
+      font-size: 0.82rem;
+    }
+
+    .footer-bottom a {
+      color: rgba(255,255,255,.4);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+
+    .footer-bottom a:hover {
+      color: var(--green);
+    }
+
+    .footer-bottom-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-email-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--green) !important;
+      font-weight: 600 !important;
+      font-size: 0.9rem !important;
+    }
+
+    @media (max-width: 900px) {
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+
+      .footer-brand {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    /* =====================================================
+       SCROLLBAR
+    ===================================================== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--navy); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+    /* =====================================================
+       MISC HELPERS
+    ===================================================== */
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 16px; }
+    .mt-8 { margin-top: 32px; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+    }
+
+    /* Provider badge */
+    .provider-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 100px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,.65);
+      font-weight: 600;
+      margin-top: 28px;
+    }
+
+    .provider-badge-icon {
+      width: 18px;
+      height: 18px;
+      background: var(--green);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+<header id="navbar" role="banner">
+  <nav class="container nav-inner" aria-label="Navegación principal">
+    <a href="#" class="nav-logo" aria-label="WhatsApp Gateway by Sixteam.pro">
+      <div class="nav-logo-icon">💬</div>
+      <span class="nav-logo-text">WA<span>Gateway</span></span>
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="#how-it-works">Cómo funciona</a></li>
+      <li><a href="#integrations">Integraciones</a></li>
+      <li><a href="#features">Características</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+
+    <div class="nav-ctas">
+      <a href="#integrations" class="btn btn-outline-dark">Ver integraciones</a>
+      <a href="https://whatsfull.sixteam.pro/install" class="btn btn-green">
+        Comenzar gratis →
+      </a>
+    </div>
+
+    <button class="nav-mobile-toggle" aria-label="Abrir menú" onclick="toggleMobileMenu()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </nav>
+</header>
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+<main>
+<section id="hero" aria-labelledby="hero-headline">
+  <div class="container hero-grid">
+
+    <!-- Content -->
+    <div class="hero-content">
+      <div class="hero-badge" role="status">
+        <span class="hero-badge-dot" aria-hidden="true"></span>
+        Powered by EvolutionAPI &amp; Gupshup
+      </div>
+
+      <h1 class="hero-headline" id="hero-headline">
+        Tu WhatsApp,<br>
+        en el inbox de<br>
+        <span class="highlight">HubSpot y GoHighLevel</span>
+      </h1>
+
+      <p class="hero-subheadline">
+        Conecta WhatsApp Business con tu CRM en minutos. Los mensajes aparecen como conversaciones nativas — sin cambiar de app, sin perder contexto, sin complicaciones.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="https://whatsfull.sixteam.pro/install" class="btn btn-green" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Conectar con HubSpot
+        </a>
+        <a href="https://whatsfull.sixteam.pro/ghl/install" class="btn btn-outline" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Conectar con GoHighLevel
+        </a>
+      </div>
+
+      <div class="hero-stats" role="list" aria-label="Estadísticas clave">
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-value">2</span>
+          <span class="hero-stat-label">CRMs soportados</span>
+        </div>
+        <div class="hero-stat-divider" aria-hidden="true"></div>
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-value">100%</span>
+          <span class="hero-stat-label">Bidireccional</span>
+        </div>
+        <div class="hero-stat-divider" aria-hidden="true"></div>
+        <div class="hero-stat" role="listitem">
+          <span class="hero-stat-value">Multi</span>
+          <span class="hero-stat-label">Números &amp; tenants</span>
+        </div>
+      </div>
+
+      <div class="provider-badge" aria-label="Tecnología utilizada">
+        <span class="provider-badge-icon" aria-hidden="true">⚡</span>
+        Sin API oficial de Meta requerida — ahorra hasta 80% en costos
+      </div>
+    </div>
+
+    <!-- Visual / Mockup -->
+    <div class="hero-visual" aria-hidden="true">
+      <div class="mockup-wrapper">
+        <div class="mockup-glow"></div>
+
+        <!-- Floating badge top-left -->
+        <div class="mockup-badge badge-top-left">
+          <div class="mockup-badge-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="mockup-badge-text">Mensaje entregado</div>
+            <div class="mockup-badge-sub">HubSpot Inbox ✓</div>
+          </div>
+        </div>
+
+        <div class="mockup-scene">
+          <!-- Phone -->
+          <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-wa-header">
+                <div class="wa-avatar">👤</div>
+                <div class="wa-contact-info">
+                  <div class="wa-name">María García</div>
+                  <div class="wa-status">en línea</div>
+                </div>
+                <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+              </div>
+
+              <div class="phone-chat">
+                <div class="chat-bubble chat-bubble-in">
+                  Hola! Quiero info sobre sus planes 😊
+                  <span class="chat-time">10:24</span>
+                </div>
+                <div class="chat-bubble chat-bubble-out">
+                  ¡Hola María! Con gusto te ayudo. ¿Cuántos usuarios necesitas?
+                  <span class="chat-time">10:25 ✓✓</span>
+                </div>
+                <div class="chat-bubble chat-bubble-in">
+                  Somos un equipo de 5 personas
+                  <span class="chat-time">10:26</span>
+                </div>
+                <div class="chat-bubble chat-bubble-out">
+                  Perfecto, te envío la propuesta ahora
+                  <span class="chat-time">10:27 ✓✓</span>
+                </div>
+              </div>
+
+              <div class="phone-input-bar">
+                <div class="phone-input-field">Escribe un mensaje</div>
+                <div class="phone-send-btn">
+                  <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22 11 13M22 2L2 9l9 4z" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow -->
+          <div class="mockup-arrow">
+            <div class="arrow-icon">
+              <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+
+          <!-- CRM Panel -->
+          <div class="crm-panel">
+            <div class="crm-header">
+              <div class="crm-dots">
+                <div class="crm-dot" style="background:#ff5f57"></div>
+                <div class="crm-dot" style="background:#ffbd2e"></div>
+                <div class="crm-dot" style="background:#28ca41"></div>
+              </div>
+              <div class="crm-title">HubSpot Inbox</div>
+            </div>
+            <div class="crm-body">
+              <div class="crm-conversation active">
+                <div class="crm-conv-avatar" style="background:rgba(37,211,102,.2)">👤</div>
+                <div class="crm-conv-info">
+                  <div class="crm-conv-name">María García</div>
+                  <div class="crm-conv-preview">Somos un equipo de 5...</div>
+                </div>
+                <div class="crm-conv-meta">
+                  <div class="crm-conv-time">10:26</div>
+                  <div class="crm-unread">1</div>
+                </div>
+              </div>
+              <div class="crm-conversation">
+                <div class="crm-conv-avatar" style="background:rgba(255,122,89,.2)">👩</div>
+                <div class="crm-conv-info">
+                  <div class="crm-conv-name">Carlos Ruiz</div>
+                  <div class="crm-conv-preview">Gracias por la info!</div>
+                </div>
+                <div class="crm-conv-meta">
+                  <div class="crm-conv-time">09:41</div>
+                </div>
+              </div>
+              <div class="crm-conversation">
+                <div class="crm-conv-avatar" style="background:rgba(43,108,230,.2)">👨</div>
+                <div class="crm-conv-info">
+                  <div class="crm-conv-name">Luis Mendoza</div>
+                  <div class="crm-conv-preview">¿Cuánto cuesta el plan...</div>
+                </div>
+                <div class="crm-conv-meta">
+                  <div class="crm-conv-time">Ayer</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating badge bottom-right -->
+        <div class="mockup-badge badge-bottom-right">
+          <div class="mockup-badge-dot" style="background:var(--ghl)"></div>
+          <div>
+            <div class="mockup-badge-text">GoHighLevel</div>
+            <div class="mockup-badge-sub">3 nuevos chats hoy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- =====================================================
+     HOW IT WORKS
+===================================================== -->
+<section id="how-it-works" aria-labelledby="how-it-works-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Proceso simple
+      </div>
+      <h2 id="how-it-works-title">Listo en menos de 10 minutos</h2>
+      <p>Sin configuraciones técnicas complicadas. Tres pasos y tus conversaciones de WhatsApp aparecen directamente en tu CRM.</p>
+    </div>
+
+    <div class="steps-grid">
+      <article class="step-card fade-up">
+        <div class="step-number" aria-label="Paso 1">1</div>
+        <div class="step-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3>Instala la app en tu CRM</h3>
+        <p>Un clic para autorizar en HubSpot o GoHighLevel. No se requieren credenciales técnicas ni conocimientos de desarrollo.</p>
+      </article>
+
+      <article class="step-card fade-up delay-2">
+        <div class="step-number" aria-label="Paso 2">2</div>
+        <div class="step-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <h3>Conecta tu número WhatsApp</h3>
+        <p>Escanea el código QR con tu WhatsApp Business (vía EvolutionAPI) o configura tu WABA oficial con Gupshup. Sin cambiar tu número actual.</p>
+      </article>
+
+      <article class="step-card fade-up delay-4">
+        <div class="step-number" aria-label="Paso 3">3</div>
+        <div class="step-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Recibe y responde desde tu inbox</h3>
+        <p>Desde ese momento, cada mensaje de WhatsApp aparece como una conversación nativa en tu CRM. Responde sin salir de la plataforma.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     INTEGRATIONS
+===================================================== -->
+<section id="integrations" aria-labelledby="integrations-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Integraciones nativas
+      </div>
+      <h2 id="integrations-title">Elige tu CRM — nosotros hacemos el puente</h2>
+      <p>Compatible con los dos CRMs más usados por agencias y equipos de ventas en Latinoamérica.</p>
+    </div>
+
+    <div class="integration-cards">
+
+      <!-- HubSpot Card -->
+      <article class="integration-card integration-card-hubspot fade-up">
+        <div class="integration-logo integration-logo-hubspot" aria-hidden="true">
+          🧡
+        </div>
+        <h3>HubSpot</h3>
+        <p class="tagline">Custom Channels API v3 — conversaciones nativas en el Conversations Inbox</p>
+
+        <ul class="integration-features" aria-label="Características de la integración con HubSpot">
+          <li>
+            <span class="feature-check feature-check-hubspot" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Mensajes aparecen como conversaciones nativas en el inbox
+          </li>
+          <li>
+            <span class="feature-check feature-check-hubspot" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Contactos creados automáticamente desde el número del cliente
+          </li>
+          <li>
+            <span class="feature-check feature-check-hubspot" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Compatible con Sales Hub y Service Hub Pro+
+          </li>
+          <li>
+            <span class="feature-check feature-check-hubspot" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Soporte para imágenes, videos, documentos y audio
+          </li>
+          <li>
+            <span class="feature-check feature-check-hubspot" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Multi-portal: cada agencia tiene su propio espacio aislado
+          </li>
+        </ul>
+
+        <a href="https://whatsfull.sixteam.pro/install" class="btn btn-hubspot" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Instalar en HubSpot
+        </a>
+      </article>
+
+      <!-- GoHighLevel Card -->
+      <article class="integration-card integration-card-ghl fade-up delay-2">
+        <div class="integration-logo integration-logo-ghl" aria-hidden="true">
+          🔵
+        </div>
+        <h3>GoHighLevel</h3>
+        <p class="tagline">Custom Conversation Provider — reemplaza LC Phone como proveedor WhatsApp</p>
+
+        <ul class="integration-features" aria-label="Características de la integración con GoHighLevel">
+          <li>
+            <span class="feature-check feature-check-ghl" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Reemplaza LC Phone como proveedor de conversación custom
+          </li>
+          <li>
+            <span class="feature-check feature-check-ghl" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Compatible con todas las sub-cuentas de tu agencia GHL
+          </li>
+          <li>
+            <span class="feature-check feature-check-ghl" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <strong>Sin número WABA oficial requerido</strong> — usa EvolutionAPI
+          </li>
+          <li>
+            <span class="feature-check feature-check-ghl" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Flujos de automatización y pipelines de oportunidades
+          </li>
+          <li>
+            <span class="feature-check feature-check-ghl" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            Multi-tenant listo para revender a tus clientes
+          </li>
+        </ul>
+
+        <a href="https://whatsfull.sixteam.pro/ghl/install" class="btn btn-ghl" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Instalar en GoHighLevel
+        </a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     FEATURES
+===================================================== -->
+<section id="features" aria-labelledby="features-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Todo incluido
+      </div>
+      <h2 id="features-title">Todo lo que necesitas para atender clientes por WhatsApp</h2>
+      <p>Construido para equipos de ventas y agencias que manejan múltiples clientes y canales de comunicación.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <article class="feature-card fade-up">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9h8M8 13h6M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>Mensajes bidireccionales en tiempo real</h3>
+        <p>El cliente escribe en WhatsApp y el agente responde desde HubSpot o GHL — y viceversa. Sin latencia, sin colas de procesamiento.</p>
+      </article>
+
+      <article class="feature-card fade-up delay-1">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Múltiples números WhatsApp</h3>
+        <p>Conecta tantos números como necesites. Cada número tiene su propia bandeja, sus propios contactos y su propia configuración.</p>
+      </article>
+
+      <article class="feature-card fade-up delay-2">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>Creación automática de contactos</h3>
+        <p>Cuando alguien te escribe por primera vez, el sistema detecta el número y crea el contacto en tu CRM automáticamente. Cero trabajo manual.</p>
+      </article>
+
+      <article class="feature-card fade-up delay-3">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        </div>
+        <h3>Multimedia completo</h3>
+        <p>Recibe y envía imágenes, videos, documentos PDF, audios y stickers. Todo el contexto de la conversación queda guardado en el CRM.</p>
+      </article>
+
+      <article class="feature-card fade-up delay-4">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3>Sin API oficial de Meta requerida</h3>
+        <p>Con EvolutionAPI (protocolo WhatsApp Web) no necesitas aprobación de Meta ni cuenta WABA. Empieza hoy mismo con tu número actual, a una fracción del costo.</p>
+      </article>
+
+      <article class="feature-card fade-up delay-5">
+        <div class="feature-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3>Multi-tenant para agencias</h3>
+        <p>Gestiona múltiples clientes desde una sola instalación. Cada cliente tiene sus credenciales aisladas, sus números y su portal CRM independiente.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     FAQ
+===================================================== -->
+<section id="faq" aria-labelledby="faq-title">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Preguntas frecuentes
+      </div>
+      <h2 id="faq-title">Resolvemos tus dudas</h2>
+      <p>Todo lo que necesitas saber antes de conectar tu WhatsApp.</p>
+    </div>
+
+    <div class="faq-list" role="list">
+
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+          <span class="faq-question-text">¿Necesito una cuenta WhatsApp Business API (WABA) oficial de Meta?</span>
+          <span class="faq-chevron" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-answer" role="region">
+          <div class="faq-answer-inner">
+            <strong>No, si usas EvolutionAPI.</strong> Con EvolutionAPI, WhatsApp Gateway usa el protocolo WhatsApp Web (Baileys), lo que significa que solo necesitas un número de WhatsApp Business normal — el mismo que ya usas en tu teléfono. Sin aprobación de Meta, sin revisión de cuenta comercial, sin tiempos de espera.<br><br>
+            Si prefieres la API oficial de Meta (para mayor estabilidad a escala y mensajes de plantilla certificados), también puedes usar <strong>Gupshup</strong> como proveedor. En ese caso sí necesitarás una cuenta WABA aprobada.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+          <span class="faq-question-text">¿Funciona con cualquier plan de HubSpot o GoHighLevel?</span>
+          <span class="faq-chevron" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-answer" role="region">
+          <div class="faq-answer-inner">
+            Para <strong>HubSpot</strong>: la integración usa la Custom Channels API v3, que requiere <strong>Sales Hub Professional o Service Hub Professional</strong> (o superior). Los planes Starter o gratuito no tienen acceso a esta API.<br><br>
+            Para <strong>GoHighLevel</strong>: funciona con cualquier plan de GHL, incluyendo las cuentas de agencia con sub-cuentas. Solo necesitas acceso a la marketplace de apps o permisos de administrador para instalar providers custom.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+          <span class="faq-question-text">¿Puedo conectar múltiples números de WhatsApp?</span>
+          <span class="faq-chevron" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-answer" role="region">
+          <div class="faq-answer-inner">
+            <strong>Sí, sin límite definido.</strong> El sistema es multi-tenant y multi-número por diseño. Cada número WhatsApp genera su propia instancia en EvolutionAPI y se asocia a su canal independiente en el CRM.<br><br>
+            Para agencias con GoHighLevel: puedes asignar un número diferente a cada sub-cuenta del cliente. Para HubSpot: cada portal puede tener múltiples números configurados como canales separados en el Conversations Inbox.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false" onclick="toggleFaq(this)">
+          <span class="faq-question-text">¿Qué pasa si el cliente no ha escrito en las últimas 24 horas?</span>
+          <span class="faq-chevron" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-answer" role="region">
+          <div class="faq-answer-inner">
+            WhatsApp tiene una <strong>ventana de servicio de 24 horas</strong>: solo puedes enviar mensajes libres si el cliente escribió en las últimas 24h.<br><br>
+            <strong>Con EvolutionAPI</strong>: el sistema detecta automáticamente si la ventana está activa. Fuera de ella, el agente recibirá una notificación en el CRM.<br><br>
+            <strong>Con Gupshup (WABA oficial)</strong>: puedes enviar mensajes de plantilla aprobados por Meta fuera de la ventana de 24h — ideal para campañas de seguimiento y reactivación de prospectos. El gateway gestiona el envío de templates directamente desde el CRM.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     CTA BAND
+===================================================== -->
+<section id="cta-band" aria-labelledby="cta-title">
+  <div class="container cta-band-inner">
+    <div class="section-label" style="background:rgba(255,255,255,.15); color:rgba(255,255,255,.9); border:1px solid rgba(255,255,255,.25);" aria-hidden="true">
+      🚀 Empieza hoy
+    </div>
+    <h2 id="cta-title">Tu CRM ya tiene todo — solo le falta WhatsApp</h2>
+    <p>Sin tarjeta de crédito. Sin periodo de prueba limitado. Conecta tu primer número en menos de 10 minutos.</p>
+    <div class="cta-band-buttons">
+      <a href="https://whatsfull.sixteam.pro/install" class="btn btn-white" rel="noopener">
+        🧡 Instalar en HubSpot
+      </a>
+      <a href="https://whatsfull.sixteam.pro/ghl/install" class="btn btn-outline" rel="noopener">
+        🔵 Instalar en GoHighLevel
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+<footer role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <a href="#" class="nav-logo" style="display:inline-flex; margin-bottom:0;" aria-label="WhatsApp Gateway">
+          <div class="nav-logo-icon">💬</div>
+          <span class="nav-logo-text">WA<span>Gateway</span></span>
+        </a>
+        <p>Conecta WhatsApp Business con HubSpot y GoHighLevel. Mensajes bidireccionales, contactos automáticos y soporte multimedia — todo desde tu CRM.</p>
+        <a href="mailto:alpha@sixteam.pro" class="footer-links" style="margin-top:20px; display:inline-flex; align-items:center; gap:8px; color:var(--green); font-weight:700; font-size:0.88rem; text-decoration:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          alpha@sixteam.pro
+        </a>
+      </div>
+
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul class="footer-links">
+          <li><a href="#how-it-works">Cómo funciona</a></li>
+          <li><a href="#integrations">Integraciones</a></li>
+          <li><a href="#features">Características</a></li>
+          <li><a href="#faq">Preguntas frecuentes</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Instalar</h4>
+        <ul class="footer-links">
+          <li><a href="https://whatsfull.sixteam.pro/install" rel="noopener">HubSpot</a></li>
+          <li><a href="https://whatsfull.sixteam.pro/ghl/install" rel="noopener">GoHighLevel</a></li>
+          <li><a href="https://whatsfull.sixteam.pro" rel="noopener">Panel de control</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Sixteam.pro</h4>
+        <ul class="footer-links">
+          <li><a href="https://sixteam.pro" rel="noopener" target="_blank">Sitio web</a></li>
+          <li><a href="mailto:alpha@sixteam.pro">Soporte</a></li>
+          <li><a href="#">Documentación</a></li>
+          <li><a href="#">Términos de uso</a></li>
+          <li><a href="#">Privacidad</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2025 WhatsApp Gateway — Desarrollado por <a href="https://sixteam.pro" target="_blank" rel="noopener">Sixteam.pro</a></p>
+      <div class="footer-bottom-links">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="mailto:alpha@sixteam.pro">Contacto</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+<script>
+  /* ----- Navbar scroll effect ----- */
+  const navbar = document.getElementById('navbar');
+  const onScroll = () => {
+    if (window.scrollY > 20) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ----- Intersection Observer for fade-up animations ----- */
+  const fadeElements = document.querySelectorAll('.fade-up');
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -48px 0px' }
+    );
+    fadeElements.forEach(el => observer.observe(el));
+  } else {
+    // Fallback: show all immediately
+    fadeElements.forEach(el => el.classList.add('visible'));
+  }
+
+  /* ----- FAQ Accordion ----- */
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(i => {
+      i.classList.remove('open');
+      i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+    });
+
+    // Open clicked if it was closed
+    if (!isOpen) {
+      item.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  /* ----- Mobile menu (simplified toggle) ----- */
+  function toggleMobileMenu() {
+    // Simple scroll to integrations on mobile
+    document.getElementById('integrations').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /* ----- Smooth scroll for anchor links ----- */
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const target = this.getAttribute('href');
+      if (target === '#') return;
+      const el = document.querySelector(target);
+      if (el) {
+        e.preventDefault();
+        const offset = 80; // navbar height
+        const top = el.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+
+  /* ----- Auto-trigger visible for hero elements (above fold) ----- */
+  document.querySelectorAll('#hero .fade-up').forEach(el => el.classList.add('visible'));
+</script>
+
+</body>
+</html>
