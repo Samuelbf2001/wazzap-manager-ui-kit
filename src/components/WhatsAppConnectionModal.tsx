@@ -19,7 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QRCodeSVG } from "qrcode.react";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
 import { whatsfullApi, type HubSpotInbox, type ChannelSetupResult } from "@/services/whatsfull-api.service";
 
 interface WhatsAppConnectionModalProps {
@@ -52,6 +54,8 @@ export function WhatsAppConnectionModal({
   const [loadingInboxes, setLoadingInboxes] = useState(false);
   const [setupResult, setSetupResult] = useState<ChannelSetupResult | null>(null);
   const [pollingInterval, setPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+  const [submitError, setSubmitError] = useState<string>('');
+  const [isAuthError, setIsAuthError] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -91,6 +95,8 @@ export function WhatsAppConnectionModal({
     e.preventDefault();
     if (loading) return;
     setLoading(true);
+    setSubmitError('');
+    setIsAuthError(false);
 
     try {
       let result: ChannelSetupResult;
@@ -159,11 +165,13 @@ export function WhatsAppConnectionModal({
       }
 
     } catch (error) {
-      toast({
-        title: "❌ Error",
-        description: error instanceof Error ? error.message : "No se pudo crear el canal.",
-        variant: "destructive",
-      });
+      const msg = error instanceof Error ? error.message : "No se pudo crear el canal.";
+      const isAuth = msg.toLowerCase().includes('token') || msg.toLowerCase().includes('autorizado') || msg.toLowerCase().includes('oauth');
+      setSubmitError(msg);
+      setIsAuthError(isAuth);
+      if (!isAuth) {
+        toast({ title: "❌ Error", description: msg, variant: "destructive" });
+      }
     } finally {
       setLoading(false);
     }
@@ -180,6 +188,8 @@ export function WhatsAppConnectionModal({
     setStep('form');
     setQrCode('');
     setSetupResult(null);
+    setSubmitError('');
+    setIsAuthError(false);
     setFormData({ name: '', phone_number: '', inboxId: inboxes[0]?.id || '' });
   };
 
@@ -203,6 +213,38 @@ export function WhatsAppConnectionModal({
 
         {step === 'form' && (
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Banner de error de autorización */}
+            {submitError && isAuthError && (
+              <div className="rounded-md bg-orange-50 border border-orange-200 p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />
+                  <p className="text-sm font-medium text-orange-700">Autorización requerida</p>
+                </div>
+                <p className="text-xs text-orange-600">{submitError}</p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-100 w-full"
+                  onClick={() => { window.location.href = `${BACKEND_URL}/ghl/install`; }}
+                >
+                  <RefreshCw className="w-3 h-3 mr-2" />
+                  Re-autorizar app en GHL
+                </Button>
+              </div>
+            )}
+
+            {/* Banner de error genérico */}
+            {submitError && !isAuthError && (
+              <div className="rounded-md bg-red-50 border border-red-200 p-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />
+                  <p className="text-xs text-red-600">{submitError}</p>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="name">Nombre de la instancia *</Label>
               <Input

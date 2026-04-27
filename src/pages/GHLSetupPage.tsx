@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Building2, AlertCircle, Loader2, ChevronDown, LayoutGrid } from 'lucide-react';
+import { Plus, Building2, AlertCircle, Loader2, ChevronDown, LayoutGrid, RefreshCw } from 'lucide-react';
 import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { ConnectionsTable } from '@/components/ConnectionsTable';
 import { whatsfullApi } from '@/services/whatsfull-api.service';
@@ -34,6 +34,7 @@ export default function GHLSetupPage() {
   const [validating, setValidating]             = useState(false);
   const [validationError, setValidationError]   = useState('');
   const [showAutoQRModal, setShowAutoQRModal]   = useState(false);
+  const [authError, setAuthError]               = useState(false);
 
   // Cargar locations cuando hay companyId (instalación agency)
   useEffect(() => {
@@ -58,11 +59,14 @@ export default function GHLSetupPage() {
     if (!locationId) return;
     setValidating(true);
     setValidationError('');
+    setAuthError(false);
     whatsfullApi
       .validateGHLLocation(locationId)
       .then((result) => {
         if (!result.readyForQR) {
-          setValidationError(result.error || 'Location no está lista para conectar');
+          const msg = result.error || 'Location no está lista para conectar';
+          setValidationError(msg);
+          if (!result.hasTokens) setAuthError(true);
         }
         // Auto-abrir modal SOLO si no hay instancia existente (primera instalación)
         // Si ya hay instancia, el usuario ve la tabla y decide desde ahí
@@ -71,7 +75,11 @@ export default function GHLSetupPage() {
         }
       })
       .catch((err) => {
-        setValidationError(err instanceof Error ? err.message : 'Error validando location');
+        const msg = err instanceof Error ? err.message : 'Error validando location';
+        setValidationError(msg);
+        if (msg.toLowerCase().includes('token') || msg.toLowerCase().includes('autorizado')) {
+          setAuthError(true);
+        }
       })
       .finally(() => setValidating(false));
   }, [locationId]);
@@ -185,13 +193,32 @@ export default function GHLSetupPage() {
 
         {/* Error de validación */}
         {locationId && validationError && !validating && (
-          <Card>
-            <CardContent className="py-10 text-center">
-              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-red-500" />
-              <p className="text-sm text-red-600">{validationError}</p>
-              <p className="text-xs text-gray-400 mt-2">
-                Intenta hacer click en el botón "Agregar número" a continuación.
+          <Card className={authError ? 'border-orange-200 bg-orange-50' : ''}>
+            <CardContent className="py-8 text-center space-y-3">
+              <AlertCircle className={`h-8 w-8 mx-auto ${authError ? 'text-orange-500' : 'text-red-500'}`} />
+              <p className={`text-sm font-medium ${authError ? 'text-orange-700' : 'text-red-600'}`}>
+                {authError ? 'Autorización requerida' : validationError}
               </p>
+              {authError ? (
+                <>
+                  <p className="text-xs text-gray-500">
+                    Los tokens de acceso expiraron o no están disponibles para esta location.<br />
+                    Re-autoriza la app para continuar.
+                  </p>
+                  <Button
+                    size="sm"
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    onClick={() => { window.location.href = `${BACKEND_URL}/ghl/install`; }}
+                  >
+                    <RefreshCw className="w-3 h-3 mr-2" />
+                    Re-autorizar app en GHL
+                  </Button>
+                </>
+              ) : (
+                <p className="text-xs text-gray-400">
+                  Intenta hacer click en el botón "Nueva conexión" a continuación.
+                </p>
+              )}
             </CardContent>
           </Card>
         )}
