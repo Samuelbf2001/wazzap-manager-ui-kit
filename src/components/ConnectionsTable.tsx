@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Loader2, RefreshCw } from 'lucide-react';
+import { Trash2, Loader2, RefreshCw, Plus } from 'lucide-react';
+import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { hubspotApi } from '@/lib/hubspotApi';
 import { whatsfullApi } from '@/services/whatsfull-api.service';
@@ -26,14 +27,16 @@ interface ConnectionsTableProps {
   mode?: 'hubspot' | 'ghl';
   locationId?: string;
   hideTitle?: boolean;
+  companyId?: string;
 }
 
 const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 const AGENT_OPTIONS = ["Sin asignar", "Agent A", "Agent B", "Agent C"];
 
-export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = false }: ConnectionsTableProps) {
+export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = false, companyId }: ConnectionsTableProps) {
   const isGHL = mode === 'ghl';
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [editing, setEditing] = useState<Connection | null>(null);
   const [deletingConnection, setDeletingConnection] = useState<Connection | null>(null);
   const [reconnecting, setReconnecting] = useState<Connection | null>(null);
@@ -196,6 +199,18 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
         </>
       )}
 
+      {isGHL && locationId && (
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg font-medium"
+          >
+            <Plus className="w-3 h-3" />
+            Agregar número
+          </button>
+        </div>
+      )}
+
       <table className="min-w-full text-sm">
         <thead className="bg-gray-50 text-gray-600">
           <tr>
@@ -213,6 +228,15 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
                 <div>
                   <p className="text-lg font-medium">No hay conexiones</p>
                   <p className="text-sm mt-1">Haz clic en "Nueva conexión" para agregar tu primera conexión de WhatsApp.</p>
+                  {isGHL && locationId && (
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Agregar número
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
@@ -374,6 +398,21 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
             </div>
           </DialogContent>
         </Dialog>
+      )}
+
+      {/* Modal agregar número desde dentro de la tabla */}
+      {showAddModal && isGHL && locationId && (
+        <WhatsAppConnectionModal
+          open={showAddModal}
+          onOpenChange={setShowAddModal}
+          onConnectionSuccess={() => {
+            setShowAddModal(false);
+            loadConnections();
+          }}
+          mode="ghl"
+          locationId={locationId}
+          companyId={companyId}
+        />
       )}
 
       {/* Modal de confirmación de eliminación */}

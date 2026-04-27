@@ -254,7 +254,13 @@ export default function GHLSetupPage() {
               </Button>
             </div>
 
-            <ConnectionsTable mode="ghl" locationId={activeLocation} key={refreshKey} hideTitle />
+            <ConnectionsTable
+              mode="ghl"
+              locationId={activeLocation}
+              companyId={companyId || undefined}
+              key={refreshKey}
+              hideTitle
+            />
           </div>
         )}
       </div>
