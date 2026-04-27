@@ -30,12 +30,13 @@ interface ConnectionsTableProps {
   locationId?: string;
   hideTitle?: boolean;
   companyId?: string;
+  onConnectionSuccess?: () => void;
 }
 
 const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL as string) || 'https://whatsfull.sixteam.pro';
 const AGENT_OPTIONS = ["Sin asignar", "Agent A", "Agent B", "Agent C"];
 
-export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = false, companyId }: ConnectionsTableProps) {
+export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = false, companyId, onConnectionSuccess }: ConnectionsTableProps) {
   const isGHL = mode === 'ghl';
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -221,7 +222,7 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
       )}
 
       {isGHL && locationId && (
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-end px-4 pt-2 pb-1">
           <button
             onClick={() => setShowAddModal(true)}
             className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg font-medium"
@@ -232,6 +233,7 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
         </div>
       )}
 
+      <div className="overflow-x-auto">
       <table className="min-w-full text-sm">
         <thead className="bg-gray-50 text-gray-600">
           <tr>
@@ -358,6 +360,7 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
           )}
         </tbody>
       </table>
+      </div>
 
       {/* Modal QR de reconexión */}
       {reconnecting && (
@@ -470,6 +473,7 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
           onConnectionSuccess={() => {
             setShowAddModal(false);
             loadConnections();
+            onConnectionSuccess?.();
           }}
           mode="ghl"
           locationId={locationId}
