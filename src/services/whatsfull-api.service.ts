@@ -185,6 +185,19 @@ class WhatsfullApiService {
     }
   }
 
+  /** Actualiza display_name o marca como predeterminado un canal GHL */
+  async updateGHLChannel(id: string, payload: { displayName?: string; isDefault?: boolean }): Promise<void> {
+    const res = await fetch(`${BACKEND_URL}/api/ghl-channels/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `Error actualizando canal GHL: ${res.status}`);
+    }
+  }
+
   /** Elimina un canal GHL por id — no requiere HubSpot auth */
   async deleteGHLChannel(id: string): Promise<void> {
     const res = await fetch(`${BACKEND_URL}/api/ghl-channels/${encodeURIComponent(id)}`, {

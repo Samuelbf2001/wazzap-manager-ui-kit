@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Loader2, RefreshCw, Plus } from 'lucide-react';
+import { Trash2, Loader2, RefreshCw, Plus, Star } from 'lucide-react';
 import { WhatsAppConnectionModal } from '@/components/WhatsAppConnectionModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { hubspotApi } from '@/lib/hubspotApi';
@@ -14,6 +14,8 @@ interface Connection {
   id: string;
   number: string;
   name: string;
+  display_name: string;
+  is_default: boolean;
   connected: boolean;
   features: string[];
   agent: string;
@@ -79,7 +81,9 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
             return {
               id:             String(c.id),
               number:         `+${c.whatsapp_phone_number}`,
-              name:           (c.evolution_instance as string) || String(c.whatsapp_phone_number),
+              name:           (c.display_name as string) || (c.evolution_instance as string) || String(c.whatsapp_phone_number),
+              display_name:   (c.display_name as string) || (c.evolution_instance as string) || String(c.whatsapp_phone_number),
+              is_default:     Boolean(c.is_default),
               connected,
               features:       ['Webhook', 'Logs'],
               agent:          'Sin asignar',
@@ -133,10 +137,27 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
     }
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!editing) return;
-    setConnections(prev => prev.map(c => c.id === editing.id ? { ...c, name: editing.name, agent: editing.agent } : c));
+    if (isGHL) {
+      try {
+        await whatsfullApi.updateGHLChannel(editing.id, { displayName: editing.name });
+      } catch (err) {
+        console.error('❌ Error guardando nombre:', err);
+      }
+    }
+    setConnections(prev => prev.map(c => c.id === editing.id ? { ...c, name: editing.name, display_name: editing.name, agent: editing.agent } : c));
     setEditing(null);
+  };
+
+  const handleSetDefault = async (conn: Connection) => {
+    if (!isGHL) return;
+    try {
+      await whatsfullApi.updateGHLChannel(conn.id, { isDefault: true });
+      setConnections(prev => prev.map(c => ({ ...c, is_default: c.id === conn.id })));
+    } catch (err) {
+      console.error('❌ Error marcando como predeterminado:', err);
+    }
   };
 
   const handleReconnect = async (conn: Connection) => {
@@ -265,7 +286,22 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
                   </div>
                 </td>
                 <td className="px-4 py-2 text-center">{conn.number}</td>
-                <td className="px-4 py-2 text-left">{conn.name}</td>
+                <td className="px-4 py-2 text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-medium text-sm">{conn.name}</span>
+                    {isGHL && conn.is_default && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">
+                        <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                        Predeterminado
+                      </span>
+                    )}
+                  </div>
+                  {isGHL && conn.instance_name && (
+                    <div className="text-xs text-gray-400 mt-0.5 font-mono">
+                      Comando: <span className="text-gray-600">/{conn.instance_name}/</span>
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-center space-x-1">
                   {conn.features.map((f, i) => (
                     <span key={i} className={
@@ -280,10 +316,22 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
                   ))}
                 </td>
                 <td className="px-4 py-2 text-center">
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-2 justify-center flex-wrap">
                     <Button variant="outline" size="sm" onClick={() => setEditing(conn)}>
                       Editar
                     </Button>
+                    {isGHL && !conn.is_default && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSetDefault(conn)}
+                        className="text-amber-600 hover:text-amber-700 hover:border-amber-300"
+                        title="Usar como número predeterminado para enviar mensajes desde GHL"
+                      >
+                        <Star className="w-3 h-3 mr-1" />
+                        Predeterminar
+                      </Button>
+                    )}
                     {!conn.connected && conn.instance_name && (
                       <Button
                         variant="outline"
@@ -363,18 +411,32 @@ export function ConnectionsTable({ mode = 'hubspot', locationId, hideTitle = fal
               <DialogTitle>Editar conexión</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <Input
-                value={editing.name}
-                onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                placeholder="Nombre"
-              />
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={editing.connected}
-                  onCheckedChange={(value) => setEditing({ ...editing, connected: value })}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Nombre del número</label>
+                <Input
+                  value={editing.name}
+                  onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                  placeholder="Ej: Ventas, Soporte, Ernesto..."
                 />
-                <span>{editing.connected ? 'Conectado' : 'Desconectado'}</span>
+                {isGHL && editing.instance_name && (
+                  <p className="text-xs text-gray-400">
+                    Comando para usar desde GHL:{' '}
+                    <span className="font-mono text-gray-600 bg-gray-100 px-1 rounded">
+                      /{editing.instance_name}/
+                    </span>{' '}
+                    al inicio del mensaje
+                  </p>
+                )}
               </div>
+              {!isGHL && (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={editing.connected}
+                    onCheckedChange={(value) => setEditing({ ...editing, connected: value })}
+                  />
+                  <span>{editing.connected ? 'Conectado' : 'Desconectado'}</span>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Agente IA asignado</label>
                 <Select
