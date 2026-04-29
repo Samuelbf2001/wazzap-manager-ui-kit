@@ -1,14 +1,17 @@
 /**
  * GHLMonitorPage — Monitor en tiempo real de instancias GHL/WhatsApp.
- * Inspirado en MonitorConexionesPage + HubSpotConnectionsPanel.
- * Polling cada 30s. Sin autenticación HubSpot.
+ * Incluye configuración de alertas de desconexión por instancia.
  */
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle,
   AlertCircle,
@@ -21,9 +24,14 @@ import {
   Clock,
   Trash2,
   QrCode,
+  Bell,
+  BellOff,
+  History,
+  Send,
 } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
-import { whatsfullApi } from '@/services/whatsfull-api.service';
+import { whatsfullApi, alertApi } from '@/services/whatsfull-api.service';
+import type { AlertConfig, DisconnectEvent } from '@/services/whatsfull-api.service';
 import { QRCodeSVG } from 'qrcode.react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -91,6 +99,276 @@ function StateBadge({ state, loading }: { state: InstanceState; loading: boolean
   }
 }
 
+// ─── Badge de evento ──────────────────────────────────────────────────────────
+
+function EventBadge({ type }: { type: string }) {
+  if (type === 'reconnected') {
+    return <Badge className="bg-green-100 text-green-800 text-xs">Reconectado</Badge>;
+  }
+  if (type === 'test') {
+    return <Badge className="bg-blue-100 text-blue-800 text-xs">Prueba</Badge>;
+  }
+  return <Badge className="bg-red-100 text-red-800 text-xs">Desconectado</Badge>;
+}
+
+// ─── Modal de Alertas ─────────────────────────────────────────────────────────
+
+interface AlertModalProps {
+  channel: ChannelWithState;
+  onClose: () => void;
+}
+
+function AlertModal({ channel, onClose }: AlertModalProps) {
+  const [config, setConfig]       = useState<AlertConfig | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [saving, setSaving]       = useState(false);
+  const [testing, setTesting]     = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; status?: number; error?: string } | null>(null);
+  const [events, setEvents]       = useState<DisconnectEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
+  const [saveMsg, setSaveMsg]     = useState('');
+
+  const instanceName = channel.evolution_instance;
+
+  useEffect(() => {
+    Promise.all([
+      alertApi.getAlertConfig(instanceName).then(setConfig).catch(() => {
+        setConfig({
+          instance_name:        instanceName,
+          location_id:          channel.location_id,
+          alert_enabled:        true,
+          notify_on_disconnect: true,
+          notify_on_reconnect:  false,
+          webhook_url:          null,
+        });
+      }),
+      alertApi.getDisconnectEvents(instanceName, 10).then(setEvents).catch(() => setEvents([])),
+    ]).finally(() => {
+      setLoading(false);
+      setEventsLoading(false);
+    });
+  }, [instanceName, channel.location_id]);
+
+  const handleSave = async () => {
+    if (!config) return;
+    setSaving(true);
+    setSaveMsg('');
+    try {
+      const saved = await alertApi.upsertAlertConfig(instanceName, {
+        ...config,
+        location_id: channel.location_id,
+      });
+      setConfig(saved);
+      setSaveMsg('Configuración guardada correctamente');
+      setTimeout(() => setSaveMsg(''), 3000);
+    } catch (err) {
+      setSaveMsg(err instanceof Error ? err.message : 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTest = async () => {
+    if (!config?.webhook_url) return;
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await alertApi.testAlertWebhook(instanceName, config.webhook_url);
+      setTestResult(result);
+    } catch {
+      setTestResult({ success: false, error: 'No se pudo conectar al backend' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const refreshEvents = async () => {
+    setEventsLoading(true);
+    try {
+      const evts = await alertApi.getDisconnectEvents(instanceName, 10);
+      setEvents(evts);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-blue-600" />
+            Alertas de Desconexión
+          </DialogTitle>
+          <p className="text-sm text-gray-500 font-normal">
+            Instancia: <span className="font-mono">{instanceName}</span>
+          </p>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        ) : config ? (
+          <div className="space-y-5">
+            {/* Alertas activas */}
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">Alertas activas</Label>
+                <p className="text-xs text-gray-500">Recibir notificaciones de cambios de estado</p>
+              </div>
+              <Switch
+                checked={config.alert_enabled}
+                onCheckedChange={(v) => setConfig({ ...config, alert_enabled: v })}
+              />
+            </div>
+
+            <Separator />
+
+            {/* Opciones de notificación */}
+            <div className={`space-y-3 ${!config.alert_enabled ? 'opacity-40 pointer-events-none' : ''}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Notificar al desconectar</Label>
+                  <p className="text-xs text-gray-500">Cuando WhatsApp pierde conexión</p>
+                </div>
+                <Switch
+                  checked={config.notify_on_disconnect}
+                  onCheckedChange={(v) => setConfig({ ...config, notify_on_disconnect: v })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Notificar al reconectar</Label>
+                  <p className="text-xs text-gray-500">Cuando WhatsApp vuelve a conectarse</p>
+                </div>
+                <Switch
+                  checked={config.notify_on_reconnect}
+                  onCheckedChange={(v) => setConfig({ ...config, notify_on_reconnect: v })}
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Webhook URL */}
+            <div className={`space-y-2 ${!config.alert_enabled ? 'opacity-40 pointer-events-none' : ''}`}>
+              <Label className="text-sm font-medium">URL del Webhook</Label>
+              <p className="text-xs text-gray-500">
+                Se enviará un POST con JSON al detectar el evento configurado
+              </p>
+              <Input
+                placeholder="https://hooks.ejemplo.com/mi-webhook"
+                value={config.webhook_url || ''}
+                onChange={(e) => setConfig({ ...config, webhook_url: e.target.value || null })}
+                className="font-mono text-sm"
+              />
+              {config.webhook_url && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleTest}
+                    disabled={testing}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    {testing ? (
+                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5 mr-1.5" />
+                    )}
+                    Probar webhook
+                  </Button>
+                  {testResult && (
+                    <span className={`text-xs font-medium ${testResult.success ? 'text-green-600' : 'text-red-600'}`}>
+                      {testResult.success
+                        ? `HTTP ${testResult.status}`
+                        : testResult.error || 'Error'}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Guardar */}
+            <div className="flex items-center gap-3 pt-1">
+              <Button onClick={handleSave} disabled={saving} className="flex-1">
+                {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Guardar configuración
+              </Button>
+              {saveMsg && (
+                <span className={`text-xs ${saveMsg.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>
+                  {saveMsg}
+                </span>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Historial */}
+            <div>
+              <button
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 w-full"
+                onClick={() => { setShowHistory(!showHistory); if (!showHistory) refreshEvents(); }}
+              >
+                <History className="w-4 h-4" />
+                Historial de eventos
+                <span className="ml-auto text-xs text-gray-400">
+                  {showHistory ? 'Ocultar' : 'Mostrar'}
+                </span>
+              </button>
+
+              {showHistory && (
+                <div className="mt-3 space-y-2">
+                  {eventsLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                    </div>
+                  ) : events.length === 0 ? (
+                    <p className="text-sm text-gray-400 text-center py-4">
+                      Sin eventos registrados aún
+                    </p>
+                  ) : (
+                    events.map((evt) => (
+                      <div
+                        key={evt.id}
+                        className="flex items-start justify-between p-3 bg-gray-50 rounded-lg border text-xs"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <EventBadge type={evt.event_type} />
+                            <span className="text-gray-500 font-mono">
+                              {evt.previous_state ?? '?'} → {evt.new_state}
+                            </span>
+                          </div>
+                          <div className="text-gray-400">
+                            {format(new Date(evt.created_at), "dd/MM/yyyy HH:mm:ss", { locale: es })}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          {evt.alert_sent ? (
+                            <span className="text-green-600 font-medium">
+                              Alerta enviada {evt.alert_webhook_status ? `[${evt.alert_webhook_status}]` : ''}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">Sin alerta</span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function GHLMonitorPage() {
@@ -110,6 +388,9 @@ export default function GHLMonitorPage() {
   // Delete confirm
   const [deleting, setDeleting] = useState<ChannelWithState | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Alert config modal
+  const [alertChannel, setAlertChannel] = useState<ChannelWithState | null>(null);
 
   // ─── Fetch channels + states ────────────────────────────────────────────────
 
@@ -175,8 +456,8 @@ export default function GHLMonitorPage() {
 
   // ─── Stats ─────────────────────────────────────────────────────────────────
 
-  const total       = channels.length;
-  const connected   = channels.filter((c) => c.state === 'open').length;
+  const total        = channels.length;
+  const connected    = channels.filter((c) => c.state === 'open').length;
   const disconnected = channels.filter((c) => c.state === 'close').length;
 
   // ─── Reconectar ────────────────────────────────────────────────────────────
@@ -401,6 +682,18 @@ export default function GHLMonitorPage() {
                         {ch.stateLoading ? '...' : ch.state}
                       </span>
 
+                      {/* Botón alertas */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAlertChannel(ch)}
+                        className="text-blue-600 hover:text-blue-700"
+                        title="Configurar alertas de desconexión"
+                      >
+                        <Bell className="w-3.5 h-3.5 mr-1" />
+                        Alertas
+                      </Button>
+
                       {/* Botón reconectar (solo si no está open) */}
                       {ch.state !== 'open' && (
                         <Button
@@ -432,6 +725,14 @@ export default function GHLMonitorPage() {
           </div>
         )}
       </div>
+
+      {/* Modal Alertas */}
+      {alertChannel && (
+        <AlertModal
+          channel={alertChannel}
+          onClose={() => setAlertChannel(null)}
+        />
+      )}
 
       {/* Modal QR de reconexión */}
       {reconnecting && (

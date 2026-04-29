@@ -243,4 +243,78 @@ class WhatsfullApiService {
   }
 }
 
+// ─── Alert Config types ───────────────────────────────────────────────────────
+
+export interface AlertConfig {
+  id?: number;
+  instance_name: string;
+  location_id?: string | null;
+  alert_enabled: boolean;
+  notify_on_disconnect: boolean;
+  notify_on_reconnect: boolean;
+  webhook_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DisconnectEvent {
+  id: number;
+  instance_name: string;
+  location_id?: string | null;
+  event_type: 'disconnected' | 'reconnected' | 'test';
+  previous_state?: string | null;
+  new_state: string;
+  alert_sent: boolean;
+  alert_webhook_status?: number | null;
+  created_at: string;
+}
+
+// ─── Alert Config methods ─────────────────────────────────────────────────────
+
+class AlertApiService {
+  async getAlertConfig(instanceName: string): Promise<AlertConfig> {
+    const res = await fetch(`${BACKEND_URL}/api/alert-configs/${encodeURIComponent(instanceName)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error obteniendo configuración de alertas');
+    return data.config as AlertConfig;
+  }
+
+  async upsertAlertConfig(instanceName: string, config: Partial<AlertConfig> & { locationId?: string }): Promise<AlertConfig> {
+    const res = await fetch(`${BACKEND_URL}/api/alert-configs/${encodeURIComponent(instanceName)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        locationId:          config.location_id,
+        alertEnabled:        config.alert_enabled,
+        notifyOnDisconnect:  config.notify_on_disconnect,
+        notifyOnReconnect:   config.notify_on_reconnect,
+        webhookUrl:          config.webhook_url,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error guardando configuración de alertas');
+    return data.config as AlertConfig;
+  }
+
+  async getDisconnectEvents(instanceName: string, limit = 20): Promise<DisconnectEvent[]> {
+    const res = await fetch(
+      `${BACKEND_URL}/api/alert-configs/${encodeURIComponent(instanceName)}/events?limit=${limit}`
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error obteniendo historial de eventos');
+    return data.events as DisconnectEvent[];
+  }
+
+  async testAlertWebhook(instanceName: string, webhookUrl: string): Promise<{ success: boolean; status?: number; error?: string }> {
+    const res = await fetch(`${BACKEND_URL}/api/alert-configs/${encodeURIComponent(instanceName)}/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ webhookUrl }),
+    });
+    return await res.json();
+  }
+}
+
+export const alertApi = new AlertApiService();
+
 export const whatsfullApi = new WhatsfullApiService();
