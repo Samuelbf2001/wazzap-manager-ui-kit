@@ -32,6 +32,7 @@ import GHLSetupPage from './pages/GHLSetupPage';
 import GHLDashboardPage from './pages/GHLDashboardPage';
 import GHLMonitorPage from './pages/GHLMonitorPage';
 import GHLRegistrosPage from './pages/GHLRegistrosPage';
+import SegundoCerebroPage from './pages/SegundoCerebroPage';
 import { connectionMonitorService } from './services/connection-monitor.service';
 
 // 🚀 INICIALIZAR SERVICIOS AL CARGAR LA APLICACIÓN
@@ -156,6 +157,10 @@ const App = () => (
 
           {/* GHL Registros — tokens OAuth y canales configurados, sin auth HubSpot */}
           <Route path="/ghl-registros" element={<GHLRegistrosPage />} />
+
+          {/* Segundo Cerebro — contactos/empresas/asignación + reuniones (sin auth HubSpot) */}
+          <Route path="/ghl-cerebro" element={<SegundoCerebroPage />} />
+          <Route path="/segundo-cerebro" element={<SegundoCerebroPage />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
