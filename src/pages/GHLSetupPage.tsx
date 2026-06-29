@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2, ChevronDown, LayoutGrid, RefreshCw, Terminal } from 'lucide-react';
+import { AlertCircle, Loader2, ChevronDown, LayoutGrid, RefreshCw, Terminal, Brain } from 'lucide-react';
 import { ConnectionsTable } from '@/components/ConnectionsTable';
 import { whatsfullApi } from '@/services/whatsfull-api.service';
 
@@ -73,7 +73,18 @@ export default function GHLSetupPage() {
       <div className="w-full max-w-3xl space-y-5">
 
         {/* Nav */}
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-1">
+          {activeLocation && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/ghl-cerebro?locationId=${activeLocation}`)}
+              className="text-purple-600 hover:text-purple-700 text-xs"
+            >
+              <Brain className="w-3 h-3 mr-1" />
+              Segundo Cerebro
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
