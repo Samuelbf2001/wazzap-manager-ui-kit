@@ -56,6 +56,9 @@ export function WhatsAppConnectionModal({
   const [pollingInterval, setPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
   const [submitError, setSubmitError] = useState<string>('');
   const [isAuthError, setIsAuthError] = useState(false);
+  const [qrRefreshing, setQrRefreshing] = useState(false);
+  const [qrCountdown, setQrCountdown] = useState(40);
+  const [waitSeconds, setWaitSeconds] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -177,6 +180,39 @@ export function WhatsAppConnectionModal({
     }
   };
 
+  // Re-genera el QR (los QR de WhatsApp expiran en ~30-60s)
+  const refreshQR = async () => {
+    if (!setupResult?.evolutionInstance || qrRefreshing) return;
+    setQrRefreshing(true);
+    try {
+      const qr = isGHL
+        ? await whatsfullApi.getGHLQRCode(setupResult.evolutionInstance)
+        : await whatsfullApi.getQRCode(setupResult.evolutionInstance, setupResult.evolutionApikey);
+      const qrValue = qr.base64 || qr.code || '';
+      if (qrValue) { setQrCode(qrValue); setQrCountdown(40); }
+    } catch {
+      // silencioso: el siguiente intento o el botón manual reintentan
+    } finally {
+      setQrRefreshing(false);
+    }
+  };
+
+  // En el paso QR: cuenta regresiva + auto-refresh del QR + cronómetro de espera
+  useEffect(() => {
+    if (step !== 'qr') return;
+    setQrCountdown(40);
+    setWaitSeconds(0);
+    const tick = setInterval(() => {
+      setWaitSeconds(s => s + 1);
+      setQrCountdown(c => {
+        if (c <= 1) { refreshQR(); return 40; }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(tick);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, setupResult?.evolutionInstance]);
+
   const handleAutomaticSuccess = () => {
     if (pollingInterval) { clearInterval(pollingInterval); setPollingInterval(null); }
     setStep('success');
@@ -190,6 +226,9 @@ export function WhatsAppConnectionModal({
     setSetupResult(null);
     setSubmitError('');
     setIsAuthError(false);
+    setQrRefreshing(false);
+    setWaitSeconds(0);
+    setQrCountdown(40);
     setFormData({ name: '', phone_number: '', inboxId: inboxes[0]?.id || '' });
   };
 
@@ -213,6 +252,7 @@ export function WhatsAppConnectionModal({
 
         {step === 'form' && (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <StepIndicator current={1} />
 
             {/* Banner de error de autorización */}
             {submitError && isAuthError && (
@@ -306,7 +346,13 @@ export function WhatsAppConnectionModal({
 
         {step === 'qr' && (
           <div className="text-center space-y-4">
+            <StepIndicator current={2} />
             <h3 className="text-lg font-medium">Escanea con tu WhatsApp</h3>
+            <ol className="text-xs text-gray-500 text-left mx-auto max-w-[230px] space-y-0.5">
+              <li>1. Abre WhatsApp en tu teléfono</li>
+              <li>2. Ajustes → Dispositivos vinculados</li>
+              <li>3. Vincular un dispositivo → escanea</li>
+            </ol>
             <div className="flex justify-center">
               {!qrCode ? (
                 <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded">
@@ -315,27 +361,47 @@ export function WhatsAppConnectionModal({
                     <p className="text-sm text-gray-600">Generando QR...</p>
                   </div>
                 </div>
-              ) : qrCode.startsWith('data:image/') ? (
-                <img src={qrCode} alt="QR Code" className="w-48 h-48 border rounded" />
               ) : (
-                <QRCodeSVG value={qrCode} size={200} />
+                <div className="relative">
+                  {qrCode.startsWith('data:image/') ? (
+                    <img src={qrCode} alt="QR Code" className={`w-48 h-48 border rounded transition-opacity ${qrRefreshing ? 'opacity-40' : ''}`} />
+                  ) : (
+                    <div className={qrRefreshing ? 'opacity-40 transition-opacity' : 'transition-opacity'}>
+                      <QRCodeSVG value={qrCode} size={200} />
+                    </div>
+                  )}
+                  {qrRefreshing && <Loader2 className="w-6 h-6 animate-spin absolute inset-0 m-auto text-green-600" />}
+                </div>
               )}
             </div>
+
+            {/* Estado en vivo: el QR expira, se regenera solo */}
+            <div className="flex items-center justify-center gap-2 text-xs">
+              <span className="inline-flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-gray-500">
+                Esperando que escanees… {waitSeconds}s · QR se renueva en {qrCountdown}s
+              </span>
+            </div>
+
             {setupResult?.evolutionInstance && (
               <p className="text-xs text-gray-400 font-mono">Instancia: {setupResult.evolutionInstance}</p>
             )}
-            <p className="text-sm text-gray-600">
-              WhatsApp → Ajustes → Dispositivos vinculados → Vincular dispositivo
-            </p>
-            <p className="text-xs text-gray-400">Verificando conexión automáticamente…</p>
-            <Button type="button" variant="outline" onClick={handleClose} className="w-full">
-              Cancelar
-            </Button>
+
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={refreshQR} disabled={qrRefreshing} className="flex-1">
+                <RefreshCw className={`w-3 h-3 mr-2 ${qrRefreshing ? 'animate-spin' : ''}`} />
+                Regenerar QR
+              </Button>
+              <Button type="button" variant="ghost" onClick={handleClose} className="flex-1">
+                Cancelar
+              </Button>
+            </div>
           </div>
         )}
 
         {step === 'success' && (
           <div className="text-center space-y-4">
+            <StepIndicator current={3} />
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -349,5 +415,31 @@ export function WhatsAppConnectionModal({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Indicador de pasos: Datos → Escanear → Listo */
+function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
+  const steps = ['Datos', 'Escanear', 'Listo'];
+  return (
+    <div className="flex items-center justify-center gap-2 pb-1">
+      {steps.map((label, i) => {
+        const n = i + 1;
+        const active = n === current;
+        const done = n < current;
+        return (
+          <div key={label} className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className={`w-5 h-5 rounded-full text-[10px] font-semibold flex items-center justify-center
+                ${done ? 'bg-green-600 text-white' : active ? 'bg-green-100 text-green-700 ring-2 ring-green-500' : 'bg-gray-100 text-gray-400'}`}>
+                {done ? '✓' : n}
+              </span>
+              <span className={`text-[11px] ${active ? 'text-gray-800 font-medium' : 'text-gray-400'}`}>{label}</span>
+            </div>
+            {n < 3 && <span className={`w-4 h-px ${done ? 'bg-green-400' : 'bg-gray-200'}`} />}
+          </div>
+        );
+      })}
+    </div>
   );
 }
