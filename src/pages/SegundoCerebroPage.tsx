@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Building2, Users, RefreshCw, Loader2, Plus, Search, CalendarClock } from 'lucide-react';
+import { Brain, Building2, Users, RefreshCw, Loader2, Plus, Search, CalendarClock, Zap } from 'lucide-react';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
 
@@ -15,6 +15,29 @@ interface Contact {
 }
 interface Stats { total_contacts: number; total_inbound: number; total_outbound: number; active_7d: number; }
 interface Meeting { id: number; title: string; source: string; meeting_date?: string; company_name?: string; }
+
+interface GoogleAccount {
+  email: string; active: boolean; lastError: string | null;
+  expiresAt?: string | null; updatedAt?: string | null;
+}
+interface PipelineMeeting {
+  id: number; title: string; source: string; meetingDate?: string | null;
+  notionSyncedAt?: string | null; processingError?: string | null; createdAt?: string;
+}
+interface PipelineStatus {
+  google: {
+    configured: boolean; pollEnabled: boolean; pollIntervalMs: number;
+    accounts: GoogleAccount[];
+    driveDocsPending: number; driveDocsFailed: number; driveDocsLastError: string | null;
+  };
+  notion: { configured: boolean; tasksDbId?: string; projectsDbId?: string; meetingsDbId?: string };
+  fathom: { webhookSecretConfigured: boolean; lastReceivedAt: string | null; count7d: number };
+  meetings: {
+    total: number; bySource: Record<string, number>;
+    pendingNotion: number; failed: number;
+    recent: PipelineMeeting[];
+  };
+}
 
 const LEAD_COLORS: Record<string, string> = {
   hot: 'bg-red-100 text-red-700', warm: 'bg-orange-100 text-orange-700',
@@ -30,10 +53,12 @@ export default function SegundoCerebroPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [pipeline, setPipeline] = useState<PipelineStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState('');
   const [newCompany, setNewCompany] = useState('');
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [retryingId, setRetryingId] = useState<number | null>(null);
 
   const headers = { 'Content-Type': 'application/json' };
 
@@ -41,16 +66,18 @@ export default function SegundoCerebroPage() {
     if (!locationId) return;
     setLoading(true);
     try {
-      const [s, c, ct, m] = await Promise.all([
+      const [s, c, ct, m, p] = await Promise.all([
         fetch(`${BACKEND_URL}/api/wiki/stats?locationId=${locationId}`).then(r => r.json()).catch(() => null),
         fetch(`${BACKEND_URL}/api/wiki/companies?locationId=${locationId}`).then(r => r.json()).catch(() => ({ companies: [] })),
         fetch(`${BACKEND_URL}/api/wiki/contacts?locationId=${locationId}&limit=300${q ? `&q=${encodeURIComponent(q)}` : ''}`).then(r => r.json()).catch(() => ({ contacts: [] })),
         fetch(`${BACKEND_URL}/api/meetings?locationId=${locationId}`).then(r => r.json()).catch(() => ({ meetings: [] })),
+        fetch(`${BACKEND_URL}/api/pipeline/status`).then(r => r.json()).catch(() => null),
       ]);
       setStats(s && !s.error ? s : null);
       setCompanies(c.companies || []);
       setContacts(ct.contacts || []);
       setMeetings(m.meetings || []);
+      setPipeline(p && !p.error ? p : null);
     } finally { setLoading(false); }
   }, [locationId, q]);
 
@@ -73,6 +100,16 @@ export default function SegundoCerebroPage() {
       });
       await load();
     } finally { setSavingId(null); }
+  };
+
+  const retryMeeting = async (meetingId: number) => {
+    setRetryingId(meetingId);
+    try {
+      await fetch(`${BACKEND_URL}/api/meetings/${meetingId}/process`, {
+        method: 'POST', headers,
+      });
+      await load();
+    } finally { setRetryingId(null); }
   };
 
   if (!locationId) {
@@ -212,6 +249,96 @@ export default function SegundoCerebroPage() {
                 </tbody>
               </table>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Pipeline 2Brain */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Zap className="w-4 h-4" /> Pipeline 2Brain
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-3">
+            {!pipeline && <span className="text-xs text-gray-400">Sin datos de pipeline.</span>}
+            {pipeline && (
+              <>
+                {/* Google */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {pipeline.google.accounts.length === 0 && (
+                    <span className="text-xs text-gray-400">Sin cuentas Google conectadas</span>
+                  )}
+                  {pipeline.google.accounts.map(acc => (
+                    <Badge
+                      key={acc.email}
+                      title={acc.lastError || undefined}
+                      className={`text-xs ${acc.active ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-red-100 text-red-700 hover:bg-red-100'}`}
+                    >
+                      {acc.email}
+                    </Badge>
+                  ))}
+                  <Badge variant="outline" className="text-xs">
+                    {pipeline.google.pollEnabled
+                      ? `Poller activo · cada ${Math.round(pipeline.google.pollIntervalMs / 60000)} min`
+                      : 'Poller inactivo'}
+                  </Badge>
+                </div>
+
+                {/* Notion */}
+                <div className="flex items-center gap-2">
+                  <Badge className={`text-xs ${pipeline.notion.configured ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-gray-100 text-gray-500 hover:bg-gray-100'}`}>
+                    {pipeline.notion.configured ? 'Notion configurado' : 'Notion sin configurar'}
+                  </Badge>
+                </div>
+
+                {/* Fathom */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className={`text-xs ${pipeline.fathom.webhookSecretConfigured ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-red-100 text-red-700 hover:bg-red-100'}`}>
+                    {pipeline.fathom.webhookSecretConfigured ? 'Webhook configurado' : 'Webhook sin configurar'}
+                  </Badge>
+                  <span className="text-xs text-gray-400">
+                    última reunión: {pipeline.fathom.lastReceivedAt ? new Date(pipeline.fathom.lastReceivedAt).toLocaleString() : 'nunca'}
+                    {' · '}{pipeline.fathom.count7d} en 7d
+                  </span>
+                </div>
+
+                {/* Resumen de reuniones */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-gray-500">{pipeline.meetings.total} reuniones totales</span>
+                  {pipeline.meetings.pendingNotion > 0 && (
+                    <Badge className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-100">
+                      {pipeline.meetings.pendingNotion} pendientes de Notion
+                    </Badge>
+                  )}
+                  {pipeline.meetings.failed > 0 && (
+                    <Badge variant="destructive" className="text-xs">
+                      {pipeline.meetings.failed} con error
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Reuniones con error */}
+                {pipeline.meetings.recent.filter(m => m.processingError).length > 0 && (
+                  <div className="space-y-1 pt-1 border-t border-gray-100">
+                    {pipeline.meetings.recent.filter(m => m.processingError).map(m => (
+                      <div key={m.id} className="flex items-center justify-between gap-2 text-sm py-1">
+                        <div className="min-w-0">
+                          <div className="text-gray-700 truncate">{m.title}</div>
+                          <div className="text-xs text-red-600 truncate">{m.processingError}</div>
+                        </div>
+                        <Button
+                          size="sm" variant="outline"
+                          onClick={() => retryMeeting(m.id)}
+                          disabled={retryingId === m.id}
+                        >
+                          {retryingId === m.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Reintentar'}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
 
